@@ -1,24 +1,30 @@
-# Título del Proyecto
+# Readora
 
-#### Curso Escolar 20XX-20XX
-#### Autor: [Nombre del alumno autor](Enlace a su cuenta de gitHub)
-#### Tutor: [Nombre del profesor tutor](Enlace a su cuenta de gitHub)
-#### Fecha de Inicio: DD-MM-YYYY
+#### Curso Escolar 2024-2025
+#### Autor: [Javier Moreno Salas](https://github.com/JavierMoren)
+#### Tutor: [Antonio Gabriel González Casado](https://github.com/antonio-gabriel-gonzalez-casado)
+#### Fecha de Inicio: 11-03-2025
 #### Fecha de Finalización: DD-MM-YYYY
 
 ## Breve descripción del proyecto
 
-Si ya tienes una idea para tu aplicación, explícala brevemente. Si no es así, lo que realmente necesitas es **buscar un problema o necesidad a la que darle solución**, y estos **están por todas partes**. Así que trata de buscar problemas o necesidades en tu vida diaria y realiza una lista. Una vez que tengas una lista exhaustiva, ya puedes empezar a pensar en **cómo puedes resolverlos**.
+Tras haber navegado mucho en la búsqueda de libros por internet, y no estar nada cómodo con ella, esta web nace para ayudar a resolver ese problema, como objetivo de unificar los libros leídos de una persona y que su búsqueda de libros sea mas cómoda.
+La Idea principal del proyecto es una web la cual unifique tu universo de lectura, en el cual puedas almacenar tus libros leídos, llevar un control de la lectura y valorar esos libros.
 
-En este apartado el alumno debe hacer una breve descripción del proyecto que vaya a realizar. Esta descripción no será ua descripción detallada, será una presentación general con no más de 10 líneas.
-
-## Definir el objetivo de la aplicación
-**Tener una gran idea** o encontrar un punto del mercado al que no se esté dando un producto o servicio es el punto de partida en cada nuevo proyecto. Antes de comenzar debes **definir claramente el propósito y la misión de la aplicación web**:
+## Objetivo de la aplicación
 
 - **¿Qué va a hacer la aplicación?**
-- **¿Cuál es su atractivo principal?** 
-- **¿Qué problema concreto va a resolver?** 
+  
+La aplicación va a permitir almacenar tus libros leídos, llevar un control de la lectura y valorar esos libros.
+- **¿Cuál es su atractivo principal?**
+
+Su atractio principal y el porque ha sido creada, es para poder permitir a la personas que le gustan llevar mas control en su vida, unificar los libros leídos de una persona y que su búsqueda de libros sea mas cómoda.
+- **¿Qué problema concreto va a resolver?**
+  
+Unificar los libros leídos de una persona y que su búsqueda de libros sea mas cómoda.
 - **¿Qué necesidad va a cubrir?**
+  
+Ayuda a las personas a organizarse y encontrar libros de una forma mas comoda.
 
 ## Estructura del Proyecto
 
