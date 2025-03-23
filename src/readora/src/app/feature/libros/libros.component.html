@@ -1,0 +1,24 @@
+<table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>ISBN</th>
+        <th>Editorial</th>
+        <th>Año de Publicación</th>
+        <th>Género</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (libro of libros; track libro.id) {
+        <tr>
+          <td>{{ libro.id }}</td>
+          <td>{{ libro.titulo }}</td>
+          <td>{{ libro.ISBN }}</td>
+          <td>{{ libro.editorial }}</td>
+          <td>{{ libro.anioPublicacion }}</td>
+          <td>{{ libro.genero }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
