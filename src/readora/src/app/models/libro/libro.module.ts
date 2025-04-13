@@ -1,7 +1,7 @@
 export interface Libro {
   id: number;
   titulo: string;
-  ISBN: string;
+  isbn: string; 
   editorial: string;
   anioPublicacion: string; 
   genero: string;
