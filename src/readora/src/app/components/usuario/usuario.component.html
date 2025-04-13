@@ -1,0 +1,33 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Lista de Usuarios</h2>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Gmail</th>
+          <th>Estado</th>
+          <th>Fecha Creación</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuarios">
+          <td>{{ usuario.id }}</td>
+          <td>{{ usuario.usuario }}</td>
+          <td>{{ usuario.nombre }}</td>
+          <td>{{ usuario.apellido }}</td>
+          <td>{{ usuario.gmail }}</td>
+          <td>
+            <span class="badge" [ngClass]="usuario.enabled ? 'bg-success' : 'bg-danger'">
+              {{ usuario.enabled ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>{{ usuario.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

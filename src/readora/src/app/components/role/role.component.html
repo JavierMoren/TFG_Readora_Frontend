@@ -1,0 +1,19 @@
+<div class="container mt-4">
+  <h2>Lista de Roles</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles">
+          <td>{{ role.id }}</td>
+          <td>{{ role.nombre }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
