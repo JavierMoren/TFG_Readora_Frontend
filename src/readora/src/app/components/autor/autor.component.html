@@ -1,0 +1,21 @@
+<div class="container mt-4">
+  <h2>Lista de Autores</h2>
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let autor of autores">
+          <td>{{ autor.id }}</td>
+          <td>{{ autor.nombre }}</td>
+          <td>{{ autor.apellido }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
