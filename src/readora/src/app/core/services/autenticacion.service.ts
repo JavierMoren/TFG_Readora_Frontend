@@ -11,11 +11,26 @@ import { environment } from '../../../enviroments/enviroments';
 export class AutenticacionService {
   
   private apiUrl = `${environment.apiUrl}/v1/authenticate`;
+  private readonly TOKEN_KEY = 'auth_token';
+  private readonly TOKEN_EXPIRY_KEY = 'auth_token_expiry';
+  private token = new BehaviorSubject<string | null>(this.getStoredToken());
 
-  // BehaviorSubject almacena el token y permite a otros componentes reaccionar cuando cambia.
-  private token = new BehaviorSubject<string | null>(null);
+  constructor(private http: HttpClient, private router: Router) {
+    // Verificar la expiración del token al iniciar el servicio
+    this.checkTokenExpiration();
+  }
 
-  constructor(private http: HttpClient, private router: Router) {}
+  private checkTokenExpiration(): void {
+    const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+    if (expiryTime && new Date().getTime() > parseInt(expiryTime)) {
+      this.logout();
+    }
+  }
+
+  private getStoredToken(): string | null {
+    this.checkTokenExpiration();
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
 
   /**
    * Método para autenticar al usuario.
@@ -32,11 +47,24 @@ export class AutenticacionService {
   }
 
   /**
-   * Almacena el token de autenticación en el BehaviorSubject.
+   * Almacena el token de autenticación en el localStorage y lo establece en el BehaviorSubject.
+   * También establece un temporizador para cerrar la sesión automáticamente después de 2 horas.
    * @param token - Token recibido tras una autenticación exitosa.
    */
   setToken(token: string): void {
-    this.token.next(token); // Actualiza el valor del token.
+    // Establecer el token
+    localStorage.setItem(this.TOKEN_KEY, token);
+    
+    // Calcular y guardar el tiempo de expiración (2 horas desde ahora)
+    const expiryTime = new Date().getTime() + (2 * 60 * 60 * 1000); // 2 horas en milisegundos
+    localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
+    
+    this.token.next(token);
+
+    // Configurar el temporizador para la expiración automática
+    setTimeout(() => {
+      this.logout();
+    }, 2 * 60 * 60 * 1000);
   }
 
   /**
@@ -63,7 +91,9 @@ export class AutenticacionService {
    * Elimina el token y redirige al usuario a la página de inicio de sesión.
    */
   logout(): void {
-    this.token.next(null); // Limpia el token almacenado.
-    this.router.navigate(['/']); // Redirige al usuario a la ruta raíz.
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+    this.token.next(null);
+    this.router.navigate(['/']);
   }
 }
