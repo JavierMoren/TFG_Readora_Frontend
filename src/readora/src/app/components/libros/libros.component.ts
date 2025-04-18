@@ -30,7 +30,7 @@ export class LibrosComponent implements OnInit {
       this.pageSize,
       this.sortField,
       this.sortDirection
-    ).subscribe({
+    ).subscribe({   
       next: (response) => {
         this.libros = response.content.map((libro: any) => ({
           ...libro,

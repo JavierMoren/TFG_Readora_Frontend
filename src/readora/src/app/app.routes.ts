@@ -10,6 +10,7 @@ import { UsuarioComponent } from './components/usuario/usuario.component';
 import { RoleComponent } from './components/role/role.component';
 import { AutorComponent } from './components/autor/autor.component';
 import { UsuarioLibroComponent } from './components/usuario-libro/usuario-libro.component';
+import { PanelAdministradorComponent } from './feature/panel-administrador/panel-administrador.component';
 
 export const routes: Routes = [
   {
@@ -47,6 +48,11 @@ export const routes: Routes = [
   {
     path: 'api/usuario-libros',
     component: UsuarioLibroComponent,
+    canActivate: [autenticacionGuard],
+  },
+  {
+    path: 'panel-administrador',
+    component: PanelAdministradorComponent,
     canActivate: [autenticacionGuard],
   },
   {
