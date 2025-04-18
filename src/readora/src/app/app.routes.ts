@@ -4,6 +4,7 @@ import { HomeComponent } from './layout/home/home.component';
 import { AutenticacionComponent } from './feature/autenticacion/autenticacion.component';
 import { LibrosComponent } from './components/libros/libros.component';
 import { autenticacionGuard } from './core/guard/autenticacion.guard';
+import { adminGuard } from './core/guard/admin.guard';
 import { ForbiddenComponent } from './feature/forbidden/forbidden.component';
 import { Error404Component } from './feature/error404/error404.component';
 import { UsuarioComponent } from './components/usuario/usuario.component';
@@ -33,12 +34,12 @@ export const routes: Routes = [
   {
     path: 'api/usuarios',
     component: UsuarioComponent,
-    canActivate: [autenticacionGuard],
+    canActivate: [autenticacionGuard, adminGuard],
   },
   {
     path: 'api/roles',
     component: RoleComponent,
-    canActivate: [autenticacionGuard],
+    canActivate: [autenticacionGuard, adminGuard],
   },
   {
     path: 'api/autores',
@@ -53,7 +54,7 @@ export const routes: Routes = [
   {
     path: 'panel-administrador',
     component: PanelAdministradorComponent,
-    canActivate: [autenticacionGuard],
+    canActivate: [autenticacionGuard, adminGuard],
   },
   {
     path: 'forbidden',
