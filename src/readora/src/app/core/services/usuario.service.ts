@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Usuario } from '../../models/usuario/usuario.model';
 import { environment } from '../../../enviroments/enviroments';
-import { AutenticacionService } from './autenticacion.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,53 +11,51 @@ import { AutenticacionService } from './autenticacion.service';
 export class UsuarioService {
   private apiUrl = `${environment.apiUrl}/usuarios`;
 
-  constructor(private http: HttpClient, private autenticationService: AutenticacionService) { }
+  constructor(private http: HttpClient) { }
 
   getAllUsuarios(): Observable<Usuario[]> {
-    const token = this.autenticationService.getToken();
+    return this.http.get<Usuario[]>(this.apiUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-    if (!token) {
-      return throwError(() => new Error('Unauthorized'));
-    }
-
-    return this.http.get<Usuario[]>(this.apiUrl, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
-    });
+  getUsuarioById(id: number): Observable<Usuario> {
+    return this.http.get<Usuario>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
 
   createUsuario(usuario: Usuario): Observable<Usuario> {
-    const token = this.autenticationService.getToken();
-
-    if (!token) {
-      return throwError(() => new Error('Unauthorized'));
-    }
-
-    return this.http.post<Usuario>(this.apiUrl, usuario, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
-    });
+    return this.http.post<Usuario>(this.apiUrl, usuario).pipe(
+      catchError(this.handleError)
+    );
   }
   
   updateUsuario(usuario: Usuario): Observable<Usuario> {
-    const token = this.autenticationService.getToken();
-
-    if (!token) {
-      return throwError(() => new Error('Unauthorized'));
-    }
-
-    return this.http.put<Usuario>(`${this.apiUrl}/${usuario.id}`, usuario, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
-    });
+    return this.http.put<Usuario>(`${this.apiUrl}/${usuario.id}`, usuario).pipe(
+      catchError(this.handleError)
+    );
   }
 
   deleteUsuario(id: number): Observable<void> {
-    const token = this.autenticationService.getToken();
-
-    if (!token) {
-      return throwError(() => new Error('Unauthorized'));
-    }
-
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
-    });
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
-} 
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Ocurrió un error desconocido';
+    if (error.error instanceof ErrorEvent) {
+      // Error del lado del cliente
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Error del lado del servidor
+      errorMessage = `Código de error: ${error.status}\nMensaje: ${error.message}`;
+      if (error.error) {
+        errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
+      }
+    }
+    console.error(errorMessage);
+    return throwError(() => new Error(errorMessage));
+  }
+}

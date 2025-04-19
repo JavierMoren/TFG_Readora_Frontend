@@ -4,7 +4,6 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Autor } from '../../models/autor/autor.model';
 import { environment } from '../../../enviroments/enviroments';
-import { AutenticacionService } from './autenticacion.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,21 +11,34 @@ import { AutenticacionService } from './autenticacion.service';
 export class AutorService {
   private apiUrl = `${environment.apiUrl}/autores`;
 
-  constructor(private http: HttpClient, private autenticationService: AutenticacionService) { }
+  constructor(private http: HttpClient) { }
 
   getAllAutores(): Observable<Autor[]> {
-    const token = this.autenticationService.getToken();
+    return this.http.get<Autor[]>(this.apiUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-    if (!token) {
-      return throwError(() => new Error('No autorizado - Token no encontrado'));
-    }
+  getAutorById(id: number): Observable<Autor> {
+    return this.http.get<Autor>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-    return this.http.get<Autor[]>(this.apiUrl, {
-      headers: new HttpHeaders({ 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      })
-    }).pipe(
+  createAutor(autor: Autor): Observable<Autor> {
+    return this.http.post<Autor>(this.apiUrl, autor).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateAutor(autor: Autor): Observable<Autor> {
+    return this.http.put<Autor>(`${this.apiUrl}/${autor.id}`, autor).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteAutor(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
