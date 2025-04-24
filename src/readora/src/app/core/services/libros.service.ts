@@ -3,7 +3,7 @@ import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http'
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroments';
-import { Libro } from '../../models/libro/libro.module';
+import { Libro } from '../../models/libro/libro.model';
 
 @Injectable({
   providedIn: 'root'

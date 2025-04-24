@@ -1,0 +1,35 @@
+<footer class="bg-background-subtle border-top mt-auto">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <a routerLink="/" class="fs-4 fw-bold text-highlight text-decoration-none mb-3 d-block transition-all">
+          Readora
+        </a>
+        <p class="mb-4 text-secondary">
+          Tu plataforma minimalista para gestionar lecturas
+        </p>
+        
+        <div class="d-flex justify-content-center gap-4 mb-4">
+          <a routerLink="/" class="text-secondary text-decoration-none transition-all">
+            Inicio
+          </a>
+          <a routerLink="/api/v1/register" class="text-secondary text-decoration-none transition-all">
+            Registro
+          </a>
+          <a routerLink="/api/v1/authenticate" class="text-secondary text-decoration-none transition-all">
+            Autenticación
+          </a>
+          <a routerLink="/panel-administrador" class="text-secondary text-decoration-none transition-all">
+            Panel Administrador
+          </a>
+        </div>
+        
+        <div class="border-top pt-4 mt-4">
+          <p class="small text-secondary mb-0">
+            © {{currentYear}} Readora. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

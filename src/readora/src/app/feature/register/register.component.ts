@@ -3,9 +3,9 @@ import { RegisterService } from '../../core/services/register.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-import { HttpResponse } from '@angular/common/http'; // Importa HttpResponse
+import { HttpResponse } from '@angular/common/http';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-register',
@@ -22,12 +22,21 @@ export class RegisterComponent {
     contrasenna: '',
   };
 
-  constructor(private registerService: RegisterService, private router: Router) {}
+  constructor(
+    private registerService: RegisterService, 
+    private router: Router
+  ) {}
 
   onSubmit(form: NgForm) {
     // Si el formulario es inválido, se muestra un error y no se procesa el envío.
     if (form.invalid) {
-      Swal.fire('Error', 'Por favor, completa correctamente el formulario', 'error');
+      toast.error('Error', { 
+        description: 'Por favor, completa correctamente el formulario',
+        action: {
+          label: 'Cerrar',
+          onClick: () => toast.dismiss(),
+        },
+      });
       return;
     }
 
@@ -37,7 +46,13 @@ export class RegisterComponent {
     );
 
     if (!isValid) {
-      Swal.fire('Error', 'Todos los campos son obligatorios y no pueden estar vacíos', 'error');
+      toast.error('Error', { 
+        description: 'Todos los campos son obligatorios y no pueden estar vacíos',
+        action: {
+          label: 'Cerrar',
+          onClick: () => toast.dismiss(),
+        },
+      });
       return;
     }
 
@@ -46,13 +61,25 @@ export class RegisterComponent {
         // Verifica si el código de estado es 201 (Created)
         if (response.status === 201) {
           console.log('Usuario registrado exitosamente', response.body);
-          Swal.fire('¡Registrado!', 'Usuario registrado con éxito', 'success');
+          toast.success('¡Registrado!', { 
+            description: 'Usuario registrado con éxito',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          });
           setTimeout(() => {
             this.router.navigate(['/']);
           }, 1500);
         } else {
           console.error('Respuesta inesperada del servidor:', response);
-          Swal.fire('Error', 'Respuesta inesperada del servidor', 'error');
+          toast.error('Error', { 
+            description: 'Respuesta inesperada del servidor',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          });
         }
       },
       error: (error) => {
@@ -60,9 +87,21 @@ export class RegisterComponent {
 
         // Maneja errores específicos
         if (error.status === 500) {
-          Swal.fire('Error', 'Error interno del servidor', 'error');
+          toast.error('Error', { 
+            description: 'Error interno del servidor',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          });
         } else {
-          Swal.fire('Error', 'No se pudo registrar el usuario', 'error');
+          toast.error('Error', { 
+            description: 'No se pudo registrar el usuario',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          });
         }
       },
     });

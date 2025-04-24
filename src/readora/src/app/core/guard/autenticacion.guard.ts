@@ -1,19 +1,24 @@
 import { CanActivateFn, Router } from '@angular/router';
-import { AutenticacionService } from '../services/autenticacion.service';
 import { inject } from '@angular/core';
 
 export const autenticacionGuard: CanActivateFn = (route, state) => {
-      // Inyecta el servicio de autenticación
-      const authService = inject(AutenticacionService);
+    const router = inject(Router);
+    
+    // Verificar si existe un token en el localStorage directamente
+    const token = localStorage.getItem('auth_token');
+    
+    if (token) {
+        // Verificar si el token ha expirado
+        const expiryTime = localStorage.getItem('auth_token_expiry');
+        if (expiryTime && new Date().getTime() > parseInt(expiryTime)) {
+            // Token expirado, redirigir al inicio
+            router.navigate(['/']);
+            return false;
+        }
+        return true; // Permite la navegación si el token existe y no está expirado
+    }
 
-      // Verifica si el usuario tiene un token válido
-      const token = authService.getToken();
-      if (token) {
-          return true; // Permite la navegación si el token existe
-      }
-  
-      // Redirige al login si no hay token
-      const router = inject(Router);
-      router.navigate(['/forbidden']); // Redirige a la página 403
-      return false; // Bloquea la navegación
+    // Redirige al login si no hay token
+    router.navigate(['/forbidden']); // Redirige a la página 403
+    return false; // Bloquea la navegación
 };

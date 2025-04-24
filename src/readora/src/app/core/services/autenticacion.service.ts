@@ -13,9 +13,13 @@ export class AutenticacionService {
   private apiUrl = `${environment.apiUrl}/v1/authenticate`;
   private readonly TOKEN_KEY = 'auth_token';
   private readonly TOKEN_EXPIRY_KEY = 'auth_token_expiry';
-  private token = new BehaviorSubject<string | null>(this.getStoredToken());
+  private token: BehaviorSubject<string | null>;
 
   constructor(private http: HttpClient, private router: Router) {
+    // Inicializar el BehaviorSubject con el token almacenado
+    const storedToken = localStorage.getItem(this.TOKEN_KEY);
+    this.token = new BehaviorSubject<string | null>(storedToken);
+    
     // Verificar la expiración del token al iniciar el servicio
     this.checkTokenExpiration();
   }
@@ -23,12 +27,13 @@ export class AutenticacionService {
   private checkTokenExpiration(): void {
     const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
     if (expiryTime && new Date().getTime() > parseInt(expiryTime)) {
-      this.logout();
+      this.removeTokenFromStorage();
+      this.token.next(null);
+      this.router.navigate(['/']);
     }
   }
 
   private getStoredToken(): string | null {
-    this.checkTokenExpiration();
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
@@ -91,9 +96,17 @@ export class AutenticacionService {
    * Elimina el token y redirige al usuario a la página de inicio de sesión.
    */
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+    this.removeTokenFromStorage();
     this.token.next(null);
     this.router.navigate(['/']);
+  }
+
+  /**
+   * Método privado para eliminar el token del almacenamiento
+   * Separa esta funcionalidad para evitar referencias circulares
+   */
+  private removeTokenFromStorage(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
   }
 }

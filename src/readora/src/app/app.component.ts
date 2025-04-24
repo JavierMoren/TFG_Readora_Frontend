@@ -1,13 +1,18 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-
+import { Router, Event, NavigationEnd, RouterOutlet } from '@angular/router';
+import { NgxSonnerToaster } from 'ngx-sonner';
+import { HeaderComponent } from './layout/header/header.component';
+import { FooterComponent } from './layout/footer/footer.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,],
+  imports: [RouterOutlet, NgxSonnerToaster, HeaderComponent, FooterComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'readora';
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+  }
 }

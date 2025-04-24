@@ -42,6 +42,17 @@ export class UsuarioService {
       catchError(this.handleError)
     );
   }
+  
+  /**
+   * Verifica si la contraseña proporcionada coincide con la almacenada para el usuario
+   * @param credenciales Objeto con el nombre de usuario y contraseña a verificar
+   * @returns Observable que emite el resultado de la verificación
+   */
+  verificarContrasenna(credenciales: {usuario: string, contrasenna: string}): Observable<{valida: boolean}> {
+    return this.http.post<{valida: boolean}>(`${this.apiUrl}/verificar-contrasenna`, credenciales).pipe(
+      catchError(this.handleError)
+    );
+  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';

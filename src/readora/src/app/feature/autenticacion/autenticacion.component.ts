@@ -3,8 +3,9 @@ import { AutenticacionService } from '../../core/services/autenticacion.service'
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { toast } from 'ngx-sonner';
+ 
 
 @Component({
   selector: 'app-autenticacion',
@@ -18,11 +19,20 @@ export class AutenticacionComponent {
     contrasenna: ''
   };
 
-  constructor(private autenticacionService: AutenticacionService, private router: Router) {}
+  constructor(
+    private autenticacionService: AutenticacionService, 
+    private router: Router,
+  ) {}
 
   onSubmit(form: NgForm) {
     if (form.invalid) {
-      Swal.fire('Error', 'Por favor, completa correctamente el formulario', 'error');
+      toast.error('Error', { 
+        description: 'Por favor, completa correctamente el formulario',
+        action: {
+          label: 'Cerrar',
+          onClick: () => toast.dismiss(),
+        },
+      }); 
       return;
     }
 
@@ -31,14 +41,26 @@ export class AutenticacionComponent {
     );
 
     if (!isValid) {
-      Swal.fire('Error', 'Todos los campos son obligatorios y no pueden estar vacíos', 'error');
+      toast.error('Error', { 
+        description: 'Todos los campos son obligatorios y no pueden estar vacíos',
+        action: {
+          label: 'Cerrar',
+          onClick: () => toast.dismiss(),
+        },
+      }); 
       return;
     }
 
     this.autenticacionService.authenticateUsuario(this.authRequest.usuario, this.authRequest.contrasenna).subscribe({
       next: (response) => {
         console.log('Usuario autenticado exitosamente', response);
-        Swal.fire('¡Autenticado!', 'Usuario autenticado con éxito', 'success');
+        toast.success('¡Autenticado!', { 
+          description: 'Usuario autenticado con éxito',
+          action: {
+            label: 'Cerrar',
+            onClick: () => toast.dismiss(),
+          },
+        }); 
         this.autenticacionService.setToken(response.token);
         setTimeout(() => {
           this.router.navigate(['/']);
@@ -48,9 +70,21 @@ export class AutenticacionComponent {
         console.error('Error al autenticar usuario', error);
 
         if (error.status === 401) {
-          Swal.fire('Error', 'Credenciales inválidas', 'error');
+          toast.error('Error', { 
+            description: 'Credenciales inválidas',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          }); 
         } else {
-          Swal.fire('Error', 'No se pudo autenticar el usuario', 'error');
+          toast.error('Error', { 
+            description: 'No se pudo autenticar el usuario',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          }); 
         }
       }
     });

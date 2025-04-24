@@ -1,15 +1,55 @@
-<div class="container mt-4">
-  <h1 class="text-center mb-4">Bienvenido a Readora</h1>
-  
-  <div class="d-grid gap-2 col-6 mx-auto">
-    <button routerLink="/" class="btn btn-info mb-2">Inicio</button>
-    <button routerLink="/api/v1/register" class="btn btn-primary mb-2">Registro</button>
-    <button routerLink="/api/v1/authenticate" class="btn btn-secondary mb-2">Autenticación</button>
-    <button routerLink="/api/libros" class="btn btn-success mb-2">Libros</button>
-    <button routerLink="/api/usuarios" class="btn btn-warning mb-2">Usuarios</button>
-    <button routerLink="/api/roles" class="btn btn-danger mb-2">Roles</button>
-    <button routerLink="/api/autores" class="btn btn-light mb-2">Autores</button>
-    <button routerLink="/api/usuario-libros" class="btn btn-light mb-2">Usuarios-Libros</button>
-    <button routerLink="panel-administrador" class="btn btn-dark mb-2">Panel de Administrador</button>
+<div class="section-padding">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center mb-5">
+        <h1 class="display-4 fw-bold mb-4 text-highlight">
+          Bienvenido a Readora
+        </h1>
+        <p class="fs-5 text-secondary mx-auto" style="max-width: 700px;">
+          Tu plataforma minimalista para gestionar lecturas y descubrir nuevos mundos a través de los libros
+        </p>
+        <div class="border-2 border-top border-primary mx-auto mt-4" style="width: 80px;"></div>
+      </div>
+    </div>
+    
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+          <div class="card-body p-4 p-lg-5">
+            <div class="d-grid gap-4">
+              <a routerLink="/api/v1/register" 
+                class="btn btn-outline-primary d-flex align-items-center justify-content-center py-3 transition-all">
+                <span class="material-icons me-2" style="font-size: 1.5rem;">person_add</span>
+                <span class="fw-medium">Registro</span>
+              </a>
+              
+              <a routerLink="/api/v1/authenticate" 
+                class="btn btn-outline-primary d-flex align-items-center justify-content-center py-3 transition-all">
+                <span class="material-icons me-2" style="font-size: 1.5rem;">login</span>
+                <span class="fw-medium">Autenticación</span>
+              </a>
+              
+              <div class="position-relative my-3">
+                <hr class="text-secondary opacity-25">
+                <div class="position-absolute top-50 start-50 translate-middle bg-white px-3">
+                  <span class="text-secondary small">Acceso administrativo</span>
+                </div>
+              </div>
+              
+              <a routerLink="/panel-administrador" 
+                class="btn btn-primary d-flex align-items-center justify-content-center py-3 transition-all">
+                <span class="material-icons me-2" style="font-size: 1.5rem;">admin_panel_settings</span>
+                <span class="fw-medium">Panel de Administrador</span>
+              </a>
+            </div>
+            
+            <div class="mt-4 text-center">
+              <p class="text-secondary small">Plataforma de gestión de lecturas</p>
+              <p class="text-secondary smaller mt-1">© 2025 Readora</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

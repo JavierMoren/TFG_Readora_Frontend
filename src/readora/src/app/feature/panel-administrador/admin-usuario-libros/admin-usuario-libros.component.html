@@ -1,0 +1,248 @@
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 fw-medium text-highlight mb-0">Gestión de Lecturas</h2>
+    
+    <!-- Botón para añadir nueva lectura -->
+    <button *ngIf="!showForm" (click)="prepareCreateUsuarioLibro()" 
+      class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+      <span class="material-icons small me-1">add</span>
+      <span>Registrar Lectura</span>
+    </button>
+  </div>
+
+  <!-- Formulario para añadir/editar relación usuario-libro -->
+  <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+      <h3 class="h6 fw-medium text-highlight mb-0">{{isEditing ? 'Editar Lectura' : 'Registrar Lectura'}}</h3>
+      <button (click)="cancelEdit()" class="btn-close btn-sm" aria-label="Cerrar"></button>
+    </div>
+    
+    <div class="card-body">
+      <form (submit)="saveUsuarioLibro()" #lecturaForm="ngForm" class="mb-3">
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label for="usuarioId" class="form-label">ID del Usuario <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">person</span>
+              </span>
+              <input type="number" id="usuarioId" [(ngModel)]="currentUsuarioLibro.usuarioId" name="usuarioId" 
+                class="form-control" 
+                required
+                min="1"
+                #usuarioIdInput="ngModel"
+                [ngClass]="{'is-invalid': usuarioIdInput.invalid && (usuarioIdInput.dirty || usuarioIdInput.touched)}">
+            </div>
+            <div *ngIf="usuarioIdInput.invalid && (usuarioIdInput.dirty || usuarioIdInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="usuarioIdInput.errors?.['required']">El ID del usuario es obligatorio</span>
+              <span *ngIf="usuarioIdInput.errors?.['min']">El ID debe ser un número positivo</span>
+            </div>
+          </div>
+          
+          <div class="col-12 col-md-6">
+            <label for="libroId" class="form-label">ID del Libro <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">book</span>
+              </span>
+              <input type="number" id="libroId" [(ngModel)]="currentUsuarioLibro.libroId" name="libroId" 
+                class="form-control" 
+                required
+                min="1"
+                #libroIdInput="ngModel"
+                [ngClass]="{'is-invalid': libroIdInput.invalid && (libroIdInput.dirty || libroIdInput.touched)}">
+            </div>
+            <div *ngIf="libroIdInput.invalid && (libroIdInput.dirty || libroIdInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="libroIdInput.errors?.['required']">El ID del libro es obligatorio</span>
+              <span *ngIf="libroIdInput.errors?.['min']">El ID debe ser un número positivo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label for="fechaInicioLectura" class="form-label">Fecha de Inicio de Lectura <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">calendar_today</span>
+              </span>
+              <input type="date" id="fechaInicioLectura" [(ngModel)]="currentUsuarioLibro.fechaInicioLectura" name="fechaInicioLectura" 
+                class="form-control" 
+                required
+                [max]="getMaxDate()"
+                #fechaInicioInput="ngModel"
+                [ngClass]="{'is-invalid': fechaInicioInput.invalid && (fechaInicioInput.dirty || fechaInicioInput.touched)}">
+            </div>
+            <div *ngIf="fechaInicioInput.invalid && (fechaInicioInput.dirty || fechaInicioInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="fechaInicioInput.errors?.['required']">La fecha de inicio es obligatoria</span>
+              <span *ngIf="fechaInicioInput.errors?.['max']">La fecha no puede ser futura</span>
+            </div>
+          </div>
+          
+          <div class="col-12 col-md-6">
+            <label for="fechaFinLectura" class="form-label">Fecha de Finalización de Lectura</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">event_available</span>
+              </span>
+              <input type="date" id="fechaFinLectura" [(ngModel)]="currentUsuarioLibro.fechaFinLectura" name="fechaFinLectura" 
+                class="form-control"
+                [min]="currentUsuarioLibro.fechaInicioLectura"
+                [max]="getMaxDate()"
+                #fechaFinInput="ngModel"
+                [ngClass]="{'is-invalid': fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched)}">
+            </div>
+            <div *ngIf="fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="fechaFinInput.errors?.['min']">La fecha de finalización debe ser posterior a la fecha de inicio</span>
+              <span *ngIf="fechaFinInput.errors?.['max']">La fecha no puede ser futura</span>
+            </div>
+            <p class="form-text text-secondary small">Dejar en blanco si aún no ha terminado la lectura</p>
+          </div>
+        </div>
+        
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label for="estadoLectura" class="form-label">Estado de Lectura <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">bookmark</span>
+              </span>
+              <select id="estadoLectura" [(ngModel)]="currentUsuarioLibro.estadoLectura" name="estadoLectura" 
+                class="form-control" 
+                required
+                #estadoInput="ngModel"
+                [ngClass]="{'is-invalid': estadoInput.invalid && (estadoInput.dirty || estadoInput.touched)}">
+                <option value="LEYENDO">LEYENDO</option>
+                <option value="TERMINADO">TERMINADO</option>
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="ABANDONADO">ABANDONADO</option>
+              </select>
+            </div>
+            <div *ngIf="estadoInput.invalid && (estadoInput.dirty || estadoInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="estadoInput.errors?.['required']">El estado de lectura es obligatorio</span>
+            </div>
+          </div>
+          
+          <div class="col-12 col-md-6">
+            <label for="valoracion" class="form-label">Valoración</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">star</span>
+              </span>
+              <select id="valoracion" [(ngModel)]="currentUsuarioLibro.valoracion" name="valoracion" class="form-control">
+                <option [ngValue]="null">Sin valoración</option>
+                <option [ngValue]="1">1 - Muy malo</option>
+                <option [ngValue]="2">2 - Malo</option>
+                <option [ngValue]="3">3 - Regular</option>
+                <option [ngValue]="4">4 - Bueno</option>
+                <option [ngValue]="5">5 - Excelente</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="comentario" class="form-label">Comentario</label>
+          <textarea id="comentario" [(ngModel)]="currentUsuarioLibro.comentario" name="comentario" 
+            class="form-control" 
+            rows="4"
+            maxlength="500"
+            #comentarioInput="ngModel"
+            [ngClass]="{'is-invalid': comentarioInput.invalid && (comentarioInput.dirty || comentarioInput.touched)}"></textarea>
+          <div *ngIf="comentarioInput.invalid && (comentarioInput.dirty || comentarioInput.touched)" class="text-danger small mt-1">
+            <span *ngIf="comentarioInput.errors?.['maxlength']">El comentario no puede exceder los 500 caracteres</span>
+          </div>
+          <p class="form-text text-secondary small text-end">{{comentarioInput.value?.length || 0}}/500</p>
+        </div>
+        
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" [disabled]="lecturaForm.invalid"
+            class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+            <span class="material-icons small me-1">save</span>
+            <span>Guardar</span>
+          </button>
+          <button type="button" (click)="cancelEdit()" 
+            class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center transition-all">
+            <span class="material-icons small me-1">close</span>
+            <span>Cancelar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de relaciones usuario-libro -->
+  <div class="table-responsive">
+    <table class="table table-hover table-striped">
+      <thead class="table-light">
+        <tr>
+          <th scope="col" class="text-primary small">ID</th>
+          <th scope="col" class="text-primary small">Usuario</th>
+          <th scope="col" class="text-primary small">Libro</th>
+          <th scope="col" class="text-primary small">Fecha Inicio</th>
+          <th scope="col" class="text-primary small">Estado</th>
+          <th scope="col" class="text-primary small text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuarioLibro of usuarioLibros">
+          <td class="small text-secondary">
+            {{usuarioLibro.id}}
+          </td>
+          <td class="fw-medium">
+            {{usuarioLibro.usuarioId}}
+          </td>
+          <td class="small text-secondary">
+            {{usuarioLibro.libroId}}
+          </td>
+          <td class="small text-secondary">
+            {{usuarioLibro.fechaInicioLectura ? formatDate(usuarioLibro.fechaInicioLectura) : '-'}}
+          </td>
+          <td>
+            <span class="badge rounded-pill"
+              [ngClass]="{
+                'bg-warning text-dark': usuarioLibro.estadoLectura === 'LEYENDO',
+                'bg-success': usuarioLibro.estadoLectura === 'TERMINADO',
+                'bg-primary': usuarioLibro.estadoLectura === 'PENDIENTE',
+                'bg-danger': usuarioLibro.estadoLectura === 'ABANDONADO'
+              }">
+              {{usuarioLibro.estadoLectura}}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="d-flex justify-content-center gap-2">
+              <button (click)="prepareUpdateUsuarioLibro(usuarioLibro)" 
+                class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">
+                <span class="material-icons small">edit</span>
+              </button>
+              <button (click)="deleteUsuarioLibro(usuarioLibro.id)" 
+                class="btn btn-sm btn-outline-danger border-0 transition-all" title="Eliminar">
+                <span class="material-icons small">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        
+        <!-- Mensaje cuando no hay relaciones -->
+        <tr *ngIf="usuarioLibros.length === 0">
+          <td colspan="6" class="text-center text-secondary py-4">
+            No hay lecturas registradas
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <app-confirm-modal
+    [visible]="showConfirmModal"
+    [title]="confirmModalTitle"
+    [message]="confirmModalMessage"
+    confirmButtonText="Eliminar"
+    confirmButtonClass="btn-danger"
+    cancelButtonText="Cancelar"
+    (confirm)="confirmDeleteUsuarioLibro()"
+    (cancel)="cancelDeleteUsuarioLibro()"
+    (close)="showConfirmModal = false">
+  </app-confirm-modal>
+</div>

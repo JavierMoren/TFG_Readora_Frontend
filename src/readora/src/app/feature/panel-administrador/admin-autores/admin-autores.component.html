@@ -1,0 +1,126 @@
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 fw-medium text-highlight mb-0">Gestión de Autores</h2>
+    
+    <!-- Botón para añadir nuevo autor -->
+    <button *ngIf="!showForm" (click)="prepareCreateAutor()" 
+      class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+      <span class="material-icons small me-1">add</span>
+      <span>Añadir Autor</span>
+    </button>
+  </div>
+
+  <!-- Formulario para añadir/editar autor -->
+  <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+      <h3 class="h6 fw-medium text-highlight mb-0">{{isEditing ? 'Editar Autor' : 'Añadir Autor'}}</h3>
+      <button (click)="cancelEdit()" class="btn-close btn-sm" aria-label="Cerrar"></button>
+    </div>
+    
+    <div class="card-body">
+      <form (submit)="saveAutor()" #autorForm="ngForm">
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+            <input type="text" id="nombre" [(ngModel)]="currentAutor.nombre" name="nombre" 
+              class="form-control" 
+              required
+              #nombreInput="ngModel"
+              pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"
+              [ngClass]="{'is-invalid': nombreInput.invalid && (nombreInput.dirty || nombreInput.touched)}">
+            <div *ngIf="nombreInput.invalid && (nombreInput.dirty || nombreInput.touched)" class="invalid-feedback">
+              <span *ngIf="nombreInput.errors?.['required']">El nombre es obligatorio</span>
+              <span *ngIf="nombreInput.errors?.['pattern']">El nombre solo puede contener letras y espacios</span>
+            </div>
+          </div>
+          
+          <div class="col-12 col-md-6">
+            <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
+            <input type="text" id="apellido" [(ngModel)]="currentAutor.apellido" name="apellido" 
+              class="form-control" 
+              required
+              #apellidoInput="ngModel"
+              pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"
+              [ngClass]="{'is-invalid': apellidoInput.invalid && (apellidoInput.dirty || apellidoInput.touched)}">
+            <div *ngIf="apellidoInput.invalid && (apellidoInput.dirty || apellidoInput.touched)" class="invalid-feedback">
+              <span *ngIf="apellidoInput.errors?.['required']">El apellido es obligatorio</span>
+              <span *ngIf="apellidoInput.errors?.['pattern']">El apellido solo puede contener letras y espacios</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" [disabled]="autorForm.invalid"
+            class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+            <span class="material-icons small me-1">save</span>
+            <span>Guardar</span>
+          </button>
+          <button type="button" (click)="cancelEdit()" 
+            class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center transition-all">
+            <span class="material-icons small me-1">close</span>
+            <span>Cancelar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de autores -->
+  <div class="table-responsive">
+    <table class="table table-hover table-striped">
+      <thead class="table-light">
+        <tr>
+          <th scope="col" class="text-primary small">ID</th>
+          <th scope="col" class="text-primary small">Nombre</th>
+          <th scope="col" class="text-primary small">Apellido</th>
+          <th scope="col" class="text-primary small text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let autor of autores">
+          <td class="small text-secondary">
+            {{autor.id}}
+          </td>
+          <td class="fw-medium">
+            {{autor.nombre}}
+          </td>
+          <td class="small text-secondary">
+            {{autor.apellido}}
+          </td>
+          <td class="text-center">
+            <div class="d-flex justify-content-center gap-2">
+              <button (click)="prepareUpdateAutor(autor)" 
+                class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">
+                <span class="material-icons small">edit</span>
+              </button>
+              <button (click)="deleteAutor(autor.id)" 
+                class="btn btn-sm btn-outline-danger border-0 transition-all" title="Eliminar">
+                <span class="material-icons small">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        
+        <!-- Mensaje cuando no hay autores -->
+        <tr *ngIf="autores.length === 0">
+          <td colspan="4" class="text-center text-secondary py-4">
+            No hay autores disponibles
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <app-confirm-modal
+    [visible]="showConfirmModal"
+    [title]="confirmModalTitle"
+    [message]="confirmModalMessage"
+    confirmButtonText="Eliminar"
+    confirmButtonClass="btn-danger"
+    cancelButtonText="Cancelar"
+    (confirm)="confirmDeleteAutor()"
+    (cancel)="cancelDeleteAutor()"
+    (close)="showConfirmModal = false">
+  </app-confirm-modal>
+</div>

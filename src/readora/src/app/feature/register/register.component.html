@@ -1,86 +1,108 @@
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="card p-4" style="width: 400px;">
-      <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="needs-validation" novalidate>
+<div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+  <div class="col-12 col-md-6 col-lg-5 col-xl-4">
+    <div class="text-center mb-4">
+      <h1 class="h2 fw-bold text-highlight">Crear cuenta</h1>
+      <p class="text-secondary small">Registra tus datos para comenzar</p>
+    </div>
+    
+    <div class="card shadow-sm border-0">
+      <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="p-4">
         <div class="mb-3">
-          <label for="usuario" class="form-label">Usuario:</label>
+          <label for="usuario" class="form-label">Usuario</label>
           <input 
             type="text" 
             id="usuario" 
             [(ngModel)]="registerRequest.usuario" 
-            name="usuario" 
-            class="form-control" 
+            name="usuario"
             required 
-            #usuario="ngModel">
-          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="text-danger">
+            #usuario="ngModel"
+            class="form-control">
+          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="text-danger small mt-1">
             El usuario es requerido.
           </div>
         </div>
-  
+
         <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre:</label>
+          <label for="nombre" class="form-label">Nombre</label>
           <input 
             type="text" 
             id="nombre" 
             [(ngModel)]="registerRequest.nombre" 
-            name="nombre" 
-            class="form-control" 
+            name="nombre"
             required 
-            #nombre="ngModel">
-          <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="text-danger">
+            #nombre="ngModel"
+            class="form-control">
+          <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="text-danger small mt-1">
             El nombre es requerido.
           </div>
         </div>
-  
+
         <div class="mb-3">
-          <label for="apellido" class="form-label">Apellido:</label>
+          <label for="apellido" class="form-label">Apellido</label>
           <input 
             type="text" 
             id="apellido" 
             [(ngModel)]="registerRequest.apellido" 
-            name="apellido" 
-            class="form-control" 
+            name="apellido"
             required 
-            #apellido="ngModel">
-          <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="text-danger">
+            #apellido="ngModel"
+            class="form-control">
+          <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="text-danger small mt-1">
             El apellido es requerido.
           </div>
         </div>
-  
+
         <div class="mb-3">
-          <label for="gmail" class="form-label">Gmail:</label>
+          <label for="gmail" class="form-label">Correo electrónico</label>
           <input 
             type="email" 
             id="gmail" 
             [(ngModel)]="registerRequest.gmail" 
-            name="gmail" 
-            class="form-control" 
+            name="gmail"
             required 
-            #gmail="ngModel">
-          <div *ngIf="gmail.invalid && (gmail.dirty || gmail.touched)" class="text-danger">
+            #gmail="ngModel"
+            class="form-control">
+          <div *ngIf="gmail.invalid && (gmail.dirty || gmail.touched)" class="text-danger small mt-1">
             Ingresa un correo válido.
           </div>
         </div>
-  
+
         <div class="mb-3">
-          <label for="contrasenna" class="form-label">Contraseña:</label>
+          <label for="contrasenna" class="form-label">Contraseña</label>
           <input 
             type="password" 
             id="contrasenna" 
             [(ngModel)]="registerRequest.contrasenna" 
-            name="contrasenna" 
-            class="form-control" 
-            required 
+            name="contrasenna"
+            required
             minlength="6" 
-            #contrasenna="ngModel">
-          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="text-danger">
+            #contrasenna="ngModel"
+            class="form-control">
+          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="text-danger small mt-1">
             La contraseña es requerida y debe tener al menos 6 caracteres.
           </div>
         </div>
-  
-        <button type="submit" class="btn btn-primary" [disabled]="registerForm.invalid">
-          Registrar
+
+        <button 
+          type="submit" 
+          [disabled]="registerForm.invalid"
+          class="btn btn-primary w-100 py-2 mb-3">
+          Crear cuenta
         </button>
+        
+        <div class="text-center">
+          <a routerLink="/api/v1/authenticate" class="text-primary small text-decoration-none">
+            ¿Ya tienes una cuenta? Inicia sesión
+          </a>
+        </div>
       </form>
     </div>
+    
+    <div class="text-center mt-4">
+      <a routerLink="/" class="d-inline-flex align-items-center text-primary text-decoration-none transition-all">
+        <span class="material-icons small me-1">arrow_back</span>
+        <span>Volver al inicio</span>
+      </a>
+    </div>
   </div>
-  
+</div>

@@ -17,7 +17,6 @@ export const jwtInterceptor: HttpInterceptorFn = (
         Authorization: `Bearer ${token}`
       }
     });
-    console.log('JWT Interceptor: Añadiendo token a la petición');
     return next(authReq);
   }
 

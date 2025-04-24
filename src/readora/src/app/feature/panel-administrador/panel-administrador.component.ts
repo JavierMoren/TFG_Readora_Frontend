@@ -1,37 +1,49 @@
 import { Component, OnInit } from '@angular/core';
-import { Usuario } from '../../models/usuario/usuario.model';
-import { UsuarioService } from '../../core/services/usuario.service';
+import { CommonModule } from '@angular/common';
+import { Router, RouterOutlet, RouterLink, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-panel-administrador',
-  imports: [],
+  imports: [CommonModule, RouterOutlet, RouterLink],
   templateUrl: './panel-administrador.component.html',
   styleUrl: './panel-administrador.component.css'
 })
 export class PanelAdministradorComponent implements OnInit {
-  onAdd() {
-  throw new Error('Method not implemented.');
-  }
-  onEdit(arg0: number) {
-  throw new Error('Method not implemented.');
-  }
-  onDelete(arg0: number) {
-  throw new Error('Method not implemented.');
-  }
-  usuarios: Usuario[] = [];
+  activeTab: string = 'usuarios';
 
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(private router: Router, private route: ActivatedRoute) { }
+
   ngOnInit(): void {
-    this.loadUsuarios();
+    console.log('PanelAdministradorComponent inicializado');
+    // Determinar la pestaña activa según la ruta actual
+    const url = this.router.url;
+    console.log('URL actual:', url);
+    
+    if (url.includes('libros')) {
+      this.activeTab = 'libros';
+    } else if (url.includes('autores')) {
+      this.activeTab = 'autores';
+    } else if (url.includes('roles')) {
+      this.activeTab = 'roles';
+    } else if (url.includes('usuario-libros')) {
+      this.activeTab = 'usuario-libros';
+    } else {
+      this.activeTab = 'usuarios';
+      // Redirigir a usuarios por defecto si estamos en la raíz del panel
+      if (url === '/panel-administrador') {
+        console.log('Redirigiendo a usuarios');
+        this.router.navigate(['usuarios'], { relativeTo: this.route });
+      }
+    }
   }
 
-  loadUsuarios(): void {
-    this.usuarioService.getAllUsuarios().subscribe({
-      next: (response) => {
-        this.usuarios = response;
-        console.log('Usuarios cargados:', this.usuarios);
-      },
-      error: (error) => console.error('Error al cargar usuarios:', error)
-    });
+  /**
+   * Navega a la sección específica del panel de administrador
+   * @param tab - Nombre de la pestaña a la que navegar
+   */
+  navigateTo(tab: string): void {
+    console.log('Navegando a:', tab);
+    this.activeTab = tab;
+    this.router.navigate([tab], { relativeTo: this.route });
   }
 }

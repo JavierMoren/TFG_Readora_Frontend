@@ -1,0 +1,22 @@
+<div class="modal-backdrop position-fixed top-0 start-0 w-100 h-100 bg-dark opacity-75" *ngIf="visible" (click)="onCancel()"></div>
+<div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="z-index: 1050;" *ngIf="visible">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content bg-dark text-light border border-secondary">
+      <div class="modal-header border-bottom border-secondary">
+        <h5 class="modal-title fs-5">{{title}}</h5>
+        <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" (click)="onCancel()"></button>
+      </div>
+      <div class="modal-body">
+        <p>{{message}}</p>
+      </div>
+      <div class="modal-footer border-top border-secondary">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+          {{cancelButtonText}}
+        </button>
+        <button type="button" class="btn" [ngClass]="confirmButtonClass ? confirmButtonClass : 'btn-primary'" (click)="onConfirm()">
+          {{confirmButtonText}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
