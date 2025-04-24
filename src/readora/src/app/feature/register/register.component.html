@@ -8,78 +8,100 @@
     <div class="card shadow-sm border-0">
       <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="p-4">
         <div class="mb-3">
-          <label for="usuario" class="form-label">Usuario</label>
+          <label for="usuario" class="form-label">Usuario <span class="text-danger">*</span></label>
           <input 
             type="text" 
             id="usuario" 
             [(ngModel)]="registerRequest.usuario" 
             name="usuario"
             required 
+            minlength="3"
+            maxlength="50"
             #usuario="ngModel"
-            class="form-control">
-          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="text-danger small mt-1">
-            El usuario es requerido.
+            class="form-control"
+            [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}">
+          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback">
+            <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
+            <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
+            <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre</label>
+          <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
           <input 
             type="text" 
             id="nombre" 
             [(ngModel)]="registerRequest.nombre" 
             name="nombre"
             required 
+            minlength="2"
+            maxlength="50"
             #nombre="ngModel"
-            class="form-control">
-          <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="text-danger small mt-1">
-            El nombre es requerido.
+            class="form-control"
+            [ngClass]="{'is-invalid': nombre.invalid && (nombre.dirty || nombre.touched)}">
+          <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="invalid-feedback">
+            <div *ngIf="nombre.errors?.['required']">El nombre es requerido.</div>
+            <div *ngIf="nombre.errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</div>
+            <div *ngIf="nombre.errors?.['maxlength']">El nombre no puede exceder 50 caracteres.</div>
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="apellido" class="form-label">Apellido</label>
+          <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
           <input 
             type="text" 
             id="apellido" 
             [(ngModel)]="registerRequest.apellido" 
             name="apellido"
             required 
+            minlength="2"
+            maxlength="50"
             #apellido="ngModel"
-            class="form-control">
-          <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="text-danger small mt-1">
-            El apellido es requerido.
+            class="form-control"
+            [ngClass]="{'is-invalid': apellido.invalid && (apellido.dirty || apellido.touched)}">
+          <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="invalid-feedback">
+            <div *ngIf="apellido.errors?.['required']">El apellido es requerido.</div>
+            <div *ngIf="apellido.errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</div>
+            <div *ngIf="apellido.errors?.['maxlength']">El apellido no puede exceder 50 caracteres.</div>
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="gmail" class="form-label">Correo electrónico</label>
+          <label for="gmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
           <input 
             type="email" 
             id="gmail" 
             [(ngModel)]="registerRequest.gmail" 
             name="gmail"
             required 
+            email
             #gmail="ngModel"
-            class="form-control">
-          <div *ngIf="gmail.invalid && (gmail.dirty || gmail.touched)" class="text-danger small mt-1">
-            Ingresa un correo válido.
+            class="form-control"
+            [ngClass]="{'is-invalid': gmail.invalid && (gmail.dirty || gmail.touched)}">
+          <div *ngIf="gmail.invalid && (gmail.dirty || gmail.touched)" class="invalid-feedback">
+            <div *ngIf="gmail.errors?.['required']">El correo electrónico es requerido.</div>
+            <div *ngIf="gmail.errors?.['email']">Ingresa un correo electrónico válido.</div>
           </div>
         </div>
 
         <div class="mb-3">
-          <label for="contrasenna" class="form-label">Contraseña</label>
+          <label for="contrasenna" class="form-label">Contraseña <span class="text-danger">*</span></label>
           <input 
             type="password" 
             id="contrasenna" 
             [(ngModel)]="registerRequest.contrasenna" 
             name="contrasenna"
             required
-            minlength="6" 
+            minlength="6"
+            maxlength="100" 
             #contrasenna="ngModel"
-            class="form-control">
-          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="text-danger small mt-1">
-            La contraseña es requerida y debe tener al menos 6 caracteres.
+            class="form-control"
+            [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}">
+          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback">
+            <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
+            <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
+            <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
           </div>
         </div>
 

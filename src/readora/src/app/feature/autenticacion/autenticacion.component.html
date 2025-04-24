@@ -8,32 +8,42 @@
     <div class="card shadow-sm border-0">
       <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" class="p-4">
         <div class="mb-3">
-          <label for="usuario" class="form-label">Usuario</label>
+          <label for="usuario" class="form-label">Usuario <span class="text-danger">*</span></label>
           <input 
             type="text" 
             id="usuario" 
             [(ngModel)]="authRequest.usuario" 
             name="usuario" 
-            required 
+            required
+            minlength="3"
+            maxlength="50" 
             #usuario="ngModel"
-            class="form-control">
-          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="text-danger small mt-1">
-            El usuario es requerido.
+            class="form-control"
+            [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}">
+          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback">
+            <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
+            <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
+            <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
           </div>
         </div>
   
         <div class="mb-3">
-          <label for="contrasenna" class="form-label">Contraseña</label>
+          <label for="contrasenna" class="form-label">Contraseña <span class="text-danger">*</span></label>
           <input 
             type="password" 
             id="contrasenna" 
             [(ngModel)]="authRequest.contrasenna" 
             name="contrasenna" 
-            required 
+            required
+            minlength="6"
+            maxlength="100" 
             #contrasenna="ngModel"
-            class="form-control">
-          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="text-danger small mt-1">
-            La contraseña es requerida.
+            class="form-control"
+            [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}">
+          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback">
+            <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
+            <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
+            <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
           </div>
         </div>
         

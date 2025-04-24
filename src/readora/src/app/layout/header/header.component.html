@@ -8,13 +8,19 @@
           <a class="nav-link text-secondary transition-all" 
              routerLink="/" 
              routerLinkActive="fw-medium text-highlight" 
-             [routerLinkActiveOptions]="{exact: true}">Inicio</a>
+             [routerLinkActiveOptions]="{exact: true}">
+             <span class="material-icons small me-1">home</span>Inicio
+          </a>
           <a class="nav-link text-secondary transition-all" 
              routerLink="/api/v1/register" 
-             routerLinkActive="fw-medium text-highlight">Registro</a>
+             routerLinkActive="fw-medium text-highlight">
+             <span class="material-icons small me-1">person_add</span>Registro
+          </a>
           <a class="nav-link text-secondary transition-all" 
              routerLink="/api/v1/authenticate" 
-             routerLinkActive="fw-medium text-highlight">Autenticación</a>
+             routerLinkActive="fw-medium text-highlight">
+             <span class="material-icons small me-1">login</span>Login
+          </a>
         </div>
       </div>
       
@@ -42,15 +48,21 @@
            routerLink="/" 
            routerLinkActive="fw-medium text-highlight" 
            [routerLinkActiveOptions]="{exact: true}"
-           data-bs-dismiss="offcanvas">Inicio</a>
+           data-bs-dismiss="offcanvas">
+           <span class="material-icons small me-1">home</span>Inicio
+        </a>
         <a class="nav-link text-secondary" 
            routerLink="/api/v1/register" 
            routerLinkActive="fw-medium text-highlight"
-           data-bs-dismiss="offcanvas">Registro</a>
+           data-bs-dismiss="offcanvas">
+           <span class="material-icons small me-1">person_add</span>Registro
+        </a>
         <a class="nav-link text-secondary" 
            routerLink="/api/v1/authenticate" 
            routerLinkActive="fw-medium text-highlight"
-           data-bs-dismiss="offcanvas">Autenticación</a>
+           data-bs-dismiss="offcanvas">
+           <span class="material-icons small me-1">login</span>Inicio de sesión
+        </a>
       </div>
     </div>
   </div>

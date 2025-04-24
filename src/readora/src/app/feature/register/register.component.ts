@@ -20,8 +20,9 @@ export class RegisterComponent {
     apellido: '',
     gmail: '',
     contrasenna: '',
+    fechaCreacion: new Date()
   };
-
+  
   constructor(
     private registerService: RegisterService, 
     private router: Router
@@ -42,7 +43,7 @@ export class RegisterComponent {
 
     // Validar que ningún campo esté vacío o contenga solo espacios en blanco
     const isValid = Object.values(this.registerRequest).every(
-      (value) => typeof value === 'string' && value.trim().length > 0
+      (value) => typeof value === 'string' && value.trim().length > 0 || value instanceof Date
     );
 
     if (!isValid) {
@@ -55,6 +56,21 @@ export class RegisterComponent {
       });
       return;
     }
+
+    // Validar longitud de contraseña
+    if (this.registerRequest.contrasenna.length < 6) {
+      toast.error('Error', {
+        description: 'La contraseña debe tener al menos 6 caracteres',
+        action: {
+          label: 'Cerrar',
+          onClick: () => toast.dismiss(),
+        },
+      });
+      return;
+    }
+    
+    // Actualizar la fecha de creación al momento exacto del registro
+    this.registerRequest.fechaCreacion = new Date();
 
     this.registerService.registerUsuario(this.registerRequest).subscribe({
       next: (response: HttpResponse<any>) => {
@@ -89,6 +105,22 @@ export class RegisterComponent {
         if (error.status === 500) {
           toast.error('Error', { 
             description: 'Error interno del servidor',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          });
+        } else if (error.status === 400) {
+          toast.error('Error', { 
+            description: 'Datos de registro inválidos',
+            action: {
+              label: 'Cerrar',
+              onClick: () => toast.dismiss(),
+            },
+          });
+        } else if (error.status === 409) {
+          toast.error('Error', { 
+            description: 'El usuario o correo ya está registrado',
             action: {
               label: 'Cerrar',
               onClick: () => toast.dismiss(),
