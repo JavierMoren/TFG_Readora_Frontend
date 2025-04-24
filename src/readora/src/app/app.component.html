@@ -2,7 +2,11 @@
   <app-header></app-header>
   
   <main class="flex-grow-1 d-flex flex-column">
-    <ngx-sonner-toaster position="bottom-right" theme="light" expand={true} richColors={true} />
+    <ngx-sonner-toaster 
+      position="bottom-right" 
+      [theme]="isDarkTheme ? 'dark' : 'light'" 
+      [expand]="true" 
+      [richColors]="true" />
     <div class="container py-5 flex-grow-1">
       <router-outlet></router-outlet>
     </div>

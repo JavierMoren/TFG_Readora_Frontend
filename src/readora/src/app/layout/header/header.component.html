@@ -1,40 +1,71 @@
-<header class="sticky-top shadow-sm bg-white">
-  <nav class="container py-3">
-    <div class="d-flex justify-content-between align-items-center">
-      <a class="fs-4 fw-bold text-highlight text-decoration-none transition-all" routerLink="/">Readora</a>
-      
-      <div class="d-none d-md-block">
-        <div class="d-flex align-items-center gap-4">
-          <a class="nav-link text-secondary transition-all" 
-             routerLink="/" 
-             routerLinkActive="fw-medium text-highlight" 
-             [routerLinkActiveOptions]="{exact: true}">
-             <span class="material-icons small me-1">home</span>Inicio
-          </a>
-          <a class="nav-link text-secondary transition-all" 
-             routerLink="/api/v1/register" 
-             routerLinkActive="fw-medium text-highlight">
-             <span class="material-icons small me-1">person_add</span>Registro
-          </a>
-          <a class="nav-link text-secondary transition-all" 
-             routerLink="/api/v1/authenticate" 
-             routerLinkActive="fw-medium text-highlight">
-             <span class="material-icons small me-1">login</span>Login
-          </a>
+<header class="sticky-top shadow-sm">
+  <div class="w-100">
+    <nav class="container py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <a class="fs-4 fw-bold text-highlight text-decoration-none transition-all" routerLink="/">Readora</a>
+        
+        <div class="d-none d-md-block">
+          <div class="d-flex align-items-center gap-4">
+            <a class="nav-link text-secondary transition-all" 
+               routerLink="/" 
+               routerLinkActive="fw-medium text-highlight" 
+               [routerLinkActiveOptions]="{exact: true}">
+               <span class="material-icons small me-1">home</span>Inicio
+            </a>
+
+            <!-- Enlaces cuando NO está autenticado -->
+            <ng-container *ngIf="!(isLoggedIn$ | async)">
+              <a class="nav-link text-secondary transition-all" 
+                routerLink="/api/v1/register" 
+                routerLinkActive="fw-medium text-highlight">
+                <span class="material-icons small me-1">person_add</span>Registro
+              </a>
+              <a class="nav-link text-secondary transition-all" 
+                routerLink="/api/v1/authenticate" 
+                routerLinkActive="fw-medium text-highlight">
+                <span class="material-icons small me-1">login</span>Login
+              </a>
+            </ng-container>
+
+            <!-- Enlaces cuando SÍ está autenticado -->
+            <ng-container *ngIf="isLoggedIn$ | async">
+              <!-- Enlace al panel de administrador si es admin -->
+              <a *ngIf="isAdmin" 
+                 class="nav-link text-secondary transition-all" 
+                 routerLink="/panel-administrador" 
+                 routerLinkActive="fw-medium text-highlight">
+                 <span class="material-icons small me-1">admin_panel_settings</span>Panel Admin
+              </a>
+              
+              <!-- Nombre de usuario -->
+              <span class="nav-link text-secondary">
+                <span class="material-icons small me-1">account_circle</span>{{ username }}
+              </span>
+              
+              <!-- Botón simple de logout -->
+              <a class="nav-link text-secondary transition-all" 
+                 href="#" 
+                 (click)="logout(); $event.preventDefault()">
+                <span class="material-icons small me-1">logout</span>Cerrar sesión
+              </a>
+            </ng-container>
+            
+            <app-theme-toggle></app-theme-toggle>
+          </div>
         </div>
+        
+        <button class="navbar-toggler d-md-none border-0" 
+                type="button" 
+                data-bs-toggle="offcanvas" 
+                data-bs-target="#offcanvasNavbar" 
+                aria-controls="offcanvasNavbar" 
+                aria-expanded="false" 
+                aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
       </div>
-      
-      <button class="navbar-toggler d-md-none border-0" 
-              type="button" 
-              data-bs-toggle="offcanvas" 
-              data-bs-target="#offcanvasNavbar" 
-              aria-controls="offcanvasNavbar" 
-              aria-expanded="false" 
-              aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-    </div>
-  </nav>
+    </nav>
+  </div>
   
   <!-- Menú móvil -->
   <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
@@ -51,18 +82,49 @@
            data-bs-dismiss="offcanvas">
            <span class="material-icons small me-1">home</span>Inicio
         </a>
-        <a class="nav-link text-secondary" 
-           routerLink="/api/v1/register" 
-           routerLinkActive="fw-medium text-highlight"
-           data-bs-dismiss="offcanvas">
-           <span class="material-icons small me-1">person_add</span>Registro
-        </a>
-        <a class="nav-link text-secondary" 
-           routerLink="/api/v1/authenticate" 
-           routerLinkActive="fw-medium text-highlight"
-           data-bs-dismiss="offcanvas">
-           <span class="material-icons small me-1">login</span>Inicio de sesión
-        </a>
+
+        <!-- Móvil: Enlaces cuando NO está autenticado -->
+        <ng-container *ngIf="!(isLoggedIn$ | async)">
+          <a class="nav-link text-secondary" 
+            routerLink="/api/v1/register" 
+            routerLinkActive="fw-medium text-highlight"
+            data-bs-dismiss="offcanvas">
+            <span class="material-icons small me-1">person_add</span>Registro
+          </a>
+          <a class="nav-link text-secondary" 
+            routerLink="/api/v1/authenticate" 
+            routerLinkActive="fw-medium text-highlight"
+            data-bs-dismiss="offcanvas">
+            <span class="material-icons small me-1">login</span>Inicio de sesión
+          </a>
+        </ng-container>
+
+        <!-- Móvil: Enlaces cuando SÍ está autenticado -->
+        <ng-container *ngIf="isLoggedIn$ | async">
+          <!-- Enlace al panel de administrador si es admin -->
+          <a *ngIf="isAdmin" 
+             class="nav-link text-secondary" 
+             routerLink="/panel-administrador" 
+             routerLinkActive="fw-medium text-highlight"
+             data-bs-dismiss="offcanvas">
+             <span class="material-icons small me-1">admin_panel_settings</span>Panel Admin
+          </a>
+          <!-- Nombre de usuario -->
+          <span class="nav-link text-secondary">
+            <span class="material-icons small me-1">account_circle</span>{{ username }}
+          </span>
+          <!-- Botón simple de logout -->
+          <a class="nav-link text-secondary" 
+             href="#" 
+             (click)="logout(); $event.preventDefault()"
+             data-bs-dismiss="offcanvas">
+             <span class="material-icons small me-1">logout</span>Cerrar sesión
+          </a>
+        </ng-container>
+
+        <div class="mt-2">
+          <app-theme-toggle></app-theme-toggle>
+        </div>
       </div>
     </div>
   </div>

@@ -1,0 +1,8 @@
+<button 
+  class="theme-toggle border-0" 
+  (click)="toggleTheme()" 
+  [attr.aria-label]="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+  [title]="isDarkTheme ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+  <span class="material-icons-outlined" *ngIf="!isDarkTheme">dark_mode</span>
+  <span class="material-icons-outlined" *ngIf="isDarkTheme">light_mode</span>
+</button>

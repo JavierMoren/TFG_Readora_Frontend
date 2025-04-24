@@ -57,6 +57,12 @@ export class AutenticacionService {
    * @param token - Token recibido tras una autenticación exitosa.
    */
   setToken(token: string): void {
+    // Verificar que el token no sea nulo o vacío
+    if (!token) {
+      console.error('Intento de guardar un token vacío');
+      return;
+    }
+    
     // Establecer el token
     localStorage.setItem(this.TOKEN_KEY, token);
     

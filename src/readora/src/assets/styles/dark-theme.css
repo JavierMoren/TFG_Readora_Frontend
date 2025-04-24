@@ -1,0 +1,267 @@
+/* Variables del tema - Modo oscuro */
+[data-theme="dark"] {
+  --primary-color: #5687bd;
+  --secondary-color: #2b3035;
+  --accent-color: #ff8585;
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --background-light: #212529;
+  --background-subtle: #343a40;
+  --border-color: #495057;
+  --component-bg: #2b3035;
+  --header-bg: #212529;
+  --footer-bg: #1c1f23;
+  --card-bg: #343a40;
+  --input-bg: #343a40;
+  --table-bg: #2b3035;
+  --table-header-bg: #343a40;
+  --table-hover-bg: #3e444a;
+  --modal-bg: #343a40;
+}
+
+/* ============== ESTILOS DE TEMA OSCURO GLOBALES ============== */
+
+/* Solución para fondos blancos fijos en componentes Bootstrap */
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-light {
+  background-color: var(--component-bg) !important;
+}
+
+/* Header y navegación */
+[data-theme="dark"] header,
+[data-theme="dark"] nav,
+[data-theme="dark"] .navbar,
+[data-theme="dark"] .offcanvas {
+  background-color: var(--header-bg) !important;
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-link {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .nav-link:hover,
+[data-theme="dark"] .nav-link:focus {
+  color: var(--text-primary);
+}
+
+/* Texto y tipografía */
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] h4, 
+[data-theme="dark"] h5, 
+[data-theme="dark"] h6,
+[data-theme="dark"] .h1,
+[data-theme="dark"] .h2,
+[data-theme="dark"] .h3,
+[data-theme="dark"] .h4,
+[data-theme="dark"] .h5,
+[data-theme="dark"] .h6 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] div,
+[data-theme="dark"] label {
+  color: var(--text-secondary);
+}
+
+/* Formularios */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .input-group-text {
+  background-color: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: var(--input-bg);
+  box-shadow: 0 0 0 0.25rem rgba(86, 135, 189, 0.25);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Tablas */
+[data-theme="dark"] .table {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table>thead {
+  background-color: var(--table-header-bg);
+}
+
+[data-theme="dark"] .table>tbody {
+  background-color: var(--table-bg);
+}
+
+[data-theme="dark"] .table-hover>tbody>tr:hover {
+  background-color: var(--table-hover-bg);
+}
+
+/* Modales y diálogos */
+[data-theme="dark"] .modal-content {
+  background-color: var(--modal-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--border-color);
+}
+
+/* Footer */
+[data-theme="dark"] footer {
+  background-color: var(--footer-bg) !important;
+  border-color: var(--border-color);
+}
+
+/* Elementos Bootstrap adicionales */
+[data-theme="dark"] .dropdown-menu {
+  background-color: var(--component-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .list-group-item {
+  background-color: var(--component-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .accordion-button,
+[data-theme="dark"] .accordion-collapse {
+  background-color: var(--component-bg) !important;
+  color: var(--text-primary);
+}
+
+/* Estilos para iconos */
+[data-theme="dark"] .material-icons,
+[data-theme="dark"] .material-icons-outlined {
+  color: var(--text-primary);
+}
+
+/* Botones en modo oscuro */
+[data-theme="dark"] .btn-light {
+  background-color: var(--background-subtle);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* Fixes para elementos específicos */
+[data-theme="dark"] .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+[data-theme="dark"] .border {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-start,
+[data-theme="dark"] .border-end {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .text-dark {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: var(--background-subtle) !important;
+}
+
+[data-theme="dark"] .shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Toasts en modo oscuro */
+[data-theme="dark"] .toast {
+  background-color: var(--component-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .toast-header {
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .toast-body {
+  background-color: var(--component-bg);
+  color: var(--text-secondary);
+}
+
+/* Para toasts específicos por tipo - Mejorados para mejor visibilidad con colores más brillantes */
+[data-theme="dark"] .toast.bg-success,
+[data-theme="dark"] .toast.bg-danger,
+[data-theme="dark"] .toast.bg-warning,
+[data-theme="dark"] .toast.bg-info {
+  background-color: var(--component-bg) !important;
+  border-left: 5px solid;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilo mejorado para toast de éxito en modo oscuro - Verde más brillante */
+[data-theme="dark"] .toast.bg-success {
+  border-left-color: #4ade80;
+  background-color: rgba(74, 222, 128, 0.25) !important;
+}
+[data-theme="dark"] .toast.bg-success .toast-header,
+[data-theme="dark"] .toast.bg-success .toast-body {
+  background-color: rgba(74, 222, 128, 0.25) !important;
+  color: #4ade80;
+}
+
+/* Estilo mejorado para toast de error en modo oscuro - Rojo más brillante */
+[data-theme="dark"] .toast.bg-danger {
+  border-left-color: #f87171;
+  background-color: rgba(248, 113, 113, 0.25) !important;
+}
+[data-theme="dark"] .toast.bg-danger .toast-header,
+[data-theme="dark"] .toast.bg-danger .toast-body {
+  background-color: rgba(248, 113, 113, 0.25) !important;
+  color: #f87171;
+}
+
+[data-theme="dark"] .toast.bg-warning {
+  border-left-color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.2) !important;
+}
+[data-theme="dark"] .toast.bg-warning .toast-header,
+[data-theme="dark"] .toast.bg-warning .toast-body {
+  background-color: rgba(251, 191, 36, 0.2) !important;
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .toast.bg-info {
+  border-left-color: #60a5fa;
+  background-color: rgba(96, 165, 250, 0.2) !important;
+}
+[data-theme="dark"] .toast.bg-info .toast-header,
+[data-theme="dark"] .toast.bg-info .toast-body {
+  background-color: rgba(96, 165, 250, 0.2) !important;
+  color: #93c5fd;
+}

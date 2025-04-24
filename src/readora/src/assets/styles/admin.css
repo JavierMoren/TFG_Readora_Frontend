@@ -1,0 +1,100 @@
+/* ============== ESTILOS ESPECÍFICOS PARA COMPONENTES DE ADMINISTRACIÓN ============== */
+
+/* Tablas en modo oscuro */
+[data-theme="dark"] .table-light,
+[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd),
+[data-theme="dark"] .table>:not(caption)>*>* {
+  color: var(--text-primary);
+  background-color: var(--table-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-hover>tbody>tr:hover>* {
+  background-color: var(--table-hover-bg);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] thead.table-light {
+  background-color: var(--table-header-bg) !important;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd)>* {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Formularios del panel de administración */
+[data-theme="dark"] .form-check-input {
+  background-color: var(--input-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Tarjetas dentro de formularios del panel de administración */
+[data-theme="dark"] .card-header {
+  background-color: var(--background-subtle);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .card.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+/* Fix para el botón de cierre en modales y tarjetas */
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Bordes de las navegaciones por pestañas */
+[data-theme="dark"] .nav-tabs {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-tabs .nav-link.active {
+  background-color: var(--background-subtle);
+  border-color: var(--primary-color) var(--border-color) var(--background-subtle);
+  color: var(--primary-color);
+}
+
+/* Estilos específicos para admin-libros */
+[data-theme="dark"] thead th.text-primary,
+[data-theme="dark"] .table th.text-primary {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .cursor-pointer {
+  cursor: pointer;
+}
+
+/* Badges */
+[data-theme="dark"] .badge.bg-success {
+  background-color: rgba(25, 135, 84, 0.8) !important;
+}
+
+[data-theme="dark"] .badge.bg-danger {
+  background-color: rgba(220, 53, 69, 0.8) !important;
+}
+
+/* Paginación */
+[data-theme="dark"] .pagination .page-link {
+  background-color: var(--background-subtle);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .pagination .page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .pagination .page-item.disabled .page-link {
+  background-color: var(--background-subtle);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}

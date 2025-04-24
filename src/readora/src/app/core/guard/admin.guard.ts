@@ -4,7 +4,6 @@ import { inject } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 
 export const adminGuard: CanActivateFn = (route, state) => {
-  // Inyecta el servicio de autenticación
   const authService = inject(AutenticacionService);
   const router = inject(Router);
   
@@ -31,7 +30,6 @@ export const adminGuard: CanActivateFn = (route, state) => {
     router.navigate(['/forbidden']);
     return false;
   } catch (error) {
-    console.error('[ADMIN GUARD] [ERROR] Error al verificar el rol de administrador:', error);
     router.navigate(['/forbidden']);
     return false;
   }

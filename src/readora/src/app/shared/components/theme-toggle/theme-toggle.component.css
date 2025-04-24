@@ -1,0 +1,27 @@
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background-color: var(--background-subtle, #f9f9f9);
+  color: var(--text-primary, #212529);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.25);
+}
+
+.theme-toggle:hover {
+  background-color: var(--border-color, #dee2e6);
+}
+
+.material-icons-outlined {
+  font-size: 1.5rem;
+  line-height: 1;
+}
