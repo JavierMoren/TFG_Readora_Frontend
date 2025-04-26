@@ -1,5 +1,5 @@
-# Imagen base con Node.js versión 20
-FROM node:20
+# Etapa de compilación
+FROM node:20 AS build
 
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
@@ -13,8 +13,30 @@ RUN npm install -g @angular/cli && npm install
 # Copia el resto del código fuente
 COPY . .
 
-# Expone el puerto 4200 para desarrollo de Angular
-EXPOSE 4200
+# Compila la aplicación para producción
+RUN ng build --configuration production
 
-# Comando para iniciar el servidor de desarrollo de Angular
-CMD ["ng", "serve", "--host", "0.0.0.0"]
+# Etapa de producción con Nginx
+FROM nginx:stable-alpine
+
+# Instala wget para descargar wait-for-it
+RUN apk add --no-cache wget bash
+
+# Descarga wait-for-it.sh y hazlo ejecutable
+RUN wget -O /wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+    && chmod +x /wait-for-it.sh
+
+# Copia la configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copia los archivos compilados desde la etapa de compilación
+COPY --from=build /app/dist/readora/browser /usr/share/nginx/html
+
+# Crea el directorio para uploads si no existe
+RUN mkdir -p /uploads
+
+# Expone el puerto 80
+EXPOSE 80
+
+# Inicia Nginx en primer plano
+CMD ["nginx", "-g", "daemon off;"]
