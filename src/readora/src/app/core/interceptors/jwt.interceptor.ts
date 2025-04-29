@@ -1,25 +1,23 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AutenticacionService } from '../services/autenticacion.service';
 
+/**
+ * Interceptor para agregar credenciales a todas las solicitudes HTTP
+ * cuando la URL pertenece al dominio de la API.
+ * Esto permite que las cookies HttpOnly se envíen automáticamente.
+ */
 export const jwtInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
-  const authService = inject(AutenticacionService);
-  const token = authService.getToken();
-
-  // Si hay un token de autenticación, lo añadimos al header
-  if (token) {
-    // Clonamos la petición para no modificar la original
+  // Verificar si la solicitud va hacia nuestra API
+  if (req.url.includes('/api/')) {
+    // Clonar la petición y añadir withCredentials para enviar cookies automáticamente
     const authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
+      withCredentials: true
     });
     return next(authReq);
   }
 
-  // Si no hay token, dejamos pasar la petición sin modificar
+  // Si no va hacia la API, dejamos pasar la petición sin modificar
   return next(req);
 };

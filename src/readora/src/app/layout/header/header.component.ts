@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 import { AutenticacionService } from '../../core/services/autenticacion.service';
 import { Observable } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
 import { toast } from 'ngx-sonner';
 
 @Component({
@@ -35,18 +34,21 @@ export class HeaderComponent implements OnInit {
   }
   
   private updateUserInfo(): void {
-    const token = this.authService.getToken();
-    if (token) {
-      try {
-        const decodedToken: any = jwtDecode(token);
-        this.username = decodedToken.sub || ''; // sub contiene el nombre de usuario
-        this.isAdmin = decodedToken.roles && 
-                       Array.isArray(decodedToken.roles) && 
-                       decodedToken.roles.includes('ROLE_ADMIN');
-      } catch (error) {
-        console.error('Error al decodificar el token:', error);
+    this.authService.getUserInfo().subscribe({
+      next: (userInfo) => {
+        if (userInfo) {
+          this.username = userInfo.username || '';
+          this.isAdmin = userInfo.roles && 
+                         Array.isArray(userInfo.roles) && 
+                         userInfo.roles.includes('ROLE_ADMIN');
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener información del usuario:', error);
+        this.username = '';
+        this.isAdmin = false;
       }
-    }
+    });
   }
   
   logout(): void {

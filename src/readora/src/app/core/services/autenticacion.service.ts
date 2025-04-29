@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse , HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, catchError, throwError, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, catchError, throwError, Observable, of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroments';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
@@ -11,108 +12,132 @@ import { environment } from '../../../enviroments/enviroments';
 export class AutenticacionService {
   
   private apiUrl = `${environment.apiUrl}/v1/authenticate`;
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly TOKEN_EXPIRY_KEY = 'auth_token_expiry';
-  private token: BehaviorSubject<string | null>;
+  private logoutUrl = `${environment.apiUrl}/v1/logout`;
+  private checkAuthUrl = `${environment.apiUrl}/v1/check-auth`;
+  private isAuthenticated = new BehaviorSubject<boolean>(false);
+  private token: string | null = null; // Para compatibilidad con componentes existentes
 
   constructor(private http: HttpClient, private router: Router) {
-    // Inicializar el BehaviorSubject con el token almacenado
-    const storedToken = localStorage.getItem(this.TOKEN_KEY);
-    this.token = new BehaviorSubject<string | null>(storedToken);
-    
-    // Verificar la expiración del token al iniciar el servicio
-    this.checkTokenExpiration();
+    // Comprobar si el usuario está autenticado al inicializar el servicio
+    this.checkAuthentication();
   }
 
-  private checkTokenExpiration(): void {
-    const expiryTime = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
-    if (expiryTime && new Date().getTime() > parseInt(expiryTime)) {
-      this.removeTokenFromStorage();
-      this.token.next(null);
-      this.router.navigate(['/']);
-    }
-  }
-
-  private getStoredToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+  /**
+   * Verifica si hay una sesión autenticada activa consultando al servidor
+   * Esta función se puede llamar en cualquier momento para refrescar el estado
+   */
+  checkAuthentication(): void {
+    // Consultar al backend sobre el estado de autenticación utilizando las cookies
+    this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
+      .pipe(
+        catchError(() => {
+          // Si hay un error, asumimos que no está autenticado
+          this.isAuthenticated.next(false);
+          this.token = null;
+          return of(false);
+        })
+      )
+      .subscribe(response => {
+        this.isAuthenticated.next(!!response);
+        // Si el backend nos proporciona un token en la respuesta, lo almacenamos
+        // para compatibilidad con los componentes que lo utilizan
+        if (response && response.token) {
+          this.token = response.token;
+        }
+      });
   }
 
   /**
    * Método para autenticar al usuario.
    * @param username - Nombre de usuario ingresado.
    * @param password - Contraseña ingresada.
-   * @returns Observable que emite un objeto con el token de autenticación si la solicitud es exitosa.
+   * @returns Observable que emite un objeto con el resultado de la autenticación
    */
-  authenticateUsuario(usuario: string, contrasenna: string): Observable<{ token: string }> {
-    return this.http.post<{ username: String, token: string }>(
+  authenticateUsuario(usuario: string, contrasenna: string): Observable<any> {
+    return this.http.post<any>(
       this.apiUrl,
       { usuario, contrasenna },
-      { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }
+      { 
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+        withCredentials: true // Importante para que se envíen y reciban cookies
+      }
+    ).pipe(
+      tap((response) => {
+        // Cuando la autenticación es exitosa, actualizamos el estado
+        this.isAuthenticated.next(true);
+        // Si el backend devuelve un token en la respuesta, lo guardamos para compatibilidad
+        if (response && response.token) {
+          this.token = response.token;
+        }
+      })
     );
   }
 
   /**
-   * Almacena el token de autenticación en el localStorage y lo establece en el BehaviorSubject.
-   * También establece un temporizador para cerrar la sesión automáticamente después de 2 horas.
-   * @param token - Token recibido tras una autenticación exitosa.
-   */
-  setToken(token: string): void {
-    // Verificar que el token no sea nulo o vacío
-    if (!token) {
-      console.error('Intento de guardar un token vacío');
-      return;
-    }
-    
-    // Establecer el token
-    localStorage.setItem(this.TOKEN_KEY, token);
-    
-    // Calcular y guardar el tiempo de expiración (2 horas desde ahora)
-    const expiryTime = new Date().getTime() + (2 * 60 * 60 * 1000); // 2 horas en milisegundos
-    localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-    
-    this.token.next(token);
-
-    // Configurar el temporizador para la expiración automática
-    setTimeout(() => {
-      this.logout();
-    }, 2 * 60 * 60 * 1000);
-  }
-
-  /**
-   * Obtiene el token actual almacenado en el BehaviorSubject.
-   * @returns El token actual o null si no está definido.
-   */
-  getToken(): string | null {
-    return this.token.value;
-  }
-
-  /**
-   * Devuelve un observable que emite el estado de autenticación basado en la existencia del token.
+   * Devuelve un observable que emite el estado de autenticación
    * @returns Observable<boolean>
    */
   isLoggedIn(): Observable<boolean> {
-    // Verifica si el token existe y emite un valor booleano.
-    return this.token
-      .asObservable()
-      .pipe(map((token: string | null) => !!token));
+    // Al suscribirse a este observable, verificamos primero el estado de autenticación
+    this.checkAuthentication();
+    return this.isAuthenticated.asObservable();
   }
 
   /**
    * Método para cerrar la sesión del usuario.
-   * Elimina el token y redirige al usuario a la página de inicio de sesión.
+   * Elimina la cookie solicitando al backend y redirige al usuario a la página de inicio.
    */
   logout(): void {
-    this.removeTokenFromStorage();
-    this.token.next(null);
-    this.router.navigate(['/']);
+    // Llamar al endpoint de logout para invalidar la cookie del lado del servidor
+    this.http.post<any>(this.logoutUrl, {}, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          this.isAuthenticated.next(false);
+          this.token = null;
+          this.router.navigate(['/']);
+        },
+        error: () => {
+          // Incluso si hay un error, limpiamos el estado local
+          this.isAuthenticated.next(false);
+          this.token = null;
+          this.router.navigate(['/']);
+        }
+      });
   }
 
   /**
-   * Método privado para eliminar el token del almacenamiento
-   * Separa esta funcionalidad para evitar referencias circulares
+   * Obtiene información del usuario decodificando el JWT desde una API segura
+   * @returns Observable con la información del usuario
    */
-  private removeTokenFromStorage(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+  getUserInfo(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/v1/user-info`, { withCredentials: true });
+  }
+
+  /**
+   * Guarda el token JWT para compatibilidad con componentes existentes
+   * @param token - El token JWT a guardar
+   */
+  setToken(token: string): void {
+    this.token = token;
+    this.isAuthenticated.next(!!token);
+  }
+
+  /**
+   * Obtiene el token JWT actual. Si no existe, intenta obtenerlo del servidor
+   * @returns El token JWT o null si no existe
+   */
+  getToken(): string | null {
+    // Si no tenemos token en memoria, pero estamos autenticados, 
+    // podríamos verificar de nuevo con el servidor
+    if (!this.token && this.isAuthenticated.getValue()) {
+      // Hacemos una llamada síncrona para intentar obtener el token actualizado
+      this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
+        .subscribe(response => {
+          if (response && response.token) {
+            this.token = response.token;
+          }
+        });
+    }
+    return this.token;
   }
 }

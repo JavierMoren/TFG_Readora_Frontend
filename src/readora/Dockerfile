@@ -35,8 +35,12 @@ COPY --from=build /app/dist/readora/browser /usr/share/nginx/html
 # Crea el directorio para uploads si no existe
 RUN mkdir -p /uploads
 
-# Expone el puerto 80
+# Crea el directorio para los certificados SSL
+RUN mkdir -p /etc/nginx/ssl
+
+# Expone los puertos 80 (HTTP) y 443 (HTTPS)
 EXPOSE 80
+EXPOSE 443
 
 # Inicia Nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]
