@@ -64,7 +64,7 @@ export class AutenticacionComponent {
         this.autenticacionService.setToken(response.token);
         setTimeout(() => {
           this.router.navigate(['/']);
-        }, 1500);
+        }, 500);
       },
       error: (error) => {
         console.error('Error al autenticar usuario', error);

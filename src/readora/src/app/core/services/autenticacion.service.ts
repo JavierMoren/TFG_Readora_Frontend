@@ -38,7 +38,11 @@ export class AutenticacionService {
         })
       )
       .subscribe(response => {
-        this.isAuthenticated.next(!!response);
+        // Verificar explícitamente si la respuesta indica que el usuario está autenticado
+        const isAuth = response && response.isAuthenticated === true;
+        this.isAuthenticated.next(isAuth);
+        console.log('Estado de autenticación actualizado:', isAuth);
+        
         // Si el backend nos proporciona un token en la respuesta, lo almacenamos
         // para compatibilidad con los componentes que lo utilizan
         if (response && response.token) {
@@ -64,10 +68,17 @@ export class AutenticacionService {
     ).pipe(
       tap((response) => {
         // Cuando la autenticación es exitosa, actualizamos el estado
-        this.isAuthenticated.next(true);
-        // Si el backend devuelve un token en la respuesta, lo guardamos para compatibilidad
-        if (response && response.token) {
-          this.token = response.token;
+        if (response && response.mensage === "Authentication successful") {
+          console.log('Autenticación exitosa, actualizando estado');
+          this.isAuthenticated.next(true);
+          
+          // Verificar el estado actual llamando a checkAuthentication
+          setTimeout(() => this.checkAuthentication(), 500);
+          
+          // Si el backend devuelve un token en la respuesta, lo guardamos para compatibilidad
+          if (response && response.token) {
+            this.token = response.token;
+          }
         }
       })
     );
