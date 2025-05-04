@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Autor } from '../../models/autor/autor.model';
@@ -41,6 +41,87 @@ export class AutorService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Obtiene autores de forma paginada
+   * 
+   * @param page Número de página (base 0)
+   * @param size Tamaño de página
+   * @param sort Campo para ordenar
+   * @param direction Dirección del ordenamiento ('asc' o 'desc')
+   * @returns Observable con los resultados paginados
+   */
+  getAllAutoresPaginados(page: number = 0, size: number = 10, sort: string = 'nombre', direction: string = 'asc'): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+
+    return this.http.get(`${this.apiUrl}/paginados`, {
+      params: params
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
+  /**
+   * Realiza una búsqueda avanzada de autores por nombre o biografía
+   * 
+   * @param query Texto a buscar en nombre o biografía
+   * @param page Número de página (base 0)
+   * @param size Tamaño de página
+   * @param sort Campo para ordenar
+   * @param direction Dirección del ordenamiento ('asc' o 'desc')
+   * @returns Observable con los resultados paginados de la búsqueda
+   */
+  searchAutores(
+    query: string, 
+    page: number = 0, 
+    size: number = 10, 
+    sort: string = 'nombre', 
+    direction: string = 'asc'
+  ): Observable<any> {
+    
+    // Construir parámetros de búsqueda
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+      
+    // Añadir query si existe
+    if (query && query.trim() !== '') {
+      params = params.set('query', query.trim());
+    }
+    
+    return this.http.get(`${this.apiUrl}/search`, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Sube una imagen de foto para un autor
+   * 
+   * @param formData FormData que contiene el archivo a subir
+   * @returns Observable con la respuesta del servidor, que incluye la URL de la imagen
+   */
+  uploadAutorImage(formData: FormData): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/files/upload/autor`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Construye una URL completa para una ruta de imagen relativa
+   * 
+   * @param relativePath Ruta relativa de la imagen (ej: "autor/uuid-filename.jpg")
+   * @returns URL completa para acceder a la imagen
+   */
+  getImageUrl(relativePath: string | null): string | null {
+    if (!relativePath) return null;
+    return `${environment.apiUrl}/files/${relativePath}`;
   }
 
   private handleError(error: HttpErrorResponse) {

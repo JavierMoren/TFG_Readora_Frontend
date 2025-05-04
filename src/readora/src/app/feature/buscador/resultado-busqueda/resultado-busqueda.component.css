@@ -1,0 +1,65 @@
+.results-container {
+  margin-bottom: 2rem;
+}
+
+.card {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  height: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.book-cover img {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.img-author {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.book-description {
+  font-size: 0.9rem;
+  color: #6c757d;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pagination .page-link {
+  color: #343a40;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #343a40;
+  border-color: #343a40;
+  color: #fff;
+}
+
+/* Estilo para resaltar las tarjetas al pasar el cursor */
+.card:active {
+  transform: translateY(0);
+  transition: transform 0.1s;
+}
+
+/* Estilo para las valoraciones de libros */
+.text-warning {
+  color: #ffc107;
+}
+
+/* Estilo para las imágenes de autores */
+.author-image .img-author {
+  border: 2px solid #fff;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}

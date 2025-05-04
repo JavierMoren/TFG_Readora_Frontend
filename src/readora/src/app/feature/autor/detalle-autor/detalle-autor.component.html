@@ -1,0 +1,98 @@
+<div class="container mt-4">
+  <!-- Indicador de carga -->
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div class="alert alert-danger" *ngIf="error">
+    {{ error }}
+    <button class="btn btn-link" (click)="reloadAutor()">
+      Intentar de nuevo
+    </button>
+  </div>
+
+  <!-- Detalles del autor -->
+  <div class="author-detail" *ngIf="autor && !loading">
+    <div class="card shadow-sm mb-4">
+      <div class="row g-0">
+        <!-- Foto del autor -->
+        <div class="col-md-3">
+          <div class="text-center p-3">
+            <img [src]="getImageUrl(autor.fotoUrl || null)" 
+                 alt="Foto de {{ autor.nombre }}" 
+                 class="img-fluid rounded-circle author-photo">
+          </div>
+        </div>
+        
+        <!-- Información básica del autor -->
+        <div class="col-md-9">
+          <div class="card-body">
+            <h1 class="card-title">{{ autor.nombre }} {{ autor.apellido }}</h1>
+            
+            <div class="mb-3">
+              <span class="badge bg-primary me-2">Autor</span>
+              <span class="badge bg-secondary" *ngIf="autor.fechaNacimiento">
+                {{ autor.fechaNacimiento | date:'yyyy' }} - {{ autor.fechaFallecimiento ? (autor.fechaFallecimiento | date:'yyyy') : 'Presente' }}
+              </span>
+            </div>
+            
+            <div class="author-details mt-4">
+              <table class="table">
+                <tbody>
+                  <tr *ngIf="autor.nacionalidad">
+                    <th>Nacionalidad:</th>
+                    <td>{{ autor.nacionalidad }}</td>
+                  </tr>
+                  <tr *ngIf="autor.fechaNacimiento">
+                    <th>Fecha de nacimiento:</th>
+                    <td>{{ autor.fechaNacimiento | date:'dd/MM/yyyy' }}</td>
+                  </tr>
+                  <tr *ngIf="autor.fechaFallecimiento">
+                    <th>Fecha de fallecimiento:</th>
+                    <td>{{ autor.fechaFallecimiento | date:'dd/MM/yyyy' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Biografía -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h3 class="card-title">Biografía</h3>
+        <p class="card-text biografia">{{ autor.biografia || 'No hay información biográfica disponible.' }}</p>
+      </div>
+    </div>
+    
+    <!-- Libros del autor -->
+    <div class="card shadow-sm mb-4" *ngIf="autor.libros?.length">
+      <div class="card-body">
+        <h3 class="card-title">Obras</h3>
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+          <div class="col" *ngFor="let libro of autor.libros">
+            <div class="card h-100 book-card">
+              <img [src]="getImageUrl(libro.portadaUrl)" 
+                   alt="Portada de {{ libro.titulo }}"
+                   class="card-img-top book-cover-sm">
+              <div class="card-body">
+                <h6 class="card-title">{{ libro.titulo }}</h6>
+                <p class="card-text text-muted small">{{ libro.anioPublicacion }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mensaje si no hay libros -->
+    <div class="alert alert-info" *ngIf="!autor.libros?.length">
+      No hay información sobre obras de este autor.
+    </div>
+  </div>
+</div>

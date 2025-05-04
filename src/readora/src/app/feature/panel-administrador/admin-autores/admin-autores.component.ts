@@ -5,7 +5,7 @@ import { Autor } from '../../../models/autor/autor.model';
 import { AutorService } from '../../../core/services/autor.service';
 import { toast } from 'ngx-sonner';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
-
+import { StorageService } from '../../../core/services/storage.service';
 
 @Component({
   selector: 'app-admin-autores',
@@ -16,6 +16,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 export class AdminAutoresComponent implements OnInit {
   // Array para almacenar todos los autores
   autores: Autor[] = [];
+  // Variables para la paginación
+  paginatedAutores: Autor[] = [];
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 1;
   // Autor actual que se está creando o editando
   currentAutor: any = this.initializeAutor();
   // Detalles del autor seleccionado
@@ -24,6 +29,12 @@ export class AdminAutoresComponent implements OnInit {
   showForm: boolean = false;
   // Indica si estamos en modo edición
   isEditing: boolean = false;
+  // Archivo seleccionado para subir
+  selectedFile: File | null = null;
+  // URL para previsualización de la imagen
+  previewImageUrl: string | null = null;
+  // Indica si se está subiendo una imagen
+  isUploading: boolean = false;
 
   // Propiedades para el modal de confirmación
   showConfirmModal: boolean = false;
@@ -32,7 +43,8 @@ export class AdminAutoresComponent implements OnInit {
   autorIdToDelete: number | null = null;
 
   constructor(
-    private autorService: AutorService
+    private autorService: AutorService,
+    private storageService: StorageService
   ) { }
 
   ngOnInit(): void {
@@ -47,6 +59,7 @@ export class AdminAutoresComponent implements OnInit {
     this.autorService.getAllAutores().subscribe({
       next: (data) => {
         this.autores = data;
+        this.updatePagination();
       },
       error: (error) => {
         console.error('Error al cargar autores', error);
@@ -59,6 +72,57 @@ export class AdminAutoresComponent implements OnInit {
         });
       }
     });
+  }
+
+  /**
+   * Actualiza la paginación y los autores mostrados
+   */
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.autores.length / this.pageSize);
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+    this.updateDisplayedAutores();
+  }
+
+  /**
+   * Actualiza los autores que se muestran según la página actual
+   */
+  updateDisplayedAutores(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.autores.length);
+    this.paginatedAutores = this.autores.slice(startIndex, endIndex);
+  }
+
+  /**
+   * Cambia a la página especificada
+   * @param page - Número de página
+   */
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.updateDisplayedAutores();
+    }
+  }
+
+  /**
+   * Va a la página anterior
+   */
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateDisplayedAutores();
+    }
+  }
+
+  /**
+   * Va a la página siguiente
+   */
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updateDisplayedAutores();
+    }
   }
 
   /**
@@ -84,11 +148,108 @@ export class AdminAutoresComponent implements OnInit {
   }
 
   /**
+   * Maneja la selección de archivos para la imagen
+   * @param event - Evento de selección de archivo
+   */
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      
+      // Validar tamaño (máx 2MB)
+      if (this.selectedFile.size > 2 * 1024 * 1024) {
+        toast.error('Error', { 
+          description: 'La imagen no debe superar los 2MB',
+          action: {
+            label: 'Cerrar',
+            onClick: () => toast.dismiss(),
+          },
+        });
+        this.selectedFile = null;
+        input.value = '';
+        return;
+      }
+      
+      // Validar tipo
+      if (!['image/jpeg', 'image/png', 'image/jpg'].includes(this.selectedFile.type)) {
+        toast.error('Error', { 
+          description: 'Solo se permiten imágenes en formato JPG o PNG',
+          action: {
+            label: 'Cerrar',
+            onClick: () => toast.dismiss(),
+          },
+        });
+        this.selectedFile = null;
+        input.value = '';
+        return;
+      }
+      
+      // Crear URL para previsualización
+      this.previewImageUrl = URL.createObjectURL(this.selectedFile);
+    }
+  }
+
+  /**
+   * Sube la imagen al servidor y guarda el autor
+   */
+  async uploadImageAndSaveAutor(): Promise<void> {
+    try {
+      if (this.selectedFile) {
+        this.isUploading = true;
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+        
+        // Subir imagen y obtener URL
+        const response = await this.storageService.uploadFile(formData, 'autor').toPromise();
+        this.currentAutor.fotoUrl = response.path; // Guardamos la ruta relativa, no la URL completa
+      }
+      
+      // Guardar autor con o sin imagen nueva
+      if (this.isEditing) {
+        await this.autorService.updateAutor(this.currentAutor).toPromise();
+        toast.success('Éxito', { 
+          description: 'Autor actualizado correctamente',
+          action: {
+            label: 'Cerrar',
+            onClick: () => toast.dismiss(),
+          },
+        });
+      } else {
+        await this.autorService.createAutor(this.currentAutor).toPromise();
+        toast.success('Éxito', { 
+          description: 'Autor creado correctamente',
+          action: {
+            label: 'Cerrar',
+            onClick: () => toast.dismiss(),
+          },
+        });
+      }
+      
+      this.getAllAutores();
+      this.cancelEdit();
+    } catch (error) {
+      console.error('Error al procesar el autor', error);
+      toast.error('Error', { 
+        description: this.isEditing ? 'No se pudo actualizar el autor' : 'No se pudo crear el autor',
+        action: {
+          label: 'Cerrar',
+          onClick: () => toast.dismiss(),
+        },
+      });
+    } finally {
+      this.isUploading = false;
+    }
+  }
+
+  /**
    * Prepara el formulario para crear un nuevo autor
    */
   prepareCreateAutor(): void {
     this.isEditing = false;
     this.currentAutor = this.initializeAutor();
+    this.selectedFile = null;
+    this.previewImageUrl = null;
     this.showForm = true;
   }
 
@@ -99,6 +260,8 @@ export class AdminAutoresComponent implements OnInit {
   prepareUpdateAutor(autor: Autor): void {
     this.isEditing = true;
     this.currentAutor = { ...autor };
+    this.selectedFile = null;
+    this.previewImageUrl = autor.fotoUrl ? this.getImageUrl(autor.fotoUrl) : null;
     this.showForm = true;
   }
 
@@ -106,69 +269,7 @@ export class AdminAutoresComponent implements OnInit {
    * Determina si debe crear o actualizar un autor
    */
   saveAutor(): void {
-    if (this.isEditing) {
-      this.updateAutor();
-    } else {
-      this.createAutor();
-    }
-  }
-
-  /**
-   * Envía la petición para crear un nuevo autor
-   */
-  createAutor(): void {
-    this.autorService.createAutor(this.currentAutor).subscribe({
-      next: (response) => {
-        toast.success('Éxito', { 
-          description: 'Autor creado correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
-        });
-        this.getAllAutores();
-        this.cancelEdit();
-      },
-      error: (error) => {
-        console.error('Error al crear autor', error);
-        toast.error('Error', { 
-          description: 'No se pudo crear el autor',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
-        });
-      }
-    });
-  }
-
-  /**
-   * Envía la petición para actualizar un autor existente
-   */
-  updateAutor(): void {
-    this.autorService.updateAutor(this.currentAutor).subscribe({
-      next: (response) => {
-        toast.success('Éxito', { 
-          description: 'Autor actualizado correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
-        });
-        this.getAllAutores();
-        this.cancelEdit();
-      },
-      error: (error) => {
-        console.error('Error al actualizar autor', error);
-        toast.error('Error', { 
-          description: 'No se pudo actualizar el autor',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
-        });
-      }
-    });
+    this.uploadImageAndSaveAutor();
   }
 
   /**
@@ -237,6 +338,8 @@ export class AdminAutoresComponent implements OnInit {
   cancelEdit(): void {
     this.showForm = false;
     this.currentAutor = this.initializeAutor();
+    this.selectedFile = null;
+    this.previewImageUrl = null;
   }
 
   /**
@@ -247,13 +350,35 @@ export class AdminAutoresComponent implements OnInit {
   }
 
   /**
-   * Crea un objeto autor con valores por defecto
+   * Obtiene la URL completa de la imagen
+   * @param path Ruta relativa de la imagen
+   * @returns URL completa para acceder a la imagen
+   */
+  getImageUrl(path: string | null): string {
+    return this.storageService.getFullImageUrl(path);
+  }
+
+  /**
+   * Obtiene el número máximo de elementos a mostrar en la página actual
+   * (para usar en el template de paginación)
+   */
+  getMaxItems(): number {
+    return Math.min(this.currentPage * this.pageSize, this.autores.length);
+  }
+
+  /**
+   * Inicializa un objeto autor vacío
    */
   private initializeAutor(): any {
     return {
       id: null,
       nombre: '',
-      apellido: ''
+      apellido: '',
+      nacionalidad: '',
+      fotoUrl: null,
+      fechaNacimiento: null,
+      fechaFallecimiento: null,
+      biografia: '',
     };
   }
 }

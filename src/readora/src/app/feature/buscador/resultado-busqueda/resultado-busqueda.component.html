@@ -1,0 +1,72 @@
+<div class="results-container">
+  <h3 class="mb-3">Resultados ({{ totalItems }})</h3>
+  
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="col" *ngFor="let item of results">
+      <div class="card h-100" (click)="navigateToDetails(item)">
+        <div class="card-body">
+          <!-- Contenido para Libros -->
+          <ng-container *ngIf="isBooks">
+            <div class="d-flex">
+              <div class="book-cover me-3">
+                <img [src]="getImageUrl(item)" 
+                     alt="Portada del libro" 
+                     class="img-fluid rounded">
+              </div>
+              <div>
+                <h5 class="card-title">{{ item.titulo }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ item.autor?.nombre || 'Autor desconocido' }}</h6>
+                <div class="book-details">
+                  <p class="text-muted">{{ item.anioPublicacion || 'Año desconocido' }} · {{ item.genero || 'Género no especificado' }}</p>
+                </div>
+              </div>
+            </div>
+            <p class="card-text mt-3 book-description">{{ item.sinopsis | slice:0:150 }}{{ item.sinopsis?.length > 150 ? '...' : '' }}</p>
+          </ng-container>
+          
+          <!-- Contenido para Autores -->
+          <ng-container *ngIf="!isBooks">
+            <div class="d-flex align-items-center">
+              <div class="author-image me-3">
+                <img [src]="getAuthorImageUrl(item)" 
+                     alt="Foto del autor" 
+                     class="rounded-circle img-author">
+              </div>
+              <div>
+                <h5 class="card-title">{{ item.nombre }}</h5>
+                <p class="card-text text-muted">{{ item.fechaNacimiento | date:'yyyy' }} - {{ item.fechaFallecimiento ? (item.fechaFallecimiento | date:'yyyy') : 'Presente' }}</p>
+                <p class="card-text"><small class="text-muted">{{ item.cantidadLibros || 0 }} libros publicados</small></p>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Paginación -->
+  <nav aria-label="Navegación de páginas" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [ngClass]="{'disabled': currentPage === 0}">
+        <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Anterior">
+          <span aria-hidden="true">&laquo;</span>
+        </button>
+      </li>
+      
+      <ng-container *ngFor="let page of pages">
+        <li *ngIf="page !== -1" class="page-item" [ngClass]="{'active': page === currentPage}">
+          <button class="page-link" (click)="changePage(page)">{{ page + 1 }}</button>
+        </li>
+        <li *ngIf="page === -1" class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+      </ng-container>
+      
+      <li class="page-item" [ngClass]="{'disabled': currentPage === totalPages - 1 || totalPages === 0}">
+        <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Siguiente">
+          <span aria-hidden="true">&raquo;</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>

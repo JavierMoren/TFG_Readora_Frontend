@@ -56,6 +56,79 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
+  
+  /**
+   * Realiza una búsqueda avanzada de libros según múltiples criterios
+   * 
+   * @param query Texto a buscar en título o sinopsis
+   * @param filters Filtros adicionales como género, año, etc.
+   * @param page Número de página (base 0)
+   * @param size Tamaño de página
+   * @param sort Campo para ordenar
+   * @param direction Dirección del ordenamiento ('asc' o 'desc')
+   * @returns Observable con los resultados paginados de la búsqueda
+   */
+  searchLibros(
+    query: string, 
+    filters: any = {}, 
+    page: number = 0, 
+    size: number = 10, 
+    sort: string = 'titulo', 
+    direction: string = 'asc'
+  ): Observable<any> {
+    
+    // Construir parámetros de búsqueda
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+      
+    // Añadir query si existe
+    if (query && query.trim() !== '') {
+      params = params.set('query', query.trim());
+    }
+    
+    // Añadir filtros opcionales
+    if (filters.genero) {
+      params = params.set('genero', filters.genero);
+    }
+    
+    if (filters.yearFrom) {
+      params = params.set('yearFrom', filters.yearFrom.toString());
+    }
+    
+    if (filters.yearTo) {
+      params = params.set('yearTo', filters.yearTo.toString());
+    }
+    
+    return this.http.get(`${this.apiUrl}/search`, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Sube una imagen de portada para un libro
+   * 
+   * @param formData FormData que contiene el archivo a subir
+   * @returns Observable con la respuesta del servidor, que incluye la URL de la imagen
+   */
+  uploadPortadaImage(formData: FormData): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/files/upload/libro`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Construye una URL completa para una ruta de imagen relativa
+   * 
+   * @param relativePath Ruta relativa de la imagen (ej: "libro/uuid-filename.jpg")
+   * @returns URL completa para acceder a la imagen
+   */
+  getImageUrl(relativePath: string | null): string | null {
+    if (!relativePath) return null;
+    return `${environment.apiUrl}/files/${relativePath}`;
+  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';

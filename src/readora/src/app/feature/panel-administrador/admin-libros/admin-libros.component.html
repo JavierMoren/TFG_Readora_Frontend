@@ -90,14 +90,47 @@
           </div>
           
           <div class="col-12 col-md-6">
-            <label for="portada" class="form-label">URL de Portada</label>
-            <input type="text" id="portada" [(ngModel)]="currentLibro.portada" name="portada" 
+            <label for="numeroPaginas" class="form-label">Número de páginas</label>
+            <input type="number" id="numeroPaginas" [(ngModel)]="currentLibro.numeroPaginas" name="numeroPaginas" 
               class="form-control"
-              #portadaInput="ngModel"
-              [ngClass]="{'is-invalid': portadaInput.invalid && (portadaInput.dirty || portadaInput.touched)}"
-              pattern="^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$">
-            <div *ngIf="portadaInput.invalid && (portadaInput.dirty || portadaInput.touched)" class="invalid-feedback">
-              <span *ngIf="portadaInput.errors?.['pattern']">Introduce una URL válida</span>
+              #paginasInput="ngModel"
+              [ngClass]="{'is-invalid': paginasInput.invalid && (paginasInput.dirty || paginasInput.touched)}"
+              min="1" max="9999">
+            <div *ngIf="paginasInput.invalid && (paginasInput.dirty || paginasInput.touched)" class="invalid-feedback">
+              <span *ngIf="paginasInput.errors?.['min']">El número de páginas debe ser mayor que 0</span>
+              <span *ngIf="paginasInput.errors?.['max']">El número de páginas no puede exceder 9999</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-12">
+            <label for="sinopsis" class="form-label">Sinopsis</label>
+            <textarea id="sinopsis" [(ngModel)]="currentLibro.sinopsis" name="sinopsis" 
+              class="form-control"
+              #sinopsisInput="ngModel"
+              [ngClass]="{'is-invalid': sinopsisInput.invalid && (sinopsisInput.dirty || sinopsisInput.touched)}"
+              rows="4"
+              maxlength="1000"></textarea>
+            <div *ngIf="sinopsisInput.invalid && (sinopsisInput.dirty || sinopsisInput.touched)" class="invalid-feedback">
+              <span *ngIf="sinopsisInput.errors?.['maxlength']">La sinopsis no puede tener más de 1000 caracteres</span>
+            </div>
+            <small class="text-muted">Breve descripción del libro (máx. 1000 caracteres)</small>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-12 col-md-6">
+            <label for="portada" class="form-label">Portada del libro</label>
+            <div class="d-flex gap-3 align-items-start">
+              <!-- Vista previa de la imagen actual si existe -->
+              <div *ngIf="previewPortadaUrl" class="mb-2" style="max-width: 100px;">
+                <img [src]="previewPortadaUrl" alt="Vista previa de portada" class="img-fluid rounded">
+              </div>
+              <div class="flex-grow-1">
+                <input type="file" class="form-control" id="portada" (change)="onFileSelected($event)" accept="image/*">
+                <small class="text-muted">Formatos aceptados: JPG, PNG (Máx. 2 MB)</small>
+              </div>
             </div>
           </div>
         </div>
@@ -139,6 +172,7 @@
               </span>
             </div>
           </th>
+          <th scope="col" class="text-primary small text-center">Portada</th>
           <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('isbn')">
             <div class="d-flex align-items-center">
               <span>ISBN</span>
@@ -155,6 +189,15 @@
               </span>
             </div>
           </th>
+          <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('numeroPaginas')">
+            <div class="d-flex align-items-center">
+              <span>Páginas</span>
+              <span *ngIf="sortBy === 'numeroPaginas'" class="material-icons small ms-1">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+            </div>
+          </th>
+          <th scope="col" class="text-primary small">Sinopsis</th>
           <th scope="col" class="text-primary small text-center">
             Acciones
           </th>
@@ -168,11 +211,25 @@
           <td class="fw-medium">
             {{libro.titulo}}
           </td>
+          <td class="text-center">
+            <img *ngIf="libro.portadaUrl" [src]="librosService.getImageUrl(libro.portadaUrl)" alt="Portada {{libro.titulo}}" 
+                 class="img-thumbnail" style="max-height: 50px; max-width: 40px;">
+            <span *ngIf="!libro.portadaUrl" class="text-muted small">Sin portada</span>
+          </td>
           <td class="small text-secondary">
             {{libro.isbn || 'No disponible'}}
           </td>
           <td class="small text-secondary">
             {{libro.editorial || 'No disponible'}}
+          </td>
+          <td class="small text-secondary text-center">
+            {{libro.numeroPaginas || 'N/D'}}
+          </td>
+          <td class="small text-secondary">
+            <span *ngIf="libro.sinopsis" title="{{libro.sinopsis}}">
+              {{libro.sinopsis | slice:0:40}}{{libro.sinopsis.length > 40 ? '...' : ''}}
+            </span>
+            <span *ngIf="!libro.sinopsis" class="text-muted">Sin sinopsis</span>
           </td>
           <td class="text-center">
             <div class="d-flex justify-content-center gap-2">
@@ -190,7 +247,7 @@
         
         <!-- Mensaje cuando no hay libros -->
         <tr *ngIf="libros.length === 0">
-          <td colspan="5" class="text-center text-secondary py-4">
+          <td colspan="9" class="text-center text-secondary py-4">
             No hay libros disponibles
           </td>
         </tr>

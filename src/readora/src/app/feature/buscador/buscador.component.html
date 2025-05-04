@@ -1,0 +1,59 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Buscador</h2>
+  
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form [formGroup]="searchForm" (ngSubmit)="search()">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-8">
+            <div class="input-group">
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Buscar por título, palabra clave..." 
+                formControlName="searchTerm"
+                aria-label="Término de búsqueda">
+              <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i> Buscar
+              </button>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="searchType" id="searchBooks" value="libros" formControlName="searchType">
+              <label class="btn btn-outline-primary" for="searchBooks">Libros</label>
+              
+              <input type="radio" class="btn-check" name="searchType" id="searchAuthors" value="autores" formControlName="searchType">
+              <label class="btn btn-outline-primary" for="searchAuthors">Autores</label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div class="text-center my-4" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+  
+  <!-- Resultados de la búsqueda -->
+  <div class="mt-4" *ngIf="results.length > 0 && !loading">
+    <app-resultado-busqueda 
+      [results]="results"
+      [isBooks]="isSearchingBooks"
+      [totalItems]="totalItems"
+      [currentPage]="currentPage"
+      [pageSize]="pageSize"
+      (pageChange)="pageChanged($event)">
+    </app-resultado-busqueda>
+  </div>
+  
+  <!-- Mensaje cuando no hay resultados -->
+  <div class="alert alert-info mt-4" *ngIf="results.length === 0 && !loading && searchForm.get('searchTerm')?.value">
+    No se encontraron resultados para tu búsqueda.
+  </div>
+</div>

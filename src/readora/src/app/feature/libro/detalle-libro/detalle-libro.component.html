@@ -1,0 +1,79 @@
+<div class="container mt-4">
+  <!-- Indicador de carga -->
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div class="alert alert-danger" *ngIf="error">
+    {{ error }}
+    <button class="btn btn-link" (click)="reloadLibro()">
+      Intentar de nuevo
+    </button>
+  </div>
+
+  <!-- Detalles del libro -->
+  <div class="card shadow-sm" *ngIf="libro && !loading">
+    <div class="row g-0">
+      <!-- Portada del libro -->
+      <div class="col-md-4">
+        <div class="text-center p-3">
+          <img [src]="getPortadaUrl(libro.portadaUrl)" 
+               alt="Portada de {{ libro.titulo }}" 
+               class="img-fluid rounded book-cover">
+          
+          <div class="mt-3 d-flex justify-content-center gap-2">
+            <button class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-bookmark-plus"></i> Añadir a mi biblioteca
+            </button>
+            <button class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-star"></i> Valorar
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Información del libro -->
+      <div class="col-md-8">
+        <div class="card-body">
+          <h1 class="card-title">{{ libro.titulo }}</h1>
+          <h4 class="card-subtitle mb-3 text-muted">{{ libro.autor?.nombre }} {{ libro.autor?.apellido }}</h4>
+          
+          <div class="mb-3">
+            <span class="badge bg-primary me-2">{{ libro.genero }}</span>
+            <span class="badge bg-secondary me-2">{{ libro.anioPublicacion }}</span>
+            <span class="badge bg-info">{{ libro.editorial }}</span>
+          </div>
+          
+          <h5 class="card-subtitle mb-2">Sinopsis</h5>
+          <p class="card-text">{{ libro.sinopsis || 'No hay sinopsis disponible para este libro.' }}</p>
+          
+          <div class="libro-detalles mt-4">
+            <table class="table table-striped">
+              <tbody>
+                <tr>
+                  <th>ISBN:</th>
+                  <td>{{ libro.isbn || 'No disponible' }}</td>
+                </tr>
+                <tr>
+                  <th>Editorial:</th>
+                  <td>{{ libro.editorial || 'No disponible' }}</td>
+                </tr>
+                <tr>
+                  <th>Año de publicación:</th>
+                  <td>{{ libro.anioPublicacion || 'No disponible' }}</td>
+                </tr>
+                <tr>
+                  <th>Páginas:</th>
+                  <td>{{ libro.numeroPaginas || 'No disponible' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

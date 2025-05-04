@@ -8,7 +8,10 @@ export interface Libro {
   editorial: string | null;
   anioPublicacion: Date | null; 
   genero: string | null;
-  portada: string | null;
+  sinopsis: string | null;
+  portadaUrl: string | null;
+  numeroPaginas: number | null;
+  autor?: Autor; // Para mostrar info del autor principal en la UI
   autores?: Autor[];
 }
 

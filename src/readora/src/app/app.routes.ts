@@ -12,6 +12,7 @@ import { AdminLibrosComponent } from './feature/panel-administrador/admin-libros
 import { AdminAutoresComponent } from './feature/panel-administrador/admin-autores/admin-autores.component';
 import { AdminRolesComponent } from './feature/panel-administrador/admin-roles/admin-roles.component';
 import { AdminUsuarioLibrosComponent } from './feature/panel-administrador/admin-usuario-libros/admin-usuario-libros.component';
+import { BuscadorComponent } from './feature/buscador/buscador.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,20 @@ export const routes: Routes = [
   {
     path: 'api/v1/authenticate',
     component: AutenticacionComponent,
+  },
+  {
+    path: 'buscador',
+    component: BuscadorComponent
+  },
+  {
+    path: 'libros/:id',
+    loadComponent: () => import('./feature/libro/detalle-libro/detalle-libro.component')
+      .then(m => m.DetalleLibroComponent)
+  },
+  {
+    path: 'autores/:id',
+    loadComponent: () => import('./feature/autor/detalle-autor/detalle-autor.component')
+      .then(m => m.DetalleAutorComponent)
   },
   {
     path: 'panel-administrador',

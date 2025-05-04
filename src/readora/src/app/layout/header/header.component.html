@@ -13,6 +13,13 @@
                <span class="material-icons small me-1">home</span>Inicio
             </a>
 
+            <!-- Enlace al buscador (visible para todos) -->
+            <a class="nav-link text-secondary transition-all" 
+               routerLink="/buscador" 
+               routerLinkActive="fw-medium text-highlight">
+               <span class="material-icons small me-1">search</span>Buscador
+            </a>
+
             <!-- Enlaces cuando NO está autenticado -->
             <ng-container *ngIf="!(isLoggedIn$ | async)">
               <a class="nav-link text-secondary transition-all" 
@@ -81,6 +88,14 @@
            [routerLinkActiveOptions]="{exact: true}"
            data-bs-dismiss="offcanvas">
            <span class="material-icons small me-1">home</span>Inicio
+        </a>
+
+        <!-- Enlace al buscador en móvil -->
+        <a class="nav-link text-secondary" 
+           routerLink="/buscador" 
+           routerLinkActive="fw-medium text-highlight"
+           data-bs-dismiss="offcanvas">
+           <span class="material-icons small me-1">search</span>Buscador
         </a>
 
         <!-- Móvil: Enlaces cuando NO está autenticado -->

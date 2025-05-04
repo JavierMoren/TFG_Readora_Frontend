@@ -20,6 +20,7 @@
     <div class="card-body">
       <form (submit)="saveAutor()" #autorForm="ngForm">
         <div class="row g-3 mb-3">
+          <!-- Fila 1: Nombre y apellido -->
           <div class="col-12 col-md-6">
             <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
             <input type="text" id="nombre" [(ngModel)]="currentAutor.nombre" name="nombre" 
@@ -47,12 +48,55 @@
               <span *ngIf="apellidoInput.errors?.['pattern']">El apellido solo puede contener letras y espacios</span>
             </div>
           </div>
+          
+          <!-- Fila 2: Fecha nacimiento y fallecimiento -->
+          <div class="col-12 col-md-6">
+            <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+            <input type="date" id="fechaNacimiento" [(ngModel)]="currentAutor.fechaNacimiento" name="fechaNacimiento" 
+              class="form-control">
+          </div>
+          
+          <div class="col-12 col-md-6">
+            <label for="fechaFallecimiento" class="form-label">Fecha de fallecimiento</label>
+            <input type="date" id="fechaFallecimiento" [(ngModel)]="currentAutor.fechaFallecimiento" name="fechaFallecimiento" 
+              class="form-control">
+          </div>
+          
+          <!-- Fila 3: Nacionalidad -->
+          <div class="col-12 col-md-6">
+            <label for="nacionalidad" class="form-label">Nacionalidad</label>
+            <input type="text" id="nacionalidad" [(ngModel)]="currentAutor.nacionalidad" name="nacionalidad" 
+              class="form-control">
+          </div>
+          
+          <!-- Fila 4: Biografía -->
+          <div class="col-12">
+            <label for="biografia" class="form-label">Biografía</label>
+            <textarea id="biografia" [(ngModel)]="currentAutor.biografia" name="biografia" 
+              class="form-control" rows="4"></textarea>
+          </div>
+          
+          <!-- Fila 5: Foto -->
+          <div class="col-12">
+            <label for="foto" class="form-label">Fotografía</label>
+            <div class="d-flex gap-3 align-items-start">
+              <!-- Vista previa de la imagen actual si existe -->
+              <div *ngIf="previewImageUrl" class="mb-2" style="max-width: 150px;">
+                <img [src]="previewImageUrl" alt="Vista previa" class="img-fluid rounded">
+              </div>
+              <div class="flex-grow-1">
+                <input type="file" class="form-control" id="foto" (change)="onFileSelected($event)" accept="image/*">
+                <small class="text-muted">Formatos aceptados: JPG, PNG (Máx. 2 MB)</small>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="d-flex gap-2 mt-4">
-          <button type="submit" [disabled]="autorForm.invalid"
+          <button type="submit" [disabled]="autorForm.invalid || isUploading"
             class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
-            <span class="material-icons small me-1">save</span>
+            <span *ngIf="!isUploading" class="material-icons small me-1">save</span>
+            <span *ngIf="isUploading" class="spinner-border spinner-border-sm me-1" role="status"></span>
             <span>Guardar</span>
           </button>
           <button type="button" (click)="cancelEdit()" 
@@ -71,21 +115,35 @@
       <thead class="table-light">
         <tr>
           <th scope="col" class="text-primary small">ID</th>
+          <th scope="col" class="text-primary small">Foto</th>
           <th scope="col" class="text-primary small">Nombre</th>
           <th scope="col" class="text-primary small">Apellido</th>
+          <th scope="col" class="text-primary small">Nacionalidad</th>
           <th scope="col" class="text-primary small text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let autor of autores">
+        <tr *ngFor="let autor of paginatedAutores">
           <td class="small text-secondary">
             {{autor.id}}
+          </td>
+          <td>
+            <img *ngIf="autor.fotoUrl" [src]="getImageUrl(autor.fotoUrl)" 
+              alt="Foto de {{autor.nombre}}" class="rounded-circle" 
+              style="width: 40px; height: 40px; object-fit: cover;">
+            <div *ngIf="!autor.fotoUrl" class="bg-light rounded-circle d-flex align-items-center justify-content-center" 
+              style="width: 40px; height: 40px;">
+              <span class="material-icons text-secondary" style="font-size: 24px;">person</span>
+            </div>
           </td>
           <td class="fw-medium">
             {{autor.nombre}}
           </td>
           <td class="small text-secondary">
             {{autor.apellido}}
+          </td>
+          <td class="small text-secondary">
+            {{autor.nacionalidad || '-'}}
           </td>
           <td class="text-center">
             <div class="d-flex justify-content-center gap-2">
@@ -103,12 +161,44 @@
         
         <!-- Mensaje cuando no hay autores -->
         <tr *ngIf="autores.length === 0">
-          <td colspan="4" class="text-center text-secondary py-4">
+          <td colspan="6" class="text-center text-secondary py-4">
             No hay autores disponibles
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Controles de paginación -->
+  <div *ngIf="autores.length > 0" class="d-flex justify-content-between align-items-center mt-4">
+    <div class="small text-muted">
+      Mostrando {{ ((currentPage - 1) * pageSize) + 1 }} - {{ getMaxItems() }} de {{ autores.length }} autores
+    </div>
+    
+    <nav aria-label="Navegación de páginas">
+      <ul class="pagination pagination-sm mb-0">
+        <!-- Botón de página anterior -->
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <a class="page-link" href="javascript:void(0)" (click)="prevPage()" aria-label="Anterior">
+            <span aria-hidden="true"><</span>
+          </a>
+        </li>
+        
+        <!-- Páginas -->
+        <ng-container *ngFor="let page of [].constructor(totalPages); let i = index">
+          <li class="page-item" [class.active]="currentPage === i + 1">
+            <a class="page-link" href="javascript:void(0)" (click)="goToPage(i + 1)">{{ i + 1 }}</a>
+          </li>
+        </ng-container>
+        
+        <!-- Botón de página siguiente -->
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <a class="page-link" href="javascript:void(0)" (click)="nextPage()" aria-label="Siguiente">
+            <span aria-hidden="true">></span>
+          </a>
+        </li>
+      </ul>
+    </nav>
   </div>
 
   <!-- Modal de confirmación para eliminar -->
