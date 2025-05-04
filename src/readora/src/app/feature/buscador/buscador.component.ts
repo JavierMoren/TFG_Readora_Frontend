@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LibrosService } from '../../core/services/libros.service';
 import { AutorService } from '../../core/services/autor.service';
-import { ResultadoBusquedaComponent } from '../buscador/resultado-busqueda/resultado-busqueda.component';
+import { ResultadoBusquedaComponent } from './resultado-busqueda/resultado-busqueda.component';
 
 @Component({
   selector: 'app-buscador',

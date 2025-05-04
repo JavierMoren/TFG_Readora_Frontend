@@ -7,5 +7,5 @@ export interface Autor {
     nacionalidad?: string;
     biografia?: string;
     fotoUrl?: string;
-    libros?: any[]; // Referencia a los libros del autor
+    libros?: any[];
 }

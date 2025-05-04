@@ -8,7 +8,8 @@ import { StorageService } from '../../../core/services/storage.service';
   templateUrl: './resultado-busqueda.component.html',
   styleUrls: ['./resultado-busqueda.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
+  providers: [StorageService]
 })
 export class ResultadoBusquedaComponent implements OnChanges {
   @Input() results: any[] = [];

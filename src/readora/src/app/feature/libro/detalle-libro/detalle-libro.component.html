@@ -28,9 +28,6 @@
             <button class="btn btn-outline-primary btn-sm">
               <i class="bi bi-bookmark-plus"></i> Añadir a mi biblioteca
             </button>
-            <button class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-star"></i> Valorar
-            </button>
           </div>
         </div>
       </div>
@@ -39,7 +36,11 @@
       <div class="col-md-8">
         <div class="card-body">
           <h1 class="card-title">{{ libro.titulo }}</h1>
-          <h4 class="card-subtitle mb-3 text-muted">{{ libro.autor?.nombre }} {{ libro.autor?.apellido }}</h4>
+          <h4 class="card-subtitle mb-3 text-muted">
+            <a [routerLink]="['/autores', libro.autor?.id]" class="author-link">
+              {{ libro.autor?.nombre }} {{ libro.autor?.apellido }}
+            </a>
+          </h4>
           
           <div class="mb-3">
             <span class="badge bg-primary me-2">{{ libro.genero }}</span>

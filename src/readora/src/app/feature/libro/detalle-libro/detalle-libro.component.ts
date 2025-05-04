@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Libro } from '../../../models/libro/libro.model';
@@ -8,7 +8,7 @@ import { Libro } from '../../../models/libro/libro.model';
 @Component({
   selector: 'app-detalle-libro',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './detalle-libro.component.html',
   styleUrl: './detalle-libro.component.css'
 })

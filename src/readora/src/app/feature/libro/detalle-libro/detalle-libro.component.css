@@ -1,8 +1,9 @@
 .book-cover {
-  max-height: 400px;
+  max-height: 350px;
   width: auto;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   transition: transform 0.3s;
+  object-fit: contain;
 }
 
 .book-cover:hover {
@@ -53,6 +54,17 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+}
+
+.author-link {
+  color: #555;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.author-link:hover {
+  color: #0d6efd;
+  text-decoration: underline;
 }
 
 /* Estilos responsivos */

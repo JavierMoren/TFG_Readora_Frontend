@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Autor } from '../../../models/autor/autor.model';
@@ -8,7 +8,7 @@ import { Autor } from '../../../models/autor/autor.model';
 @Component({
   selector: 'app-detalle-autor',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './detalle-autor.component.html',
   styleUrl: './detalle-autor.component.css'
 })

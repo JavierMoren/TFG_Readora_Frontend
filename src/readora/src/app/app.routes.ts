@@ -29,7 +29,8 @@ export const routes: Routes = [
   },
   {
     path: 'buscador',
-    component: BuscadorComponent
+    component: BuscadorComponent,
+    canActivate: [autenticacionGuard]
   },
   {
     path: 'libros/:id',
