@@ -98,17 +98,4 @@
       </tbody>
     </table>
   </div>
-  
-  <!-- Modal de confirmación para eliminar -->
-  <app-confirm-modal
-    [visible]="showConfirmModal"
-    [title]="confirmModalTitle"
-    [message]="confirmModalMessage"
-    confirmButtonText="Eliminar"
-    confirmButtonClass="btn-danger"
-    cancelButtonText="Cancelar"
-    (confirm)="confirmDeleteRole()"
-    (cancel)="cancelDeleteRole()"
-    (close)="showConfirmModal = false">
-  </app-confirm-modal>
 </div>

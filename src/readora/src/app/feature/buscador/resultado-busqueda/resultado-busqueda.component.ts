@@ -1,7 +1,10 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { StorageService } from '../../../core/services/storage.service';
+import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
+import { AutenticacionService } from '../../../core/services/autenticacion.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-resultado-busqueda',
@@ -21,52 +24,186 @@ export class ResultadoBusquedaComponent implements OnChanges {
 
   totalPages: number = 0;
   pages: number[] = [];
+  usuarioId: number | null = null;
+  isLoggedIn = false;
+  librosAgregando: Set<number> = new Set(); // Para controlar los botones de "Añadiendo..."
 
   constructor(
     private router: Router,
-    private storageService: StorageService
-  ) {}
+    private storageService: StorageService,
+    private usuarioLibroService: UsuarioLibroService,
+    private autenticacionService: AutenticacionService,
+    private notificationService: NotificationService
+  ) {
+    // Comprobar si el usuario está autenticado
+    this.autenticacionService.isLoggedIn().subscribe(isLoggedIn => {
+      this.isLoggedIn = isLoggedIn;
+      if (isLoggedIn) {
+        this.cargarDatosUsuario();
+      }
+    });
+  }
 
-  ngOnChanges(): void {
+  /**
+   * Carga los datos del usuario autenticado
+   */
+  cargarDatosUsuario(): void {
+    this.autenticacionService.getUserInfo().subscribe({
+      next: (userData) => {
+        if (userData && userData.id) {
+          this.usuarioId = userData.id;
+        }
+      },
+      error: (error) => {
+        console.error('[ResultadoBusqueda] Error al obtener información del usuario', error);
+      }
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Si hay cambios en totalItems o pageSize, recalcular la paginación
+    if (changes['totalItems'] || changes['pageSize']) {
+      this.calcularPaginacion();
+    }
+    
+    // Si hay cambios en los resultados, hacer scroll hacia arriba
+    if (changes['results'] && !changes['results'].firstChange) {
+      window.scrollTo(0, 0);
+    }
+  }
+  
+  /**
+   * Calcula la paginación basándose en el total de items y el tamaño de página
+   */
+  calcularPaginacion(): void {
+    console.log(`[ResultadoBusqueda] Calculando paginación: ${this.totalItems} items, página ${this.currentPage + 1}, tamaño ${this.pageSize}`);
+    
     // Calcular el número total de páginas
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
     
     // Crear array de páginas para la paginación
     this.pages = [];
-    for (let i = 0; i < this.totalPages; i++) {
-      if (
-        i === 0 || // Primera página
-        i === this.totalPages - 1 || // Última página
-        (i >= this.currentPage - 2 && i <= this.currentPage + 2) // Páginas alrededor de la actual
-      ) {
+    
+    // Si no hay páginas, salimos
+    if (this.totalPages === 0) {
+      return;
+    }
+    
+    // Para un número moderado de páginas (hasta 7), mostrar todas las páginas sin separadores
+    if (this.totalPages <= 7) {
+      for (let i = 0; i < this.totalPages; i++) {
         this.pages.push(i);
-      } else if (
-        i === this.currentPage - 3 ||
-        i === this.currentPage + 3
-      ) {
-        // Añadir separador
+      }
+    } else {
+      // Para más de 7 páginas, usar lógica de separadores
+      
+      // Siempre mostrar primera página
+      this.pages.push(0);
+      
+      // Añadir separador después de la primera página si la página actual está lejos del inicio
+      if (this.currentPage > 2) {
+        this.pages.push(-1); // -1 representa un separador "..."
+      }
+      
+      // Páginas alrededor de la actual
+      const startPage = Math.max(1, this.currentPage - 1);
+      const endPage = Math.min(this.totalPages - 2, this.currentPage + 1);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        this.pages.push(i);
+      }
+      
+      // Añadir separador antes de la última página si la página actual está lejos del final
+      if (this.currentPage < this.totalPages - 3) {
         this.pages.push(-1);
       }
+      
+      // Siempre mostrar la última página
+      this.pages.push(this.totalPages - 1);
     }
     
     // Eliminar duplicados
-    this.pages = this.pages.filter((value, index, self) => {
-      return self.indexOf(value) === index;
-    });
+    this.pages = this.pages.filter((value, index, self) => self.indexOf(value) === index);
+    
+    console.log('[ResultadoBusqueda] Páginas generadas:', this.pages);
   }
 
   changePage(page: number): void {
+    console.log(`[ResultadoBusqueda] Usuario seleccionó página: ${page + 1}`);
     if (page !== this.currentPage && page >= 0 && page < this.totalPages) {
       this.pageChange.emit(page);
     }
   }
 
-  navigateToDetails(item: any): void {
+  /**
+   * Navega a la página de detalles del elemento seleccionado
+   * Detiene la propagación del evento si viene del botón de añadir a biblioteca
+   */
+  navigateToDetails(item: any, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     if (this.isBooks) {
       this.router.navigate(['/libros', item.id]);
     } else {
       this.router.navigate(['/autores', item.id]);
     }
+  }
+
+  /**
+   * Añade un libro a la biblioteca personal del usuario
+   * @param libro El libro a añadir
+   * @param event El evento del click para evitar navegación
+   */
+  agregarABiblioteca(libro: any, event: Event): void {
+    event.stopPropagation(); // Evitar que se abra la página de detalles
+    console.log('[ResultadoBusqueda] Intentando añadir libro a biblioteca:', libro.id);
+    
+    if (!this.isLoggedIn || !this.usuarioId) {
+      this.notificationService.warning('Inicio de sesión requerido', { 
+        description: 'Debes iniciar sesión para añadir libros a tu biblioteca'
+      });
+      return;
+    }
+    
+    // Marcar como "añadiendo" para deshabilitar el botón
+    this.librosAgregando.add(libro.id);
+    
+    const nuevoUsuarioLibro = {
+      usuarioId: this.usuarioId,
+      libroId: libro.id,
+      estadoLectura: 'PENDIENTE', // Por defecto se añade como pendiente
+      valoracion: null,
+      comentario: '',
+      fechaInicioLectura: null,
+      fechaFinLectura: null
+    };
+    
+    this.usuarioLibroService.createUsuarioLibro(nuevoUsuarioLibro).subscribe({
+      next: (response) => {
+        console.log('[ResultadoBusqueda] Libro añadido correctamente a la biblioteca');
+        this.notificationService.success('Libro añadido', {
+          description: 'El libro ha sido añadido a tu biblioteca con éxito'
+        });
+        this.librosAgregando.delete(libro.id);
+      },
+      error: (error) => {
+        console.error('[ResultadoBusqueda] Error al añadir libro a la biblioteca', error);
+        this.librosAgregando.delete(libro.id);
+        
+        // Comprobar si es un error de libro ya existente
+        if (error.status === 409) {
+          this.notificationService.warning('Libro ya en biblioteca', { 
+            description: 'Este libro ya está en tu biblioteca'
+          });
+        } else {
+          this.notificationService.error('Error', {
+            description: 'No se pudo añadir el libro a la biblioteca'
+          });
+        }
+      }
+    });
   }
 
   getImageUrl(item: any): string {

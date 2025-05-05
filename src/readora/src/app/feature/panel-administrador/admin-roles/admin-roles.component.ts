@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Role } from '../../../models/role/role.model';
 import { RoleService } from '../../../core/services/role.service';
-import { toast } from 'ngx-sonner';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-admin-roles',
-  imports: [CommonModule, FormsModule, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-roles.component.html',
   styleUrl: './admin-roles.component.css'
 })
@@ -25,17 +24,14 @@ export class AdminRolesComponent implements OnInit {
   isEditing: boolean = false;
   
   // Propiedades para el modal de confirmación
-  showConfirmModal: boolean = false;
-  confirmModalTitle: string = '¿Eliminar rol?';
-  confirmModalMessage: string = 'Esta acción no se puede deshacer';
   roleIdToDelete: number | null = null;
 
   constructor(
-    private roleService: RoleService
+    private roleService: RoleService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
-    // Carga todos los roles al inicializar el componente
     this.getAllRoles();
   }
 
@@ -49,12 +45,8 @@ export class AdminRolesComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar roles', error);
-        toast.error('Error', { 
-          description: 'No se pudieron cargar los roles',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar los roles'
         });
       }
     });
@@ -66,17 +58,13 @@ export class AdminRolesComponent implements OnInit {
    */
   getRoleById(id: number): void {
     this.roleService.getRoleById(id).subscribe({
-      next: (role) => {
-        this.roleDetalle = role;
+      next: (data) => {
+        this.roleDetalle = data;
       },
       error: (error) => {
-        console.error('Error al obtener detalles del rol', error);
-        toast.error('Error', { 
-          description: 'No se pudieron cargar los detalles del rol',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        console.error('Error al cargar rol', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudo cargar el rol'
         });
       }
     });
@@ -118,24 +106,16 @@ export class AdminRolesComponent implements OnInit {
   createRole(): void {
     this.roleService.createRole(this.currentRole).subscribe({
       next: (response) => {
-        toast.success('Éxito', { 
-          description: 'Rol creado correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.success('Éxito', { 
+          description: 'Rol creado correctamente'
         });
         this.getAllRoles();
         this.cancelEdit();
       },
       error: (error) => {
         console.error('Error al crear rol', error);
-        toast.error('Error', { 
-          description: 'No se pudo crear el rol',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudo crear el rol'
         });
       }
     });
@@ -147,24 +127,16 @@ export class AdminRolesComponent implements OnInit {
   updateRole(): void {
     this.roleService.updateRole(this.currentRole).subscribe({
       next: (response) => {
-        toast.success('Éxito', { 
-          description: 'Rol actualizado correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.success('Éxito', { 
+          description: 'Rol actualizado correctamente'
         });
         this.getAllRoles();
         this.cancelEdit();
       },
       error: (error) => {
         console.error('Error al actualizar rol', error);
-        toast.error('Error', { 
-          description: 'No se pudo actualizar el rol',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudo actualizar el rol'
         });
       }
     });
@@ -174,49 +146,46 @@ export class AdminRolesComponent implements OnInit {
    * Envía la petición para eliminar un rol
    * @param id - ID del rol a eliminar
    */
-  deleteRole(id: number): void {
+  async deleteRole(id: number): Promise<void> {
     this.roleIdToDelete = id;
-    this.showConfirmModal = true;
+    
+    const confirmed = await this.notificationService.confirm({
+      title: '¿Eliminar rol?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    
+    if (confirmed) {
+      this.confirmDeleteRole();
+    } else {
+      this.roleIdToDelete = null;
+    }
   }
   
   /**
    * Confirma la eliminación del rol
    */
   confirmDeleteRole(): void {
-    if (this.roleIdToDelete) {
+    if (this.roleIdToDelete !== null) {
       this.roleService.deleteRole(this.roleIdToDelete).subscribe({
         next: () => {
-          toast.success('Éxito', { 
-            description: 'Rol eliminado correctamente',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.success('Eliminado', { 
+            description: 'El rol ha sido eliminado correctamente'
           });
           this.getAllRoles();
           this.roleIdToDelete = null;
         },
         error: (error) => {
-          console.error('Error al eliminar rol', error);
-          toast.error('Error', { 
-            description: 'No se pudo eliminar el rol',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          console.error('Error al eliminar role', error);
+          this.notificationService.error('Error', { 
+            description: 'No se pudo eliminar el rol'
           });
           this.roleIdToDelete = null;
         }
       });
     }
-  }
-  
-  /**
-   * Cancela la eliminación del rol
-   */
-  cancelDeleteRole(): void {
-    this.roleIdToDelete = null;
-    console.log('Eliminación cancelada');
   }
 
   /**

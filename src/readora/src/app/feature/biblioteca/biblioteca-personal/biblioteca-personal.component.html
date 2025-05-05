@@ -1,1 +1,220 @@
-<p>biblioteca-personal works!</p>
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">Mi Biblioteca Personal</h1>
+
+    <!-- Filtros para seleccionar qué libros mostrar -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn" 
+                [class.btn-primary]="filtroActual === 'todos'" 
+                [class.btn-outline-primary]="filtroActual !== 'todos'"
+                (click)="cambiarFiltro('todos')">
+                Todos
+            </button>
+            <button type="button" class="btn" 
+                [class.btn-primary]="filtroActual === 'leyendo'" 
+                [class.btn-outline-primary]="filtroActual !== 'leyendo'"
+                (click)="cambiarFiltro('leyendo')">
+                Leyendo ({{librosLeyendo.length}})
+            </button>
+            <button type="button" class="btn" 
+                [class.btn-primary]="filtroActual === 'pendientes'" 
+                [class.btn-outline-primary]="filtroActual !== 'pendientes'"
+                (click)="cambiarFiltro('pendientes')">
+                Por leer ({{librosPendientes.length}})
+            </button>
+            <button type="button" class="btn" 
+                [class.btn-primary]="filtroActual === 'terminados'" 
+                [class.btn-outline-primary]="filtroActual !== 'terminados'"
+                (click)="cambiarFiltro('terminados')">
+                Leídos ({{librosTerminados.length}})
+            </button>
+            <button type="button" class="btn" 
+                [class.btn-primary]="filtroActual === 'abandonados'" 
+                [class.btn-outline-primary]="filtroActual !== 'abandonados'"
+                (click)="cambiarFiltro('abandonados')">
+                Abandonados ({{librosAbandonados.length}})
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensaje cuando no hay libros -->
+    <div *ngIf="!librosLeyendo.length && !librosPendientes.length && !librosTerminados.length && !librosAbandonados.length"
+         class="alert alert-info">
+        No tienes libros en tu biblioteca personal. 
+        Utiliza el buscador para encontrar libros y añadirlos a tu colección.
+    </div>
+
+    <!-- Sección de libros que estoy leyendo -->
+    <div *ngIf="filtroActual === 'todos' || filtroActual === 'leyendo'" class="mb-5">
+        <h2>Estoy leyendo</h2>
+        <div *ngIf="!librosLeyendo.length" class="text-muted">
+            No tienes libros en esta sección.
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            <div class="col" *ngFor="let libro of librosLeyendo">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img [src]="getImageUrl(libro.portadaUrl)" class="card-img-top" alt="Portada del libro {{libro.titulo}}" height="300" style="object-fit: cover;">
+                        <span class="position-absolute top-0 start-0 badge bg-primary">Leyendo</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{libro.titulo}}</h5>
+                        <p class="card-text"><small>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</small></p>
+                        <p class="card-text">
+                            <strong>Inicio lectura:</strong> {{formatearFecha(libro.fechaInicioLectura)}}
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" (click)="editarLibro(libro)">Editar estado</button>
+                            <button class="btn btn-outline-danger" (click)="eliminarDeColeccion(libro)">Eliminar de mi biblioteca</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de libros pendientes por leer -->
+    <div *ngIf="filtroActual === 'todos' || filtroActual === 'pendientes'" class="mb-5">
+        <h2>Pendientes por leer</h2>
+        <div *ngIf="!librosPendientes.length" class="text-muted">
+            No tienes libros en esta sección.
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            <div class="col" *ngFor="let libro of librosPendientes">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img [src]="getImageUrl(libro.portadaUrl)" class="card-img-top" alt="Portada del libro {{libro.titulo}}" height="300" style="object-fit: cover;">
+                        <span class="position-absolute top-0 start-0 badge bg-warning text-dark">Pendiente</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{libro.titulo}}</h5>
+                        <p class="card-text"><small>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</small></p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" (click)="editarLibro(libro)">Editar estado</button>
+                            <button class="btn btn-outline-danger" (click)="eliminarDeColeccion(libro)">Eliminar de mi biblioteca</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de libros terminados -->
+    <div *ngIf="filtroActual === 'todos' || filtroActual === 'terminados'" class="mb-5">
+        <h2>Libros leídos</h2>
+        <div *ngIf="!librosTerminados.length" class="text-muted">
+            No tienes libros en esta sección.
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            <div class="col" *ngFor="let libro of librosTerminados">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img [src]="getImageUrl(libro.portadaUrl)" class="card-img-top" alt="Portada del libro {{libro.titulo}}" height="300" style="object-fit: cover;">
+                        <span class="position-absolute top-0 start-0 badge bg-success">Leído</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{libro.titulo}}</h5>
+                        <p class="card-text"><small>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</small></p>
+                        <p *ngIf="libro.valoracion" class="card-text">
+                            <strong>Valoración:</strong> 
+                            <span *ngFor="let star of estrellasPorValoracion(libro.valoracion)" class="text-warning">★</span>
+                        </p>
+                        <p class="card-text">
+                            <strong>Terminado:</strong> {{formatearFecha(libro.fechaFinLectura)}}
+                        </p>
+                        <p *ngIf="libro.comentario" class="card-text">
+                            <small class="text-muted">{{libro.comentario}}</small>
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" (click)="editarLibro(libro)">Editar estado</button>
+                            <button class="btn btn-outline-danger" (click)="eliminarDeColeccion(libro)">Eliminar de mi biblioteca</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de libros abandonados -->
+    <div *ngIf="filtroActual === 'todos' || filtroActual === 'abandonados'" class="mb-5">
+        <h2>Libros abandonados</h2>
+        <div *ngIf="!librosAbandonados.length" class="text-muted">
+            No tienes libros en esta sección.
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+            <div class="col" *ngFor="let libro of librosAbandonados">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img [src]="getImageUrl(libro.portadaUrl)" class="card-img-top" alt="Portada del libro {{libro.titulo}}" height="300" style="object-fit: cover;">
+                        <span class="position-absolute top-0 start-0 badge bg-secondary">Abandonado</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{libro.titulo}}</h5>
+                        <p class="card-text"><small>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</small></p>
+                        <p *ngIf="libro.comentario" class="card-text">
+                            <small class="text-muted">{{libro.comentario}}</small>
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" (click)="editarLibro(libro)">Editar estado</button>
+                            <button class="btn btn-outline-danger" (click)="eliminarDeColeccion(libro)">Eliminar de mi biblioteca</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de edición de estado de lectura -->
+<div *ngIf="mostrarEdicion" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar estado de lectura</h5>
+                <button type="button" class="btn-close" (click)="cerrarEdicion()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="estadoLectura" class="form-label">Estado de lectura</label>
+                    <select class="form-select" id="estadoLectura" [(ngModel)]="libroSeleccionado.estadoLectura">
+                        <option *ngFor="let estado of estadosLectura" [value]="estado.valor">{{estado.etiqueta}}</option>
+                    </select>
+                </div>
+
+                <div class="mb-3" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO'">
+                    <label for="valoracion" class="form-label">Valoración</label>
+                    <select class="form-select" id="valoracion" [(ngModel)]="libroSeleccionado.valoracion">
+                        <option [ngValue]="null">Sin valoración</option>
+                        <option [value]="1">1 ★</option>
+                        <option [value]="2">2 ★★</option>
+                        <option [value]="3">3 ★★★</option>
+                        <option [value]="4">4 ★★★★</option>
+                        <option [value]="5">5 ★★★★★</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="fechaInicioLectura" class="form-label">Fecha de inicio de lectura</label>
+                    <input type="date" class="form-control" id="fechaInicioLectura" 
+                           [(ngModel)]="libroSeleccionado.fechaInicioLectura">
+                </div>
+
+                <div class="mb-3" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO' || libroSeleccionado?.estadoLectura === 'ABANDONADO'">
+                    <label for="fechaFinLectura" class="form-label">Fecha de finalización</label>
+                    <input type="date" class="form-control" id="fechaFinLectura" 
+                           [(ngModel)]="libroSeleccionado.fechaFinLectura">
+                </div>
+
+                <div class="mb-3">
+                    <label for="comentario" class="form-label">Comentarios</label>
+                    <textarea class="form-control" id="comentario" rows="3"
+                              [(ngModel)]="libroSeleccionado.comentario"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarEdicion()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="actualizarEstadoLectura()">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+</div>

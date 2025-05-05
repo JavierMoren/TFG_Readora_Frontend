@@ -33,6 +33,12 @@ export const routes: Routes = [
     canActivate: [autenticacionGuard]
   },
   {
+    path: 'biblioteca',
+    loadComponent: () => import('./feature/biblioteca/biblioteca-personal/biblioteca-personal.component')
+      .then(m => m.BibliotecaPersonalComponent),
+    canActivate: [autenticacionGuard]
+  },
+  {
     path: 'libros/:id',
     loadComponent: () => import('./feature/libro/detalle-libro/detalle-libro.component')
       .then(m => m.DetalleLibroComponent)

@@ -1,13 +1,15 @@
 <div class="mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
     <h2 class="h5 fw-medium text-highlight mb-0">Gestión de Libros</h2>
     
-    <!-- Botón para añadir nuevo libro -->
-    <button *ngIf="!showForm" (click)="prepareCreateLibro()" 
-      class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
-      <span class="material-icons small me-1">add</span>
-      <span>Añadir Libro</span>
-    </button>
+    <div class="d-flex flex-wrap gap-2">
+      <!-- Botón para añadir nuevo libro -->
+      <button *ngIf="!showForm" (click)="prepareCreateLibro()" 
+        class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+        <span class="material-icons small me-1">add</span>
+        <span>Añadir Libro</span>
+      </button>
+    </div>
   </div>
 
   <!-- Formulario para añadir/editar libro -->
@@ -18,105 +20,74 @@
     </div>
     
     <div class="card-body">
-      <form (submit)="saveLibro()" #libroForm="ngForm">
+      <form (submit)="saveLibro()" #libroForm="ngForm" class="mb-3">
         <div class="row mb-3">
-          <div class="col-12 col-md-6 mb-3 mb-md-0">
+          <div class="col-12 col-md-8 mb-3 mb-md-0">
             <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
-            <input type="text" id="titulo" [(ngModel)]="currentLibro.titulo" name="titulo" 
-              class="form-control" 
-              required
-              #tituloInput="ngModel"
-              minlength="2"
-              maxlength="200"
-              [ngClass]="{'is-invalid': tituloInput.invalid && (tituloInput.dirty || tituloInput.touched)}">
-            <div *ngIf="tituloInput.invalid && (tituloInput.dirty || tituloInput.touched)" class="invalid-feedback">
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">book</span>
+              </span>
+              <input type="text" id="titulo" [(ngModel)]="currentLibro.titulo" name="titulo" 
+                class="form-control" 
+                required
+                #tituloInput="ngModel"
+                [ngClass]="{'is-invalid': tituloInput.invalid && (tituloInput.dirty || tituloInput.touched)}">
+            </div>
+            <div *ngIf="tituloInput.invalid && (tituloInput.dirty || tituloInput.touched)" class="text-danger small mt-1">
               <span *ngIf="tituloInput.errors?.['required']">El título es obligatorio</span>
-              <span *ngIf="tituloInput.errors?.['minlength']">El título debe tener al menos 2 caracteres</span>
-              <span *ngIf="tituloInput.errors?.['maxlength']">El título no puede tener más de 200 caracteres</span>
             </div>
           </div>
           
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-md-4">
             <label for="isbn" class="form-label">ISBN</label>
-            <input type="text" id="isbn" [(ngModel)]="currentLibro.isbn" name="isbn" 
-              class="form-control"
-              #isbnInput="ngModel"
-              [ngClass]="{'is-invalid': isbnInput.invalid && (isbnInput.dirty || isbnInput.touched)}"
-              pattern="^(?:(?:978|979)-?)?(?:\d-?){9}[\dXx]$">
-            <div *ngIf="isbnInput.invalid && (isbnInput.dirty || isbnInput.touched)" class="invalid-feedback">
-              <span *ngIf="isbnInput.errors?.['pattern']">Formato ISBN inválido</span>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">qr_code</span>
+              </span>
+              <input type="text" id="isbn" [(ngModel)]="currentLibro.isbn" name="isbn" 
+                class="form-control">
             </div>
-            <small class="form-text text-secondary">Formato ISBN válido (10 o 13 dígitos)</small>
           </div>
         </div>
-
+        
         <div class="row mb-3">
           <div class="col-12 col-md-6 mb-3 mb-md-0">
-            <label for="editorial" class="form-label">Editorial</label>
-            <input type="text" id="editorial" [(ngModel)]="currentLibro.editorial" name="editorial" 
-              class="form-control"
-              #editorialInput="ngModel"
-              [ngClass]="{'is-invalid': editorialInput.invalid && (editorialInput.dirty || editorialInput.touched)}"
-              maxlength="100">
-            <div *ngIf="editorialInput.invalid && (editorialInput.dirty || editorialInput.touched)" class="invalid-feedback">
-              <span *ngIf="editorialInput.errors?.['maxlength']">La editorial no puede tener más de 100 caracteres</span>
-            </div>
-          </div>
-          
-          <div class="col-12 col-md-6">
             <label for="anioPublicacion" class="form-label">Fecha de Publicación</label>
-            <input type="date" id="anioPublicacion" [(ngModel)]="currentLibro.anioPublicacion" name="anioPublicacion" 
-              class="form-control"
-              #anioPublicacionInput="ngModel"
-              [ngClass]="{'is-invalid': anioPublicacionInput.invalid && (anioPublicacionInput.dirty || anioPublicacionInput.touched)}"
-              [max]="getMaxDate()">
-            <div *ngIf="anioPublicacionInput.invalid && (anioPublicacionInput.dirty || anioPublicacionInput.touched)" class="invalid-feedback">
-              <span *ngIf="anioPublicacionInput.errors?.['max']">La fecha no puede ser futura</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="row mb-3">
-          <div class="col-12 col-md-6 mb-3 mb-md-0">
-            <label for="genero" class="form-label">Género</label>
-            <input type="text" id="genero" [(ngModel)]="currentLibro.genero" name="genero" 
-              class="form-control"
-              #generoInput="ngModel"
-              [ngClass]="{'is-invalid': generoInput.invalid && (generoInput.dirty || generoInput.touched)}"
-              maxlength="50">
-            <div *ngIf="generoInput.invalid && (generoInput.dirty || generoInput.touched)" class="invalid-feedback">
-              <span *ngIf="generoInput.errors?.['maxlength']">El género no puede tener más de 50 caracteres</span>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">event</span>
+              </span>
+              <input type="date" id="anioPublicacion" [(ngModel)]="currentLibro.anioPublicacion" name="anioPublicacion" 
+                class="form-control"
+                [max]="getMaxDate()">
             </div>
           </div>
           
           <div class="col-12 col-md-6">
-            <label for="numeroPaginas" class="form-label">Número de páginas</label>
-            <input type="number" id="numeroPaginas" [(ngModel)]="currentLibro.numeroPaginas" name="numeroPaginas" 
-              class="form-control"
-              #paginasInput="ngModel"
-              [ngClass]="{'is-invalid': paginasInput.invalid && (paginasInput.dirty || paginasInput.touched)}"
-              min="1" max="9999">
-            <div *ngIf="paginasInput.invalid && (paginasInput.dirty || paginasInput.touched)" class="invalid-feedback">
-              <span *ngIf="paginasInput.errors?.['min']">El número de páginas debe ser mayor que 0</span>
-              <span *ngIf="paginasInput.errors?.['max']">El número de páginas no puede exceder 9999</span>
+            <label for="numeroPaginas" class="form-label">Número de Páginas</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">auto_stories</span>
+              </span>
+              <input type="number" id="numeroPaginas" [(ngModel)]="currentLibro.numeroPaginas" name="numeroPaginas" 
+                class="form-control" min="1">
             </div>
           </div>
         </div>
-
-        <div class="row mb-3">
-          <div class="col-12">
-            <label for="sinopsis" class="form-label">Sinopsis</label>
-            <textarea id="sinopsis" [(ngModel)]="currentLibro.sinopsis" name="sinopsis" 
-              class="form-control"
-              #sinopsisInput="ngModel"
-              [ngClass]="{'is-invalid': sinopsisInput.invalid && (sinopsisInput.dirty || sinopsisInput.touched)}"
-              rows="4"
-              maxlength="1000"></textarea>
-            <div *ngIf="sinopsisInput.invalid && (sinopsisInput.dirty || sinopsisInput.touched)" class="invalid-feedback">
-              <span *ngIf="sinopsisInput.errors?.['maxlength']">La sinopsis no puede tener más de 1000 caracteres</span>
-            </div>
-            <small class="text-muted">Breve descripción del libro (máx. 1000 caracteres)</small>
+        
+        <div class="mb-3">
+          <label for="sinopsis" class="form-label">Sinopsis</label>
+          <textarea id="sinopsis" [(ngModel)]="currentLibro.sinopsis" name="sinopsis" 
+            class="form-control" rows="3"
+            #sinopsisInput="ngModel"
+            maxlength="1000"
+            [ngClass]="{'is-invalid': sinopsisInput.invalid && (sinopsisInput.dirty || sinopsisInput.touched)}">
+          </textarea>
+          <div *ngIf="sinopsisInput.invalid && (sinopsisInput.dirty || sinopsisInput.touched)" class="text-danger small mt-1">
+            <span *ngIf="sinopsisInput.errors?.['maxlength']">La sinopsis no puede tener más de 1000 caracteres</span>
           </div>
+          <small class="text-muted">Breve descripción del libro (máx. 1000 caracteres)</small>
         </div>
 
         <div class="row mb-3">
@@ -134,12 +105,39 @@
             </div>
           </div>
         </div>
-
-        <div class="d-flex gap-2 mt-3">
-          <button type="submit" [disabled]="libroForm.invalid"
+        
+        <!-- Autores asociados al libro -->
+        <div class="mb-3">
+          <label class="form-label">Autores</label>
+          
+          <div class="d-flex flex-column gap-2">
+            <!-- Lista de autores actuales -->
+            <div *ngIf="currentLibro.autores?.length > 0" class="mb-2">
+              <div *ngFor="let autor of currentLibro.autores" class="badge bg-primary bg-opacity-10 text-primary me-2 mb-2 p-2 d-inline-flex align-items-center">
+                {{autor.nombre}} {{autor.apellido}}
+                <button type="button" class="btn-close btn-close-sm ms-2" (click)="removeAutor(autor)"></button>
+              </div>
+            </div>
+            
+            <!-- Mensaje si no hay autores -->
+            <div *ngIf="!currentLibro.autores?.length" class="text-muted small mb-2">
+              No hay autores asociados a este libro
+            </div>
+            
+            <!-- Botón para añadir autor -->
+            <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center align-self-start" (click)="showAutorSelector()">
+              <span class="material-icons small me-1">person_add</span>
+              <span>Añadir autor</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" [disabled]="libroForm.invalid || isUploading"
             class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
             <span class="material-icons small me-1">save</span>
-            <span>Guardar</span>
+            <span *ngIf="!isUploading">Guardar</span>
+            <span *ngIf="isUploading">Guardando...</span>
           </button>
           <button type="button" (click)="cancelEdit()" 
             class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center transition-all">
@@ -156,51 +154,14 @@
     <table class="table table-hover table-striped">
       <thead class="table-light">
         <tr>
-          <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('id')">
-            <div class="d-flex align-items-center">
-              <span>ID</span>
-              <span *ngIf="sortBy === 'id'" class="material-icons small ms-1">
-                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('titulo')">
-            <div class="d-flex align-items-center">
-              <span>Título</span>
-              <span *ngIf="sortBy === 'titulo'" class="material-icons small ms-1">
-                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="text-primary small text-center">Portada</th>
-          <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('isbn')">
-            <div class="d-flex align-items-center">
-              <span>ISBN</span>
-              <span *ngIf="sortBy === 'isbn'" class="material-icons small ms-1">
-                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('editorial')">
-            <div class="d-flex align-items-center">
-              <span>Editorial</span>
-              <span *ngIf="sortBy === 'editorial'" class="material-icons small ms-1">
-                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="text-primary small cursor-pointer" (click)="changeSort('numeroPaginas')">
-            <div class="d-flex align-items-center">
-              <span>Páginas</span>
-              <span *ngIf="sortBy === 'numeroPaginas'" class="material-icons small ms-1">
-                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-              </span>
-            </div>
-          </th>
-          <th scope="col" class="text-primary small">Sinopsis</th>
-          <th scope="col" class="text-primary small text-center">
-            Acciones
-          </th>
+          <th scope="col" class="text-primary small">ID</th>
+          <th scope="col" class="text-primary small">Portada</th>
+          <th scope="col" class="text-primary small">Título</th>
+          <th scope="col" class="text-primary small">ISBN</th>
+          <th scope="col" class="text-primary small">Autores</th>
+          <th scope="col" class="text-primary small">Páginas</th>
+          <th scope="col" class="text-primary small">Publicación</th>
+          <th scope="col" class="text-primary small text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -208,28 +169,33 @@
           <td class="small text-secondary">
             {{libro.id}}
           </td>
-          <td class="fw-medium">
+          <td>
+            <img [src]="libro.portadaUrl ? getImageUrl(libro.portadaUrl) : '/assets/placeholder-book.jpg'" 
+              alt="Portada de {{libro.titulo}}" 
+              class="img-thumbnail" 
+              style="height: 50px; width: auto;">
+          </td>
+          <td>
             {{libro.titulo}}
           </td>
-          <td class="text-center">
-            <img *ngIf="libro.portadaUrl" [src]="librosService.getImageUrl(libro.portadaUrl)" alt="Portada {{libro.titulo}}" 
-                 class="img-thumbnail" style="max-height: 50px; max-width: 40px;">
-            <span *ngIf="!libro.portadaUrl" class="text-muted small">Sin portada</span>
+          <td>
+            {{libro.isbn || 'N/A'}}
           </td>
-          <td class="small text-secondary">
-            {{libro.isbn || 'No disponible'}}
-          </td>
-          <td class="small text-secondary">
-            {{libro.editorial || 'No disponible'}}
-          </td>
-          <td class="small text-secondary text-center">
-            {{libro.numeroPaginas || 'N/D'}}
-          </td>
-          <td class="small text-secondary">
-            <span *ngIf="libro.sinopsis" title="{{libro.sinopsis}}">
-              {{libro.sinopsis | slice:0:40}}{{libro.sinopsis.length > 40 ? '...' : ''}}
+          <td class="small">
+            <!-- Mostrar hasta 2 autores -->
+            <span *ngFor="let autor of libro.autores?.slice(0, 2); let i = index">
+              {{autor.nombre}} {{autor.apellido}}{{i < ((libro.autores && libro.autores.length > 2) ? 2 : (libro.autores ? libro.autores.length : 0)) - 1 ? ', ' : ''}}
             </span>
-            <span *ngIf="!libro.sinopsis" class="text-muted">Sin sinopsis</span>
+            <!-- Indicar si hay más autores -->
+            <span *ngIf="libro.autores && libro.autores.length > 2" class="text-muted"> y {{libro.autores.length - 2}} más</span>
+            <!-- Si no hay autores -->
+            <span *ngIf="!libro.autores?.length" class="text-muted">Sin autores</span>
+          </td>
+          <td class="text-center">
+            {{libro.numeroPaginas || 'N/A'}}
+          </td>
+          <td>
+            {{libro.anioPublicacion ? (libro.anioPublicacion | date:'yyyy') : 'N/A'}}
           </td>
           <td class="text-center">
             <div class="d-flex justify-content-center gap-2">
@@ -247,23 +213,19 @@
         
         <!-- Mensaje cuando no hay libros -->
         <tr *ngIf="libros.length === 0">
-          <td colspan="9" class="text-center text-secondary py-4">
+          <td colspan="8" class="text-center text-secondary py-4">
             No hay libros disponibles
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-
+  
   <!-- Paginación -->
-  <div *ngIf="totalPages > 1" class="d-flex justify-content-between align-items-center small">
-    <div class="text-secondary">
-      Mostrando <span class="fw-medium">{{currentPage * pageSize + 1}}-{{(currentPage + 1) * pageSize > totalElements ? totalElements : (currentPage + 1) * pageSize}}</span> de <span class="fw-medium">{{totalElements}}</span> libros
-    </div>
-    
-    <nav aria-label="Páginas">
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" [class.disabled]="currentPage === 0">
+  <div *ngIf="totalPages > 0" class="d-flex justify-content-center mt-3">
+    <nav>
+      <ul class="pagination pagination-sm">
+        <li class="page-item" [class.disabled]="currentPage <= 0">
           <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Anterior">
             <span class="material-icons small">navigate_before</span>
           </button>
@@ -288,16 +250,34 @@
     </nav>
   </div>
   
-  <!-- Modal de confirmación para eliminar -->
-  <app-confirm-modal
-    [visible]="showConfirmModal"
-    [title]="confirmModalTitle"
-    [message]="confirmModalMessage"
-    confirmButtonText="Eliminar"
-    confirmButtonClass="btn-danger"
-    cancelButtonText="Cancelar"
-    (confirm)="confirmDeleteLibro()"
-    (cancel)="cancelDeleteLibro()"
-    (close)="showConfirmModal = false">
-  </app-confirm-modal>
+  <!-- Modal para seleccionar autores -->
+  <div *ngIf="showAutorSelectorModal" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Seleccionar autor</h5>
+          <button type="button" class="btn-close" (click)="showAutorSelectorModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="allAutores.length === 0" class="alert alert-info">
+            No hay autores disponibles. Crea un autor primero.
+          </div>
+          
+          <div *ngIf="allAutores.length > 0" class="form-group">
+            <label for="autorSelector" class="form-label">Autor</label>
+            <select [(ngModel)]="selectedAutorId" class="form-select" id="autorSelector">
+              <option [ngValue]="null" disabled>-- Selecciona un autor --</option>
+              <option *ngFor="let autor of allAutores" [ngValue]="autor.id">
+                {{autor.nombre}} {{autor.apellido}}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="showAutorSelectorModal = false">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="selectAutor()" [disabled]="!selectedAutorId">Añadir</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

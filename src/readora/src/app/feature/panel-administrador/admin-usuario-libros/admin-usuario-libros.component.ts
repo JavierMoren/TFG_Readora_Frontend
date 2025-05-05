@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model';
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
-import { toast } from 'ngx-sonner';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { NotificationService } from '../../../core/services/notification.service';
 
 
 @Component({
   selector: 'app-admin-usuario-libros',
-  imports: [CommonModule, FormsModule, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-usuario-libros.component.html',
   styleUrl: './admin-usuario-libros.component.css'
 })
@@ -32,7 +31,8 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   usuarioLibroIdToDelete: number | null = null;
 
   constructor(
-    private usuarioLibroService: UsuarioLibroService
+    private usuarioLibroService: UsuarioLibroService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -50,12 +50,8 @@ export class AdminUsuarioLibrosComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar relaciones usuario-libro', error);
-        toast.error('Error', { 
-          description: 'No se pudieron cargar las relaciones usuario-libro',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar las relaciones usuario-libro'
         });
       }
     });
@@ -72,12 +68,8 @@ export class AdminUsuarioLibrosComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al obtener detalles de la relación usuario-libro', error);
-        toast.error('Error', { 
-          description: 'No se pudieron cargar los detalles de la relación',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar los detalles de la relación'
         });
       }
     });
@@ -119,24 +111,16 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   createUsuarioLibro(): void {
     this.usuarioLibroService.createUsuarioLibro(this.currentUsuarioLibro).subscribe({
       next: (response) => {
-        toast.success('Éxito', { 
-          description: 'Relación usuario-libro creada correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.success('Éxito', { 
+          description: 'Relación usuario-libro creada correctamente'
         });
         this.getAllUsuarioLibros();
         this.cancelEdit();
       },
       error: (error) => {
         console.error('Error al crear relación usuario-libro', error);
-        toast.error('Error', { 
-          description: 'No se pudo crear la relación usuario-libro',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudo crear la relación usuario-libro'
         });
       }
     });
@@ -148,24 +132,16 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   updateUsuarioLibro(): void {
     this.usuarioLibroService.updateUsuarioLibro(this.currentUsuarioLibro.id, this.currentUsuarioLibro).subscribe({
       next: (response) => {
-        toast.success('Éxito', { 
-          description: 'Relación usuario-libro actualizada correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.success('Éxito', { 
+          description: 'Relación usuario-libro actualizada correctamente'
         });
         this.getAllUsuarioLibros();
         this.cancelEdit();
       },
       error: (error) => {
         console.error('Error al actualizar relación usuario-libro', error);
-        toast.error('Error', { 
-          description: 'No se pudo actualizar la relación usuario-libro',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudo actualizar la relación usuario-libro'
         });
       }
     });
@@ -187,24 +163,16 @@ export class AdminUsuarioLibrosComponent implements OnInit {
     if (this.usuarioLibroIdToDelete) {
       this.usuarioLibroService.deleteUsuarioLibro(this.usuarioLibroIdToDelete).subscribe({
         next: () => {
-          toast.success('Eliminada', { 
-            description: 'La relación usuario-libro ha sido eliminada',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.success('Eliminada', { 
+            description: 'La relación usuario-libro ha sido eliminada'
           });
           this.getAllUsuarioLibros();
           this.usuarioLibroIdToDelete = null;
         },
         error: (error) => {
           console.error('Error al eliminar relación usuario-libro', error);
-          toast.error('Error', { 
-            description: 'No se pudo eliminar la relación usuario-libro',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'No se pudo eliminar la relación usuario-libro'
           });
           this.usuarioLibroIdToDelete = null;
         }

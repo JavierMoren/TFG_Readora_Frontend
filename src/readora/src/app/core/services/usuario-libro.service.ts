@@ -43,6 +43,17 @@ export class UsuarioLibroService {
     );
   }
 
+  /**
+   * Obtiene todas las relaciones usuario-libro para un usuario específico
+   * @param usuarioId ID del usuario
+   * @returns Observable con la lista de relaciones usuario-libro
+   */
+  getLibrosByUsuarioId(usuarioId: number): Observable<UsuarioLibro[]> {
+    return this.http.get<UsuarioLibro[]>(`${this.apiUrl}/usuario/${usuarioId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
     if (error.error instanceof ErrorEvent) {

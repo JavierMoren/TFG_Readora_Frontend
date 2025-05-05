@@ -1,5 +1,5 @@
 export interface UsuarioLibro {
-    id: number;
+    id?: number; 
     usuarioId: number;
     libroId: number;
     estadoLectura: string; // LEYENDO, TERMINADO, PENDIENTE, ABANDONADO

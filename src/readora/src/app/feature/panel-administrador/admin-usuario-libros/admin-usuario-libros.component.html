@@ -215,7 +215,7 @@
                 class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">
                 <span class="material-icons small">edit</span>
               </button>
-              <button (click)="deleteUsuarioLibro(usuarioLibro.id)" 
+              <button (click)="deleteUsuarioLibro(usuarioLibro.id!)" 
                 class="btn btn-sm btn-outline-danger border-0 transition-all" title="Eliminar">
                 <span class="material-icons small">delete</span>
               </button>
@@ -232,17 +232,4 @@
       </tbody>
     </table>
   </div>
-
-  <!-- Modal de confirmación para eliminar -->
-  <app-confirm-modal
-    [visible]="showConfirmModal"
-    [title]="confirmModalTitle"
-    [message]="confirmModalMessage"
-    confirmButtonText="Eliminar"
-    confirmButtonClass="btn-danger"
-    cancelButtonText="Cancelar"
-    (confirm)="confirmDeleteUsuarioLibro()"
-    (cancel)="cancelDeleteUsuarioLibro()"
-    (close)="showConfirmModal = false">
-  </app-confirm-modal>
 </div>

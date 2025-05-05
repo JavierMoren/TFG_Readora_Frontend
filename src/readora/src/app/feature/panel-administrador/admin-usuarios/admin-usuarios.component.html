@@ -188,8 +188,8 @@
           <th scope="col" class="text-primary small">Usuario</th>
           <th scope="col" class="text-primary small">Nombre</th>
           <th scope="col" class="text-primary small">Apellido</th>
-          <th scope="col" class="text-primary small">Gmail</th>
-          <th scope="col" class="text-primary small">Estado</th>
+          <th scope="col" class="text-primary small">Email</th>
+          <th scope="col" class="text-primary small text-center">Estado</th>
           <th scope="col" class="text-primary small text-center">Acciones</th>
         </tr>
       </thead>
@@ -198,19 +198,19 @@
           <td class="small text-secondary">
             {{usuario.id}}
           </td>
-          <td class="fw-medium">
+          <td>
             {{usuario.usuario}}
           </td>
-          <td class="small text-secondary">
+          <td>
             {{usuario.nombre}}
           </td>
-          <td class="small text-secondary">
+          <td>
             {{usuario.apellido}}
           </td>
           <td class="small text-secondary">
             {{usuario.gmail}}
           </td>
-          <td>
+          <td class="text-center">
             <span class="badge rounded-pill"
               [ngClass]="usuario.enabled ? 'bg-success' : 'bg-danger'">
               {{usuario.enabled ? 'Activo' : 'Inactivo'}}
@@ -239,17 +239,4 @@
       </tbody>
     </table>
   </div>
-
-  <!-- Modal de confirmación para eliminar -->
-  <app-confirm-modal
-    [title]="confirmModalTitle"
-    [message]="confirmModalMessage"
-    confirmButtonText="Eliminar"
-    cancelButtonText="Cancelar"
-    confirmButtonClass="btn-danger"
-    [visible]="showConfirmModal"
-    (confirm)="confirmDelete()"
-    (cancel)="cancelDelete()"
-    (close)="showConfirmModal = false"
-  ></app-confirm-modal>
 </div>

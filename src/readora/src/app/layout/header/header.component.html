@@ -36,6 +36,13 @@
 
             <!-- Enlaces cuando SÍ está autenticado -->
             <ng-container *ngIf="isLoggedIn$ | async">
+              <!-- Enlace a la Biblioteca Personal -->
+              <a class="nav-link text-secondary transition-all" 
+                 routerLink="/biblioteca" 
+                 routerLinkActive="fw-medium text-highlight">
+                 <span class="material-icons small me-1">book</span>Mi Biblioteca
+              </a>
+              
               <!-- Enlace al panel de administrador si es admin -->
               <a *ngIf="isAdmin" 
                  class="nav-link text-secondary transition-all" 
@@ -116,6 +123,14 @@
 
         <!-- Móvil: Enlaces cuando SÍ está autenticado -->
         <ng-container *ngIf="isLoggedIn$ | async">
+          <!-- Enlace a la Biblioteca Personal -->
+          <a class="nav-link text-secondary" 
+             routerLink="/biblioteca" 
+             routerLinkActive="fw-medium text-highlight"
+             data-bs-dismiss="offcanvas">
+             <span class="material-icons small me-1">book</span>Mi Biblioteca
+          </a>
+          
           <!-- Enlace al panel de administrador si es admin -->
           <a *ngIf="isAdmin" 
              class="nav-link text-secondary" 

@@ -37,6 +37,19 @@ export class UsuarioService {
     );
   }
 
+  /**
+   * Actualiza un usuario incluyendo la contraseña
+   * Este método es específico para cuando se actualiza la contraseña de un usuario
+   * @param usuario Datos del usuario con la nueva contraseña
+   * @returns Observable con el usuario actualizado
+   */
+  updateUsuarioConPassword(usuario: Usuario): Observable<Usuario> {
+    // Utilizamos la misma ruta de actualización estándar pero enviando explícitamente la contraseña
+    return this.http.put<Usuario>(`${this.apiUrl}/${usuario.id}`, usuario).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   deleteUsuario(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)

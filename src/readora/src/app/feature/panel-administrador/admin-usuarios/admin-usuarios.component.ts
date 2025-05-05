@@ -4,13 +4,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { FormsModule } from '@angular/forms';
 import { Usuario } from '../../../models/usuario/usuario.model';
 import { UsuarioService } from '../../../core/services/usuario.service';
-import { toast } from 'ngx-sonner';
-import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
-
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-admin-usuarios',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ConfirmModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './admin-usuarios.component.html',
   styleUrl: './admin-usuarios.component.css'
 })
@@ -32,14 +30,12 @@ export class AdminUsuariosComponent implements OnInit {
   passwordForm!: FormGroup;
   
   // Variables para el modal de confirmación
-  showConfirmModal: boolean = false;
-  confirmModalTitle: string = '¿Estás seguro?';
-  confirmModalMessage: string = 'Esta acción no se puede deshacer';
   userIdToDelete: number | null = null;
 
   constructor(
     private usuarioService: UsuarioService,
     private fb: FormBuilder,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -104,12 +100,8 @@ export class AdminUsuariosComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar usuarios', error);
-        toast.error('Error', { 
-          description: 'No se pudieron cargar los usuarios',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar los usuarios'
         });
       }
     });
@@ -120,20 +112,14 @@ export class AdminUsuariosComponent implements OnInit {
    * @param id - ID del usuario a buscar
    */
   getUsuarioById(id: number): void {
-    console.log('Solicitando usuario con ID:', id);
     this.usuarioService.getUsuarioById(id).subscribe({
-      next: (usuario) => {
-        console.log('Usuario recibido:', usuario);
-        this.usuarioDetalle = usuario;
+      next: (data) => {
+        this.usuarioDetalle = data;
       },
       error: (error) => {
-        console.error('Error al obtener detalles del usuario', error);
-        toast.error('Error', { 
-          description: 'No se pudieron cargar los detalles del usuario',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        console.error('Error al cargar usuario', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudo cargar el usuario'
         });
       }
     });
@@ -202,19 +188,31 @@ export class AdminUsuariosComponent implements OnInit {
    * Determina si debe crear o actualizar un usuario
    */
   saveUsuario(): void {
-    if (!this.usuarioForm.valid || (this.cambiarContrasenna && !this.passwordForm.valid)) {
-      this.usuarioForm.markAllAsTouched();
-      if (this.cambiarContrasenna) {
-        this.passwordForm.markAllAsTouched();
+    if (this.usuarioForm.valid) {
+      this.currentUsuario = this.usuarioForm.value;
+      
+      if (this.isEditing) {
+        // Si está editando y quiere cambiar la contraseña
+        if (this.cambiarContrasenna) {
+          if (this.passwordForm.valid) {
+            this.verificarContrasenna();
+          } else {
+            this.notificationService.warning('Validación', {
+              description: 'Verifica los campos de contraseña'
+            });
+          }
+        } else {
+          // Edición normal sin cambio de contraseña
+          this.updateUsuario();
+        }
+      } else {
+        // Creación de nuevo usuario
+        this.createUsuario();
       }
-      return;
-    }
-    console.log('Guardando usuario en modo:', this.isEditing ? 'edición' : 'creación');
-    this.currentUsuario = this.usuarioForm.value;
-    if (this.isEditing) {
-      this.updateUsuario();
     } else {
-      this.createUsuario();
+      this.notificationService.warning('Validación', {
+        description: 'Por favor, completa correctamente el formulario'
+      });
     }
   }
 
@@ -226,24 +224,16 @@ export class AdminUsuariosComponent implements OnInit {
     this.usuarioService.createUsuario(this.currentUsuario).subscribe({
       next: (response) => {
         console.log('Usuario creado:', response);
-        toast.success('Éxito', { 
-          description: 'Usuario creado correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.success('Éxito', { 
+          description: 'Usuario creado correctamente'
         });
         this.getAllUsuarios();
         this.cancelEdit();
       },
       error: (error) => {
         console.error('Error al crear usuario', error);
-        toast.error('Error', { 
-          description: 'No se pudo crear el usuario',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudo crear el usuario'
         });
       }
     });
@@ -254,49 +244,56 @@ export class AdminUsuariosComponent implements OnInit {
    */
   updateUsuario(): void {
     console.log('Actualizando usuario...');
-    // Si se está cambiando la contraseña, verificamos primero
-    if (this.cambiarContrasenna) {
-      this.verificarContrasenna();
-    } else {
-      // Si no cambiamos contraseña, enviamos la actualización directamente
-      this.enviarActualizacion();
-    }
+    this.usuarioService.updateUsuario(this.currentUsuario).subscribe({
+      next: (response) => {
+        console.log('Usuario actualizado:', response);
+        this.notificationService.success('Éxito', { 
+          description: 'Usuario actualizado correctamente'
+        });
+        this.getAllUsuarios();
+        this.cancelEdit();
+      },
+      error: (error) => {
+        console.error('Error al actualizar usuario', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudo actualizar el usuario'
+        });
+      }
+    });
   }
 
   /**
    * Verifica la contraseña actual antes de permitir el cambio
    */
   verificarContrasenna(): void {
-    // Crear un objeto con el usuario y contraseña para validar
-    const credenciales = {
-      usuario: this.currentUsuario.usuario,
+    console.log('Verificando contraseña actual...');
+    
+    const verificacionData = {
+      usuario: this.usuarioForm.value.usuario, // Usar el nombre de usuario en lugar del ID
       contrasenna: this.passwordForm.value.contrasennaActual
     };
-    this.usuarioService.verificarContrasenna(credenciales).subscribe({
-      next: (resultado) => {
-        if (resultado.valida) {
-          // Si la contraseña es correcta, procedemos con la actualización
-          // Guardamos la nueva contraseña en el objeto de usuario para que el backend la cifre
+    
+    this.usuarioService.verificarContrasenna(verificacionData).subscribe({
+      next: (response) => {
+        if (response.valida) { // Cambiar de response.valid a response.valida según la interfaz del servicio
+          console.log('Contraseña verificada correctamente');
+          // Mostrar notificación de éxito en la verificación
+          this.notificationService.success('Verificación exitosa', {
+            description: 'La contraseña actual es correcta'
+          });
+          // Actualizar el objeto con la nueva contraseña
           this.currentUsuario.contrasenna = this.passwordForm.value.nuevaContrasenna;
           this.enviarActualizacion();
         } else {
-          toast.error('Error', { 
-            description: 'La contraseña actual no es correcta',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'La contraseña actual no es correcta'
           });
         }
       },
       error: (error) => {
         console.error('Error al verificar contraseña', error);
-        toast.error('Error', { 
-          description: 'No se pudo verificar la contraseña',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.error('Error', { 
+          description: 'No se pudo verificar la contraseña'
         });
       }
     });
@@ -306,28 +303,20 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la solicitud de actualización al servidor
    */
   enviarActualizacion(): void {
-    this.currentUsuario.enabled = !!this.currentUsuario.enabled;
-    this.usuarioService.updateUsuario(this.currentUsuario).subscribe({
+    console.log('Enviando actualización con nueva contraseña...');
+    this.usuarioService.updateUsuarioConPassword(this.currentUsuario).subscribe({
       next: (response) => {
-        console.log('Usuario actualizado:', response);
-        toast.success('Éxito', { 
-          description: 'Usuario actualizado correctamente',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        console.log('Usuario con contraseña actualizado:', response);
+        this.notificationService.success('Éxito', { 
+          description: 'Usuario y contraseña actualizados correctamente'
         });
         this.getAllUsuarios();
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al actualizar usuario', error);
-        toast.error('Error', { 
-          description: 'No se pudo actualizar el usuario',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        console.error('Error al actualizar usuario con contraseña', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudo actualizar la contraseña'
         });
       }
     });
@@ -337,13 +326,22 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la petición para eliminar un usuario
    * @param id - ID del usuario a eliminar
    */
-  deleteUsuario(id: number): void {
+  async deleteUsuario(id: number): Promise<void> {
     this.userIdToDelete = id;
-    this.confirmModalTitle = '¿Eliminar usuario?';
-    this.confirmModalMessage = 'Esta acción no se puede deshacer';
-    setTimeout(() => {
-      this.showConfirmModal = true;
-    }, 0);
+    
+    const confirmed = await this.notificationService.confirm({
+      title: '¿Eliminar usuario?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    
+    if (confirmed) {
+      this.confirmDelete();
+    } else {
+      this.userIdToDelete = null;
+    }
   }
 
   /**
@@ -355,37 +353,21 @@ export class AdminUsuariosComponent implements OnInit {
       this.usuarioService.deleteUsuario(this.userIdToDelete).subscribe({
         next: () => {
           console.log('Usuario eliminado con éxito');
-          toast.success('Eliminado', { 
-            description: 'El usuario ha sido eliminado',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.success('Eliminado', { 
+            description: 'El usuario ha sido eliminado'
           });
           this.getAllUsuarios();
         },
         error: (error) => {
           console.error('Error al eliminar usuario', error);
-          toast.error('Error', { 
-            description: 'No se pudo eliminar el usuario',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'No se pudo eliminar el usuario'
           });
         }
       });
       // Resetear el ID del usuario a eliminar
       this.userIdToDelete = null;
     }
-  }
-
-  /**
-   * Método que se ejecuta cuando se cancela la eliminación en el modal
-   */
-  cancelDelete(): void {
-    console.log('Eliminación cancelada');
-    this.userIdToDelete = null;
   }
 
   /**

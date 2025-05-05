@@ -25,8 +25,11 @@
                class="img-fluid rounded book-cover">
           
           <div class="mt-3 d-flex justify-content-center gap-2">
-            <button class="btn btn-outline-primary btn-sm">
+            <button class="btn btn-primary btn-sm" (click)="agregarABiblioteca()" *ngIf="isLoggedIn">
               <i class="bi bi-bookmark-plus"></i> Añadir a mi biblioteca
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" *ngIf="!isLoggedIn" routerLink="/api/v1/authenticate" [queryParams]="{returnUrl: '/libros/' + libroId}">
+              <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión para añadir
             </button>
           </div>
         </div>

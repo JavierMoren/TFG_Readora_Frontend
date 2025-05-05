@@ -20,6 +20,28 @@ export class StorageService {
   uploadFile(file: FormData, tipo: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/upload/${tipo}`, file);
   }
+  
+  /**
+   * Sube una imagen de libro al servidor
+   * @param file Archivo de imagen a subir
+   * @returns Observable con la respuesta del servidor
+   */
+  uploadLibroImage(file: Blob): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file instanceof File ? file.name : 'libro.jpg');
+    return this.uploadFile(formData, 'libro');
+  }
+  
+  /**
+   * Sube una imagen de autor al servidor
+   * @param file Archivo de imagen a subir
+   * @returns Observable con la respuesta del servidor
+   */
+  uploadAutorImage(file: Blob): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file instanceof File ? file.name : 'autor.jpg');
+    return this.uploadFile(formData, 'autor');
+  }
 
   /**
    * Construye la URL completa para un recurso de imagen
