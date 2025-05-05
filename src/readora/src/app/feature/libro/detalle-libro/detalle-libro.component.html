@@ -36,10 +36,24 @@
       <div class="col-md-8">
         <div class="card-body">
           <h1 class="card-title">{{ libro.titulo }}</h1>
-          <h4 class="card-subtitle mb-3 text-muted">
-            <a [routerLink]="['/autores', libro.autor?.id]" class="author-link">
-              {{ libro.autor?.nombre }} {{ libro.autor?.apellido }}
-            </a>
+          
+          <!-- Mostrar múltiples autores -->
+          <h4 class="card-subtitle mb-3 text-muted" *ngIf="libro.autores && libro.autores.length > 0">
+            <span>por </span>
+            <ng-container *ngFor="let autor of libro.autores; let last = last; let i = index">
+              <a [routerLink]="['/autores', autor.id]" class="author-link">
+                {{ autor.nombre }} {{ autor.apellido }}
+              </a>
+              <ng-container *ngIf="!last">
+                <ng-container *ngIf="i < libro.autores.length - 2">, </ng-container>
+                <ng-container *ngIf="i === libro.autores.length - 2"> y </ng-container>
+              </ng-container>
+            </ng-container>
+          </h4>
+          
+          <!-- Mensaje si no hay autores -->
+          <h4 class="card-subtitle mb-3 text-muted" *ngIf="!libro.autores || libro.autores.length === 0">
+            Autor desconocido
           </h4>
           
           <div class="mb-3">

@@ -35,7 +35,6 @@
               <div>
                 <h5 class="card-title">{{ item.nombre }}</h5>
                 <p class="card-text text-muted">{{ item.fechaNacimiento | date:'yyyy' }} - {{ item.fechaFallecimiento ? (item.fechaFallecimiento | date:'yyyy') : 'Presente' }}</p>
-                <p class="card-text"><small class="text-muted">{{ item.cantidadLibros || 0 }} libros publicados</small></p>
               </div>
             </div>
           </ng-container>

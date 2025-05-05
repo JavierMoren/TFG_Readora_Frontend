@@ -124,6 +124,19 @@ export class AutorService {
     return `${environment.apiUrl}/files/${relativePath}`;
   }
 
+  /**
+   * Obtiene el detalle completo de un autor por su ID, incluyendo sus libros
+   * Usa el nuevo endpoint optimizado que evita referencias circulares
+   * 
+   * @param id ID del autor a consultar
+   * @returns Observable con el detalle completo del autor incluyendo sus libros
+   */
+  getAutorDetalleById(id: number): Observable<Autor> {
+    return this.http.get<Autor>(`${this.apiUrl}/${id}/detalle`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
     if (error.error instanceof ErrorEvent) {

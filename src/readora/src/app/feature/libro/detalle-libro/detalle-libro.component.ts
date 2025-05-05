@@ -27,6 +27,7 @@ export class DetalleLibroComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.libroId = +params['id']; // Guardamos el ID para poder usarlo en la plantilla
+      console.log('Inicializando componente de detalle para el libro con ID:', this.libroId);
       this.loadLibro(this.libroId);
     });
   }
@@ -34,16 +35,38 @@ export class DetalleLibroComponent implements OnInit {
   loadLibro(id: number): void {
     this.loading = true;
     this.error = null;
+    console.log('Cargando información del libro con ID:', id);
 
-    this.librosService.getLibroById(id).subscribe({
+    // Manejo de errores: intenta primero con el endpoint de detalle, si falla usa el método básico
+    this.librosService.getLibroDetalleById(id).subscribe({
       next: (data) => {
+        console.log('Libro cargado con éxito (con detalle):', data);
         this.libro = data;
         this.loading = false;
+        
+        if (data.autores) {
+          console.log('Autores encontrados:', data.autores.length);
+        } else {
+          console.log('No se encontraron autores');
+        }
       },
       error: (err) => {
-        console.error('Error al cargar el libro:', err);
-        this.error = 'No se pudo cargar la información del libro.';
-        this.loading = false;
+        console.error('Error al cargar el detalle del libro:', err);
+        console.log('Intentando cargar información básica del libro...');
+        
+        // Si falla el endpoint de detalle, probamos con el endpoint básico
+        this.librosService.getLibroById(id).subscribe({
+          next: (basicData) => {
+            console.log('Libro cargado con éxito (información básica):', basicData);
+            this.libro = basicData;
+            this.loading = false;
+          },
+          error: (basicErr) => {
+            console.error('Error al cargar información básica del libro:', basicErr);
+            this.error = 'No se pudo cargar la información del libro.';
+            this.loading = false;
+          }
+        });
       }
     });
   }

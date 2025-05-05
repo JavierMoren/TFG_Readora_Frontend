@@ -35,14 +35,16 @@ export class DetalleAutorComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.autorService.getAutorById(id).subscribe({
+    // Usamos el nuevo método que obtiene el detalle completo con libros
+    this.autorService.getAutorDetalleById(id).subscribe({
       next: (data) => {
         this.autor = data;
         this.loading = false;
+        console.log('Detalle de autor cargado correctamente:', data);
       },
       error: (err) => {
-        console.error('Error al cargar el autor:', err);
-        this.error = 'No se pudo cargar la información del autor.';
+        console.error('Error al cargar el detalle del autor:', err);
+        this.error = 'No se pudo cargar la información completa del autor.';
         this.loading = false;
       }
     });

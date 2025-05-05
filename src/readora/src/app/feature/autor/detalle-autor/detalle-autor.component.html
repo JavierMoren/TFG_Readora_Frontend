@@ -76,15 +76,19 @@
         <h3 class="card-title">Obras</h3>
         <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
           <div class="col" *ngFor="let libro of autor.libros">
-            <div class="card h-100 book-card">
-              <img [src]="getImageUrl(libro.portadaUrl)" 
-                   alt="Portada de {{ libro.titulo }}"
-                   class="card-img-top book-cover-sm">
-              <div class="card-body">
-                <h6 class="card-title">{{ libro.titulo }}</h6>
-                <p class="card-text text-muted small">{{ libro.anioPublicacion }}</p>
+            <!-- Añadimos enlace al detalle del libro -->
+            <a [routerLink]="['/libros', libro.id]" class="text-decoration-none">
+              <div class="card h-100 book-card">
+                <img [src]="getImageUrl(libro.portadaUrl)" 
+                     alt="Portada de {{ libro.titulo }}"
+                     class="card-img-top book-cover-sm">
+                <div class="card-body">
+                  <h6 class="card-title">{{ libro.titulo }}</h6>
+                  <p class="card-text text-muted small">{{ libro.anioPublicacion }}</p>
+                  <span class="badge bg-secondary" *ngIf="libro.genero">{{ libro.genero }}</span>
+                </div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </div>

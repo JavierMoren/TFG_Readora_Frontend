@@ -38,6 +38,17 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
+  
+  /**
+   * Obtiene el detalle completo de un libro, incluyendo la lista de autores asociados
+   * @param id ID del libro a obtener
+   * @returns Observable con el detalle completo del libro
+   */
+  getLibroDetalleById(id: number): Observable<Libro> {
+    return this.http.get<Libro>(`${this.apiUrl}/${id}/detalle`).pipe(
+      catchError(this.handleError)
+    );
+  }
 
   createLibro(libro: Libro): Observable<Libro> {
     return this.http.post<Libro>(this.apiUrl, libro).pipe(
