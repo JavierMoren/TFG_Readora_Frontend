@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroments';
 import { Libro } from '../../models/libro/libro.model';
+import { Autor } from '../../models/autor/autor.model';
 
 @Injectable({
   providedIn: 'root'
@@ -139,6 +140,19 @@ export class LibrosService {
   getImageUrl(relativePath: string | null): string | null {
     if (!relativePath) return null;
     return `${environment.apiUrl}/files/${relativePath}`;
+  }
+
+  /**
+   * Obtiene los autores de un libro específico
+   * Este método consume el endpoint del backend que hemos creado
+   * 
+   * @param id ID del libro
+   * @returns Observable con la lista de autores del libro
+   */
+  getAutoresByLibroId(id: number): Observable<Autor[]> {
+    return this.http.get<Autor[]>(`${this.apiUrl}/${id}/autores`).pipe(
+      catchError(this.handleError)
+    );
   }
 
   private handleError(error: HttpErrorResponse) {

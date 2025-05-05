@@ -4,6 +4,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Autor } from '../../../models/autor/autor.model';
+import { Libro } from '../../../models/libro/libro.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-detalle-autor',
@@ -14,6 +16,7 @@ import { Autor } from '../../../models/autor/autor.model';
 })
 export class DetalleAutorComponent implements OnInit {
   autor: Autor | null = null;
+  libros: Libro[] = [];
   loading: boolean = true;
   error: string | null = null;
   autorId: number = 0;
@@ -35,12 +38,17 @@ export class DetalleAutorComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // Usamos el nuevo método que obtiene el detalle completo con libros
-    this.autorService.getAutorDetalleById(id).subscribe({
-      next: (data) => {
-        this.autor = data;
+    // Realizamos dos llamadas paralelas: una para el autor y otra para sus libros
+    forkJoin({
+      autor: this.autorService.getAutorById(id),
+      libros: this.autorService.getLibrosByAutorId(id)
+    }).subscribe({
+      next: (result) => {
+        this.autor = result.autor;
+        this.libros = result.libros;
         this.loading = false;
-        console.log('Detalle de autor cargado correctamente:', data);
+        console.log('Autor cargado correctamente:', this.autor);
+        console.log('Libros del autor cargados:', this.libros);
       },
       error: (err) => {
         console.error('Error al cargar el detalle del autor:', err);

@@ -4,6 +4,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Libro } from '../../../models/libro/libro.model';
+import { Autor } from '../../../models/autor/autor.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-detalle-libro',
@@ -14,6 +16,7 @@ import { Libro } from '../../../models/libro/libro.model';
 })
 export class DetalleLibroComponent implements OnInit {
   libro: Libro | null = null;
+  autores: Autor[] = [];
   loading: boolean = true;
   error: string | null = null;
   libroId: number = 0;
@@ -37,36 +40,22 @@ export class DetalleLibroComponent implements OnInit {
     this.error = null;
     console.log('Cargando información del libro con ID:', id);
 
-    // Manejo de errores: intenta primero con el endpoint de detalle, si falla usa el método básico
-    this.librosService.getLibroDetalleById(id).subscribe({
-      next: (data) => {
-        console.log('Libro cargado con éxito (con detalle):', data);
-        this.libro = data;
+    // Realizamos dos llamadas paralelas: una para el libro y otra para sus autores
+    forkJoin({
+      libro: this.librosService.getLibroById(id),
+      autores: this.librosService.getAutoresByLibroId(id)
+    }).subscribe({
+      next: (result) => {
+        this.libro = result.libro;
+        this.autores = result.autores;
         this.loading = false;
-        
-        if (data.autores) {
-          console.log('Autores encontrados:', data.autores.length);
-        } else {
-          console.log('No se encontraron autores');
-        }
+        console.log('Libro cargado correctamente:', this.libro);
+        console.log('Autores del libro cargados:', this.autores);
       },
       error: (err) => {
         console.error('Error al cargar el detalle del libro:', err);
-        console.log('Intentando cargar información básica del libro...');
-        
-        // Si falla el endpoint de detalle, probamos con el endpoint básico
-        this.librosService.getLibroById(id).subscribe({
-          next: (basicData) => {
-            console.log('Libro cargado con éxito (información básica):', basicData);
-            this.libro = basicData;
-            this.loading = false;
-          },
-          error: (basicErr) => {
-            console.error('Error al cargar información básica del libro:', basicErr);
-            this.error = 'No se pudo cargar la información del libro.';
-            this.loading = false;
-          }
-        });
+        this.error = 'No se pudo cargar la información completa del libro.';
+        this.loading = false;
       }
     });
   }
@@ -77,12 +66,12 @@ export class DetalleLibroComponent implements OnInit {
   }
   
   // Método para obtener la URL completa de la imagen de portada
-  getPortadaUrl(path: string | null): string {
-    return this.storageService.getFullImageUrl(path);
+  getPortadaUrl(path: string | null | undefined): string {
+    return this.storageService.getFullImageUrl(path || null);
   }
   
   // Método para obtener la URL completa de la imagen de autor
-  getAutorImageUrl(path: string | null): string {
+  getAutorImageUrl(path: string | null | undefined): string {
     if (!path) return 'assets/images/default-author.jpg';
     return this.storageService.getFullImageUrl(path);
   }

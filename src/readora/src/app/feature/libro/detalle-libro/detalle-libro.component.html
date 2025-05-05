@@ -38,21 +38,21 @@
           <h1 class="card-title">{{ libro.titulo }}</h1>
           
           <!-- Mostrar múltiples autores -->
-          <h4 class="card-subtitle mb-3 text-muted" *ngIf="libro.autores && libro.autores.length > 0">
+          <h4 class="card-subtitle mb-3 text-muted" *ngIf="autores && autores.length > 0">
             <span>por </span>
-            <ng-container *ngFor="let autor of libro.autores; let last = last; let i = index">
+            <ng-container *ngFor="let autor of autores; let last = last; let i = index">
               <a [routerLink]="['/autores', autor.id]" class="author-link">
                 {{ autor.nombre }} {{ autor.apellido }}
               </a>
               <ng-container *ngIf="!last">
-                <ng-container *ngIf="i < libro.autores.length - 2">, </ng-container>
-                <ng-container *ngIf="i === libro.autores.length - 2"> y </ng-container>
+                <ng-container *ngIf="i < autores.length - 2">, </ng-container>
+                <ng-container *ngIf="i === autores.length - 2"> y </ng-container>
               </ng-container>
             </ng-container>
           </h4>
           
           <!-- Mensaje si no hay autores -->
-          <h4 class="card-subtitle mb-3 text-muted" *ngIf="!libro.autores || libro.autores.length === 0">
+          <h4 class="card-subtitle mb-3 text-muted" *ngIf="!autores || autores.length === 0">
             Autor desconocido
           </h4>
           
@@ -87,6 +87,36 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sección de autores -->
+  <div class="card shadow-sm mt-4" *ngIf="autores && autores.length > 0 && !loading">
+    <div class="card-body">
+      <h3 class="card-title">Autores</h3>
+      <div class="row">
+        <div class="col-md-4 mb-3" *ngFor="let autor of autores">
+          <a [routerLink]="['/autores', autor.id]" class="text-decoration-none">
+            <div class="card author-card h-100">
+              <div class="row g-0">
+                <div class="col-4">
+                  <img [src]="getAutorImageUrl(autor.fotoUrl)" 
+                       alt="Foto de {{ autor.nombre }}"
+                       class="img-fluid rounded-start author-thumbnail">
+                </div>
+                <div class="col-8">
+                  <div class="card-body">
+                    <h5 class="card-title">{{ autor.nombre }} {{ autor.apellido }}</h5>
+                    <p class="card-text small text-muted" *ngIf="autor.nacionalidad">
+                      {{ autor.nacionalidad }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
         </div>
       </div>
     </div>

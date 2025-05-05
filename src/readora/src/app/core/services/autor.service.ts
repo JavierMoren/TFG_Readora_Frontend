@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Autor } from '../../models/autor/autor.model';
+import { Libro } from '../../models/libro/libro.model';
 import { environment } from '../../../enviroments/enviroments';
 
 @Injectable({
@@ -133,6 +134,19 @@ export class AutorService {
    */
   getAutorDetalleById(id: number): Observable<Autor> {
     return this.http.get<Autor>(`${this.apiUrl}/${id}/detalle`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene los libros de un autor específico
+   * Este método es reutilizable y puede usarse en cualquier componente
+   * 
+   * @param id ID del autor
+   * @returns Observable con la lista de libros del autor
+   */
+  getLibrosByAutorId(id: number): Observable<Libro[]> {
+    return this.http.get<Libro[]>(`${this.apiUrl}/${id}/libros`).pipe(
       catchError(this.handleError)
     );
   }

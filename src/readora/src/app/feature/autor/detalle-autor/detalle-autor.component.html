@@ -37,6 +37,9 @@
               <span class="badge bg-secondary" *ngIf="autor.fechaNacimiento">
                 {{ autor.fechaNacimiento | date:'yyyy' }} - {{ autor.fechaFallecimiento ? (autor.fechaFallecimiento | date:'yyyy') : 'Presente' }}
               </span>
+              <span class="badge bg-info ms-2" *ngIf="libros?.length">
+                {{ libros.length }} {{ libros.length === 1 ? 'obra' : 'obras' }}
+              </span>
             </div>
             
             <div class="author-details mt-4">
@@ -71,11 +74,11 @@
     </div>
     
     <!-- Libros del autor -->
-    <div class="card shadow-sm mb-4" *ngIf="autor.libros?.length">
+    <div class="card shadow-sm mb-4" *ngIf="libros?.length">
       <div class="card-body">
         <h3 class="card-title">Obras</h3>
         <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
-          <div class="col" *ngFor="let libro of autor.libros">
+          <div class="col" *ngFor="let libro of libros">
             <!-- Añadimos enlace al detalle del libro -->
             <a [routerLink]="['/libros', libro.id]" class="text-decoration-none">
               <div class="card h-100 book-card">
@@ -95,7 +98,7 @@
     </div>
     
     <!-- Mensaje si no hay libros -->
-    <div class="alert alert-info" *ngIf="!autor.libros?.length">
+    <div class="alert alert-info" *ngIf="!libros?.length">
       No hay información sobre obras de este autor.
     </div>
   </div>
