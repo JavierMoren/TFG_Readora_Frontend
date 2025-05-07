@@ -13,6 +13,7 @@ import { AdminAutoresComponent } from './feature/panel-administrador/admin-autor
 import { AdminRolesComponent } from './feature/panel-administrador/admin-roles/admin-roles.component';
 import { AdminUsuarioLibrosComponent } from './feature/panel-administrador/admin-usuario-libros/admin-usuario-libros.component';
 import { BuscadorComponent } from './feature/buscador/buscador.component';
+import { DetalleUsuarioComponent } from './feature/usuario/detalle-usuario/detalle-usuario.component';
 
 export const routes: Routes = [
   {
@@ -26,6 +27,11 @@ export const routes: Routes = [
   {
     path: 'api/v1/authenticate',
     component: AutenticacionComponent,
+  },
+  {
+    path: 'perfil',
+    component: DetalleUsuarioComponent,
+    canActivate: [autenticacionGuard]
   },
   {
     path: 'buscador',

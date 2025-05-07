@@ -1,0 +1,136 @@
+<div class="container py-5">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4 h2 fw-bold">Mi perfil</h1>
+    </div>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div *ngIf="cargando" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Cargando datos...</p>
+  </div>
+
+  <!-- Error de carga -->
+  <div *ngIf="errorCarga" class="alert alert-danger">
+    <p class="mb-0">No se pudieron cargar los datos del usuario. Por favor, intenta de nuevo más tarde.</p>
+  </div>
+
+  <!-- Datos del usuario -->
+  <div *ngIf="!cargando && !errorCarga" class="row">
+    <!-- Columna de información del perfil -->
+    <div class="col-12 col-lg-7 mb-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-transparent border-0">
+          <h2 class="h5 fw-bold mb-0">Información personal</h2>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="usuarioForm" (submit)="guardarCambios()">
+            <div class="mb-3">
+              <label for="usuario" class="form-label">Nombre de usuario</label>
+              <input type="text" id="usuario" formControlName="usuario" class="form-control" readonly>
+              <small class="text-muted">El nombre de usuario no se puede cambiar.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+              <input type="text" id="nombre" formControlName="nombre" class="form-control" 
+                [ngClass]="{'is-invalid': usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched}">
+              <div *ngIf="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched" class="invalid-feedback">
+                <span *ngIf="usuarioForm.get('nombre')?.errors?.['required']">El nombre es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('nombre')?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
+              <input type="text" id="apellido" formControlName="apellido" class="form-control"
+                [ngClass]="{'is-invalid': usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched}">
+              <div *ngIf="usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched" class="invalid-feedback">
+                <span *ngIf="usuarioForm.get('apellido')?.errors?.['required']">El apellido es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('apellido')?.errors?.['pattern']">El apellido solo puede contener letras y espacios.</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="gmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+              <input type="email" id="gmail" formControlName="gmail" class="form-control"
+                [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched}">
+              <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback">
+                <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El correo electrónico es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Formato de correo electrónico inválido.</span>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid">
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna de seguridad y opciones -->
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-transparent border-0">
+          <h2 class="h5 fw-bold mb-0">Seguridad</h2>
+        </div>
+        <div class="card-body">
+          <!-- Formulario para cambio de contraseña -->
+          <div *ngIf="!cambiarContrasenna">
+            <p>Actualiza tu contraseña para mantener tu cuenta segura.</p>
+            <button class="btn btn-outline-primary" (click)="cambiarContrasenna = true">
+              Cambiar contraseña
+            </button>
+          </div>
+
+          <form *ngIf="cambiarContrasenna" [formGroup]="passwordForm" (submit)="verificarContrasenna()">
+            <div class="mb-3">
+              <label for="contrasennaActual" class="form-label">Contraseña actual <span class="text-danger">*</span></label>
+              <input type="password" id="contrasennaActual" formControlName="contrasennaActual" class="form-control"
+                [ngClass]="{'is-invalid': passwordForm.get('contrasennaActual')?.invalid && passwordForm.get('contrasennaActual')?.touched}">
+              <div *ngIf="passwordForm.get('contrasennaActual')?.invalid && passwordForm.get('contrasennaActual')?.touched" class="invalid-feedback">
+                <span *ngIf="passwordForm.get('contrasennaActual')?.errors?.['required']">Debes introducir tu contraseña actual.</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="nuevaContrasenna" class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+              <input type="password" id="nuevaContrasenna" formControlName="nuevaContrasenna" class="form-control"
+                [ngClass]="{'is-invalid': passwordForm.get('nuevaContrasenna')?.invalid && passwordForm.get('nuevaContrasenna')?.touched}">
+              <div *ngIf="passwordForm.get('nuevaContrasenna')?.invalid && passwordForm.get('nuevaContrasenna')?.touched" class="invalid-feedback">
+                <span *ngIf="passwordForm.get('nuevaContrasenna')?.errors?.['required']">Debes introducir una nueva contraseña.</span>
+                <span *ngIf="passwordForm.get('nuevaContrasenna')?.errors?.['pattern']">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</span>
+              </div>
+              <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmarContrasenna" class="form-label">Confirmar nueva contraseña <span class="text-danger">*</span></label>
+              <input type="password" id="confirmarContrasenna" formControlName="confirmarContrasenna" class="form-control"
+                [ngClass]="{'is-invalid': passwordForm.get('confirmarContrasenna')?.invalid && passwordForm.get('confirmarContrasenna')?.touched}">
+              <div *ngIf="passwordForm.get('confirmarContrasenna')?.invalid && passwordForm.get('confirmarContrasenna')?.touched" class="invalid-feedback">
+                <span *ngIf="passwordForm.get('confirmarContrasenna')?.errors?.['required']">Debes confirmar la nueva contraseña.</span>
+                <span *ngIf="passwordForm.get('confirmarContrasenna')?.errors?.['notMatch']">Las contraseñas no coinciden.</span>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelarCambioContrasenna()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
+                Actualizar contraseña
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

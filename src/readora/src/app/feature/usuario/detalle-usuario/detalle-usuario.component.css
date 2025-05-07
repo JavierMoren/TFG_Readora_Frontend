@@ -1,0 +1,24 @@
+.card {
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-header {
+  padding: 1.25rem 1.5rem;
+}
+
+.text-highlight {
+  color: var(--bs-primary);
+}
+
+/* Estilo para input deshabilitado más claro que el estándar */
+input[readonly], input[disabled] {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}

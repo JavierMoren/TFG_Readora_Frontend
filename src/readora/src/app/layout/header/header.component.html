@@ -51,10 +51,12 @@
                  <span class="material-icons small me-1">admin_panel_settings</span>Panel Admin
               </a>
               
-              <!-- Nombre de usuario -->
-              <span class="nav-link text-secondary">
-                <span class="material-icons small me-1">account_circle</span>{{ username }}
-              </span>
+              <!-- Enlace al perfil de usuario -->
+              <a class="nav-link text-secondary transition-all" 
+                 routerLink="/perfil" 
+                 routerLinkActive="fw-medium text-highlight">
+                 <span class="material-icons small me-1">account_circle</span>{{ username }}
+              </a>
               
               <!-- Botón simple de logout -->
               <a class="nav-link text-secondary transition-all" 
@@ -139,10 +141,15 @@
              data-bs-dismiss="offcanvas">
              <span class="material-icons small me-1">admin_panel_settings</span>Panel Admin
           </a>
-          <!-- Nombre de usuario -->
-          <span class="nav-link text-secondary">
-            <span class="material-icons small me-1">account_circle</span>{{ username }}
-          </span>
+          
+          <!-- Enlace al perfil de usuario versión móvil -->
+          <a class="nav-link text-secondary"
+             routerLink="/perfil"
+             routerLinkActive="fw-medium text-highlight"
+             data-bs-dismiss="offcanvas">
+             <span class="material-icons small me-1">account_circle</span>Mi Perfil
+          </a>
+          
           <!-- Botón simple de logout -->
           <a class="nav-link text-secondary" 
              href="#" 
