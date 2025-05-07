@@ -51,6 +51,9 @@ export class AdminLibrosComponent implements OnInit {
   selectedAutorId: number | null = null;
   showAutorSelectorModal: boolean = false;
 
+  // Rutas para imágenes predeterminadas
+  readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
+
   constructor(
     private librosService: LibroService,
     private autorService: AutorService,
@@ -401,6 +404,9 @@ export class AdminLibrosComponent implements OnInit {
    * @returns URL completa para acceder a la imagen
    */
   getImageUrl(path: string | null): string {
+    if (!path) {
+      return this.libroPlaceholder;
+    }
     return this.librosService.getImageUrl(path);
   }
 }

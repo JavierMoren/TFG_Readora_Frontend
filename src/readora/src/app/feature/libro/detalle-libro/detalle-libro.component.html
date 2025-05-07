@@ -22,14 +22,43 @@
         <div class="text-center p-3">
           <img [src]="getPortadaUrl(libro.portadaUrl)" 
                alt="Portada de {{ libro.titulo }}" 
-               class="img-fluid rounded book-cover">
+               class="book-cover-standard">
           
           <div class="mt-3 d-flex justify-content-center gap-2">
-            <button class="btn btn-primary btn-sm" (click)="agregarABiblioteca()" *ngIf="isLoggedIn">
-              <i class="bi bi-bookmark-plus"></i> Añadir a mi biblioteca
+            <!-- Botón para añadir a biblioteca (visible cuando no está en la biblioteca) -->
+            <button class="btn btn-primary btn-sm" 
+                    *ngIf="isLoggedIn && !enBiblioteca" 
+                    (click)="agregarABiblioteca()"
+                    [disabled]="agregando">
+              <ng-container *ngIf="!agregando">
+                <i class="bi bi-bookmark-plus me-1"></i> Añadir a mi biblioteca
+              </ng-container>
+              <ng-container *ngIf="agregando">
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Añadiendo...
+              </ng-container>
             </button>
-            <button class="btn btn-outline-secondary btn-sm" *ngIf="!isLoggedIn" routerLink="/api/v1/authenticate" [queryParams]="{returnUrl: '/libros/' + libroId}">
-              <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión para añadir
+            
+            <!-- Botón para eliminar de biblioteca (visible cuando está en la biblioteca) -->
+            <button class="btn btn-outline-danger btn-sm"
+                    *ngIf="isLoggedIn && enBiblioteca"
+                    (click)="eliminarDeColeccion()"
+                    [disabled]="eliminando">
+              <ng-container *ngIf="!eliminando">
+                <i class="bi bi-trash me-1"></i> Eliminar de mi biblioteca
+              </ng-container>
+              <ng-container *ngIf="eliminando">
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Eliminando...
+              </ng-container>
+            </button>
+            
+            <!-- Botón para iniciar sesión (solo visible cuando no hay sesión) -->
+            <button class="btn btn-outline-secondary btn-sm" 
+                    *ngIf="!isLoggedIn" 
+                    routerLink="/api/v1/authenticate" 
+                    [queryParams]="{returnUrl: '/libros/' + libroId}">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar sesión para añadir
             </button>
           </div>
         </div>

@@ -1,0 +1,247 @@
+/* Estilos para la biblioteca personal */
+.biblioteca-container {
+  padding: 2rem 0;
+}
+
+.seccion-titulo {
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+/* Grid para libros */
+.libros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Estilos para las tarjetas de libros */
+.libro-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.libro-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.libro-img-container {
+  position: relative;
+  height: 280px;
+  overflow: hidden;
+  background-color: #f8f9fa;
+}
+
+.libro-img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.3s ease;
+}
+
+.libro-card:hover .libro-img {
+  transform: scale(1.05);
+}
+
+/* Estilos específicos para las portadas de libros */
+.book-cover-biblioteca {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.3s ease;
+}
+
+.libro-card:hover .book-cover-biblioteca {
+  transform: scale(1.05);
+}
+
+.libro-estado {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.libro-info {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.libro-titulo {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  height: 2.8rem;
+}
+
+.libro-autor {
+  color: #6c757d;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.libro-meta {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.libro-valoracion {
+  margin-bottom: 0.5rem;
+}
+
+.libro-comentario {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  max-height: 4.5rem;
+}
+
+.libro-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.libro-actions button {
+  flex: 1;
+}
+
+/* Estilos para los filtros */
+.filtros-container {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.filtro-btn {
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.filtro-btn:hover {
+  transform: scale(1.05);
+}
+
+.filtro-btn-count {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #212529;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  text-align: center;
+  line-height: 1.5rem;
+  margin-left: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Estilos para el modal */
+.modal-custom {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-custom .modal-content {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-custom .modal-header {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+.modal-custom .modal-body {
+  padding: 1.5rem;
+}
+
+.modal-custom .modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+/* Estilos para las estrellas de valoración */
+.star-rating {
+  color: #ffc107;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+/* Estado sin libros */
+.sin-libros {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.sin-libros-icon {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .libros-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  
+  .libro-img-container {
+    height: 220px;
+  }
+  
+  .libro-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 576px) {
+  .filtro-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

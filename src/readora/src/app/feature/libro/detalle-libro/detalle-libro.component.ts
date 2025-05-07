@@ -1,171 +1,269 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { LibrosService } from '../../../core/services/libros.service';
+import { LibroService } from '../../../core/services/libro.service';
+import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
-import { NotificationService } from '../../../core/services/notification.service';
-import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Libro } from '../../../models/libro/libro.model';
 import { Autor } from '../../../models/autor/autor.model';
-import { forkJoin } from 'rxjs';
+import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
+import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model';
 
 @Component({
   selector: 'app-detalle-libro',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './detalle-libro.component.html',
-  styleUrl: './detalle-libro.component.css'
+  styleUrls: ['./detalle-libro.component.css']
 })
 export class DetalleLibroComponent implements OnInit {
+  libroId!: number;
   libro: Libro | null = null;
-  autores: Autor[] = [];
+  autores: Autor[] | null = null;
   loading: boolean = true;
   error: string | null = null;
-  libroId: number = 0;
-  
-  // Datos del usuario
-  usuarioId: number | null = null;
   isLoggedIn: boolean = false;
+  usuarioId: number | null = null;
+  enBiblioteca: boolean = false;
+  usuarioLibroId: number | null = null;
+  eliminando: boolean = false;
+  agregando: boolean = false;
+
+  // Rutas para imágenes predeterminadas
+  readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
+  readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
 
   constructor(
     private route: ActivatedRoute,
-    private librosService: LibrosService,
-    private storageService: StorageService,
+    private router: Router,
+    private libroService: LibroService,
+    private autorService: AutorService,
+    public storageService: StorageService,
+    private authService: AutenticacionService,
     private notificationService: NotificationService,
-    private usuarioLibroService: UsuarioLibroService,
-    private authService: AutenticacionService
-  ) {
-    console.log('[DetalleLibro] Componente creado');
-  }
+    private usuarioLibroService: UsuarioLibroService
+  ) { }
 
   ngOnInit(): void {
-    console.log('[DetalleLibro] Inicializando componente');
     // Verificar si el usuario está autenticado
-    this.authService.isLoggedIn().subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
-      console.log('[DetalleLibro] Estado de autenticación:', loggedIn ? 'Autenticado' : 'No autenticado');
-      if (loggedIn) {
-        this.authService.getUserInfo().subscribe({
-          next: (userData) => {
-            if (userData && userData.id) {
-              this.usuarioId = userData.id;
-              console.log('[DetalleLibro] ID de usuario obtenido:', userData.id);
-            }
-          },
-          error: (error) => {
-            console.error('[DetalleLibro] Error al obtener información del usuario', error);
-          }
-        });
+    this.authService.isLoggedIn().subscribe(isLoggedIn => {
+      this.isLoggedIn = isLoggedIn;
+      if (isLoggedIn) {
+        this.cargarDatosUsuario();
       }
     });
-  
+
+    // Obtener el ID del libro de la URL
     this.route.params.subscribe(params => {
-      this.libroId = +params['id']; // Guardamos el ID para poder usarlo en la plantilla
-      console.log('[DetalleLibro] Inicializando componente de detalle para el libro con ID:', this.libroId);
-      this.loadLibro(this.libroId);
+      this.libroId = +params['id'];
+      this.loadLibro();
     });
   }
 
-  loadLibro(id: number): void {
-    this.loading = true;
-    this.error = null;
-    console.log('[DetalleLibro] Cargando información del libro con ID:', id);
-
-    // Realizamos dos llamadas paralelas: una para el libro y otra para sus autores
-    forkJoin({
-      libro: this.librosService.getLibroById(id),
-      autores: this.librosService.getAutoresByLibroId(id)
-    }).subscribe({
-      next: (result) => {
-        this.libro = result.libro;
-        this.autores = result.autores;
-        this.loading = false;
-        console.log('[DetalleLibro] Libro cargado correctamente:', this.libro);
-        console.log('[DetalleLibro] Autores del libro cargados:', this.autores);
+  cargarDatosUsuario(): void {
+    this.authService.getUserInfo().subscribe({
+      next: (userData) => {
+        if (userData && userData.id) {
+          this.usuarioId = userData.id;
+          // Si ya tenemos el ID del libro, verificar si está en la biblioteca
+          if (this.libroId) {
+            this.verificarLibroEnBiblioteca();
+          }
+        }
       },
-      error: (err) => {
-        console.error('[DetalleLibro] Error al cargar el detalle del libro:', err);
-        this.error = 'No se pudo cargar la información completa del libro.';
-        this.loading = false;
-        this.notificationService.error('Error', {
-          description: 'No se pudo cargar la información del libro'
-        });
+      error: (error) => {
+        console.error('Error al obtener información del usuario', error);
       }
     });
-  }
-  
-  // Método para recargar el libro actual
-  reloadLibro(): void {
-    console.log('[DetalleLibro] Recargando información del libro');
-    this.loadLibro(this.libroId);
-  }
-  
-  // Método para obtener la URL completa de la imagen de portada
-  getPortadaUrl(path: string | null | undefined): string {
-    const url = this.storageService.getFullImageUrl(path || null);
-    console.log('[DetalleLibro] URL de portada generada:', url);
-    return url;
-  }
-  
-  // Método para obtener la URL completa de la imagen de autor
-  getAutorImageUrl(path: string | null | undefined): string {
-    if (!path) {
-      console.log('[DetalleLibro] Usando imagen predeterminada para autor');
-      return 'assets/images/default-author.jpg';
-    }
-    const url = this.storageService.getFullImageUrl(path);
-    console.log('[DetalleLibro] URL de imagen de autor generada:', url);
-    return url;
   }
 
   /**
-   * Añade el libro actual a la biblioteca del usuario
+   * Verifica si el libro actual está en la biblioteca del usuario
    */
+  verificarLibroEnBiblioteca(): void {
+    if (!this.usuarioId || !this.libroId) return;
+    
+    this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
+      next: (usuarioLibros) => {
+        // Buscar si el libro actual está en la lista de libros del usuario
+        const relacion = usuarioLibros?.find(ul => ul.libroId === this.libroId);
+        if (relacion) {
+          this.enBiblioteca = true;
+          this.usuarioLibroId = relacion.id ?? null;
+          console.log(`Libro encontrado en la biblioteca, ID relación: ${this.usuarioLibroId}`);
+        } else {
+          this.enBiblioteca = false;
+          this.usuarioLibroId = null;
+        }
+      },
+      error: (error) => {
+        console.error('Error al verificar si el libro está en la biblioteca', error);
+      }
+    });
+  }
+
+  loadLibro(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.libroService.getLibroById(this.libroId).subscribe({
+      next: (libro) => {
+        this.libro = libro;
+        // Cargar autores si están disponibles
+        this.cargarAutores();
+        // Si el usuario está logueado, verificar si el libro está en su biblioteca
+        if (this.isLoggedIn && this.usuarioId) {
+          this.verificarLibroEnBiblioteca();
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al cargar el libro', error);
+        this.error = 'No se pudo cargar el libro. Por favor, inténtelo de nuevo más tarde.';
+        this.loading = false;
+      }
+    });
+  }
+
+  cargarAutores(): void {
+    if (this.libro && this.libro.id) {
+      this.libroService.getAutoresByLibroId(this.libro.id).subscribe({
+        next: (autores: Autor[]) => {
+          this.autores = autores;
+          this.loading = false;
+        },
+        error: (error: any) => {
+          console.error('Error al cargar autores del libro', error);
+          this.loading = false;
+        }
+      });
+    } else {
+      this.loading = false;
+    }
+  }
+
+  getPortadaUrl(url: string | null | undefined): string {
+    if (!url) {
+      return this.libroPlaceholder;
+    }
+    return this.storageService.getFullImageUrl(url);
+  }
+
+  getAutorImageUrl(url: string | null | undefined): string {
+    if (!url) {
+      return this.autorPlaceholder;
+    }
+    return this.storageService.getFullImageUrl(url);
+  }
+
+  reloadLibro(): void {
+    this.loadLibro();
+  }
+
   agregarABiblioteca(): void {
-    console.log('[DetalleLibro] Intentando añadir libro a biblioteca');
     if (!this.isLoggedIn) {
-      console.log('[DetalleLibro] Usuario no autenticado, mostrando notificación');
-      this.notificationService.warning('Inicio de sesión requerido', {
-        description: 'Debes iniciar sesión para añadir libros a tu biblioteca'
+      this.router.navigate(['/api/v1/authenticate'], { 
+        queryParams: { returnUrl: `/libros/${this.libroId}` } 
       });
       return;
     }
 
-    if (!this.usuarioId || !this.libro) {
-      console.error('[DetalleLibro] Falta información necesaria: usuarioId o libro');
+    this.agregando = true;
+
+    this.authService.getUserInfo().subscribe({
+      next: (userData) => {
+        if (userData && userData.id && this.libro) {
+          const usuarioLibro: UsuarioLibro = {
+            id: undefined, // Usando undefined en lugar de null para cumplir con la interfaz
+            usuarioId: userData.id,
+            libroId: this.libro.id,
+            estadoLectura: 'PENDIENTE',
+            valoracion: null,
+            comentario: null,
+            fechaInicioLectura: null,
+            fechaFinLectura: null
+          };
+
+          this.usuarioLibroService.createUsuarioLibro(usuarioLibro).subscribe({
+            next: (response) => {
+              this.notificationService.success('Libro añadido', {
+                description: 'El libro se ha añadido a tu biblioteca personal'
+              });
+              // Actualizar el estado local
+              this.enBiblioteca = true;
+              this.usuarioLibroId = response?.id ? response.id : null;
+              this.agregando = false;
+            },
+            error: (err) => {
+              this.agregando = false;
+              // Verificar si es un error de duplicación
+              if (err.status === 409) {
+                this.notificationService.info('Libro duplicado', {
+                  description: 'Este libro ya está en tu biblioteca personal'
+                });
+                // Actualizar estado local
+                this.enBiblioteca = true;
+                this.verificarLibroEnBiblioteca(); // Obtener el ID de la relación
+              } else {
+                this.notificationService.error('Error', {
+                  description: 'No se pudo añadir el libro a tu biblioteca'
+                });
+              }
+            }
+          });
+        } else {
+          this.agregando = false;
+        }
+      },
+      error: (err) => {
+        this.agregando = false;
+        this.notificationService.error('Error', {
+          description: 'No se pudo verificar tu información de usuario'
+        });
+      }
+    });
+  }
+
+  /**
+   * Elimina el libro actual de la biblioteca personal del usuario
+   */
+  eliminarDeColeccion(): void {
+    if (!this.isLoggedIn || !this.usuarioLibroId) {
       return;
     }
     
-    const nuevoUsuarioLibro = {
-      usuarioId: this.usuarioId,
-      libroId: this.libro.id,
-      estadoLectura: 'PENDIENTE', // Por defecto se añade como pendiente
-      valoracion: null,
-      comentario: '',
-      fechaInicioLectura: null,
-      fechaFinLectura: null
-    };
-    
-    console.log('[DetalleLibro] Enviando solicitud para añadir libro:', nuevoUsuarioLibro);
-    this.usuarioLibroService.createUsuarioLibro(nuevoUsuarioLibro).subscribe({
-      next: (response) => {
-        console.log('[DetalleLibro] Libro añadido correctamente a la biblioteca', response);
-        this.notificationService.success('Libro añadido', {
-          description: 'El libro ha sido añadido a tu biblioteca con éxito'
+    // Mostrar confirmación
+    this.notificationService.confirm({
+      title: '¿Eliminar libro?',
+      text: '¿Estás seguro de eliminar este libro de tu biblioteca?',
+      icon: 'warning',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(resultado => {
+      if (resultado) {
+        this.eliminando = true;
+        
+        this.usuarioLibroService.deleteUsuarioLibro(this.usuarioLibroId!).subscribe({
+          next: () => {
+            console.log('Libro eliminado correctamente de la biblioteca');
+            this.notificationService.success('Libro eliminado', {
+              description: 'El libro ha sido eliminado de tu biblioteca'
+            });
+            
+            // Actualizar estado local
+            this.enBiblioteca = false;
+            this.usuarioLibroId = null;
+            this.eliminando = false;
+          },
+          error: (error) => {
+            console.error('Error al eliminar libro de la biblioteca', error);
+            this.eliminando = false;
+            this.notificationService.error('Error', {
+              description: 'No se pudo eliminar el libro de tu biblioteca'
+            });
+          }
         });
-      },
-      error: (error) => {
-        console.error('[DetalleLibro] Error al añadir libro a la biblioteca', error);
-        if (error.status === 409) {
-          this.notificationService.warning('Libro ya en biblioteca', {
-            description: 'Este libro ya está en tu biblioteca'
-          });
-        } else {
-          this.notificationService.error('Error', {
-            description: 'No se pudo añadir el libro a la biblioteca'
-          });
-        }
       }
     });
   }

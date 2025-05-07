@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="100" fill="#f8f9fa"/>
+  <circle cx="100" cy="80" r="40" fill="#dee2e6" stroke="#adb5bd" stroke-width="2"/>
+  <path d="M100,120 C60,120 40,150 40,190 L160,190 C160,150 140,120 100,120" fill="#dee2e6" stroke="#adb5bd" stroke-width="2"/>
+  <text x="100" y="230" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057">Sin imagen</text>
+</svg>

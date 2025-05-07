@@ -42,11 +42,18 @@ export class BibliotecaPersonalComponent implements OnInit {
     { valor: 'TERMINADO', etiqueta: 'Leído' },
     { valor: 'ABANDONADO', etiqueta: 'Abandonado' }
   ];
+  
+  // Rutas para imágenes predeterminadas
+  readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
+  readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
+
+  // Indicador de carga
+  cargando: boolean = false;
 
   constructor(
     private usuarioLibroService: UsuarioLibroService,
     private libroService: LibroService,
-    private storageService: StorageService,
+    public storageService: StorageService,
     private authService: AutenticacionService,
     private notificationService: NotificationService
   ) {
@@ -263,12 +270,17 @@ export class BibliotecaPersonalComponent implements OnInit {
     }).then(resultado => {
       if (resultado) {
         console.log('[BibliotecaPersonal] Confirmación recibida, eliminando libro de la biblioteca');
+        
+        // Eliminar inmediatamente de la lista local para actualizar la UI
+        this.eliminarLibroDeListas(libro);
+        
         this.usuarioLibroService.deleteUsuarioLibro(libro.usuarioLibroId).subscribe({
           next: () => {
             console.log('[BibliotecaPersonal] Libro eliminado correctamente');
             this.notificationService.success('Libro eliminado', {
               description: 'El libro ha sido eliminado de tu biblioteca'
             });
+            // También recargamos los datos para asegurar sincronización completa
             this.cargarLibrosUsuario();
           },
           error: (error) => {
@@ -276,12 +288,35 @@ export class BibliotecaPersonalComponent implements OnInit {
             this.notificationService.error('Error', {
               description: 'No se pudo eliminar el libro de tu biblioteca'
             });
+            // Si hay un error, recargamos para restaurar el estado original
+            this.cargarLibrosUsuario();
           }
         });
       } else {
         console.log('[BibliotecaPersonal] Eliminación cancelada por el usuario');
       }
     });
+  }
+  
+  /**
+   * Elimina un libro de todas las listas locales
+   */
+  eliminarLibroDeListas(libro: any): void {
+    // Eliminar de la lista correspondiente según su estado
+    switch(libro.estadoLectura) {
+      case 'LEYENDO':
+        this.librosLeyendo = this.librosLeyendo.filter(l => l.usuarioLibroId !== libro.usuarioLibroId);
+        break;
+      case 'PENDIENTE':
+        this.librosPendientes = this.librosPendientes.filter(l => l.usuarioLibroId !== libro.usuarioLibroId);
+        break;
+      case 'TERMINADO':
+        this.librosTerminados = this.librosTerminados.filter(l => l.usuarioLibroId !== libro.usuarioLibroId);
+        break;
+      case 'ABANDONADO':
+        this.librosAbandonados = this.librosAbandonados.filter(l => l.usuarioLibroId !== libro.usuarioLibroId);
+        break;
+    }
   }
 
   /**
@@ -293,9 +328,22 @@ export class BibliotecaPersonalComponent implements OnInit {
   }
 
   /**
-   * Obtiene la URL completa de la imagen
+   * Obtiene la URL completa de la imagen con placeholder si no existe
    */
   getImageUrl(imagen: string | null): string {
+    if (!imagen) {
+      return this.libroPlaceholder;
+    }
+    return this.storageService.getFullImageUrl(imagen);
+  }
+  
+  /**
+   * Obtiene la URL de imagen de autor con placeholder si no existe
+   */
+  getAutorImageUrl(imagen: string | null): string {
+    if (!imagen) {
+      return this.autorPlaceholder;
+    }
     return this.storageService.getFullImageUrl(imagen);
   }
 
@@ -312,5 +360,39 @@ export class BibliotecaPersonalComponent implements OnInit {
    */
   estrellasPorValoracion(valoracion: number | null): number[] {
     return valoracion ? Array(valoracion).fill(0) : [];
+  }
+  
+  /**
+   * Obtiene el color de fondo según el estado del libro
+   */
+  getColorEstado(estado: string): string {
+    switch(estado) {
+      case 'LEYENDO': return 'bg-primary';
+      case 'PENDIENTE': return 'bg-warning text-dark';
+      case 'TERMINADO': return 'bg-success';
+      case 'ABANDONADO': return 'bg-secondary';
+      default: return 'bg-light text-dark';
+    }
+  }
+  
+  /**
+   * Obtiene la etiqueta para mostrar según el estado del libro
+   */
+  getEtiquetaEstado(estado: string): string {
+    switch(estado) {
+      case 'LEYENDO': return 'Leyendo';
+      case 'PENDIENTE': return 'Por leer';
+      case 'TERMINADO': return 'Leído';
+      case 'ABANDONADO': return 'Abandonado';
+      default: return estado;
+    }
+  }
+  
+  /**
+   * Trunca un texto largo para mostrar una versión corta
+   */
+  truncarTexto(texto: string | null, longitud: number = 100): string {
+    if (!texto) return '';
+    return texto.length > longitud ? texto.substring(0, longitud) + '...' : texto;
   }
 }

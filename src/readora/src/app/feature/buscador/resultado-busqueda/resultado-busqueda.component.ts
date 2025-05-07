@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { StorageService } from '../../../core/services/storage.service';
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
@@ -11,7 +11,7 @@ import { NotificationService } from '../../../core/services/notification.service
   templateUrl: './resultado-busqueda.component.html',
   styleUrls: ['./resultado-busqueda.component.css'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   providers: [StorageService]
 })
 export class ResultadoBusquedaComponent implements OnChanges {
@@ -27,6 +27,12 @@ export class ResultadoBusquedaComponent implements OnChanges {
   usuarioId: number | null = null;
   isLoggedIn = false;
   librosAgregando: Set<number> = new Set(); // Para controlar los botones de "Añadiendo..."
+  librosEliminando: Set<number> = new Set(); // Para controlar los botones de "Eliminando..."
+  librosEnBiblioteca: Map<number, number> = new Map(); // Mapa de ID libro -> ID relación usuario-libro
+
+  // Rutas para imágenes predeterminadas
+  readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
+  readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
 
   constructor(
     private router: Router,
@@ -52,6 +58,9 @@ export class ResultadoBusquedaComponent implements OnChanges {
       next: (userData) => {
         if (userData && userData.id) {
           this.usuarioId = userData.id;
+          if (this.isBooks && this.results.length > 0) {
+            this.verificarLibrosEnBiblioteca();
+          }
         }
       },
       error: (error) => {
@@ -66,12 +75,59 @@ export class ResultadoBusquedaComponent implements OnChanges {
       this.calcularPaginacion();
     }
     
-    // Si hay cambios en los resultados, hacer scroll hacia arriba
+    // Si hay cambios en los resultados, hacer scroll hacia arriba y verificar libros en biblioteca
     if (changes['results'] && !changes['results'].firstChange) {
       window.scrollTo(0, 0);
+      if (this.isLoggedIn && this.usuarioId && this.isBooks && this.results.length > 0) {
+        this.verificarLibrosEnBiblioteca();
+      }
     }
   }
   
+  /**
+   * Verifica qué libros de los resultados ya están en la biblioteca del usuario
+   */
+  verificarLibrosEnBiblioteca(): void {
+    if (!this.usuarioId) return;
+    
+    console.log('[ResultadoBusqueda] Verificando libros en biblioteca del usuario');
+    
+    this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
+      next: (usuarioLibros) => {
+        // Limpiar el mapa actual
+        this.librosEnBiblioteca.clear();
+        
+        // Llenar el mapa con los libros que el usuario ya tiene
+        if (usuarioLibros && usuarioLibros.length > 0) {
+          usuarioLibros.forEach(usuarioLibro => {
+            if (usuarioLibro.id !== undefined) {
+              this.librosEnBiblioteca.set(usuarioLibro.libroId, usuarioLibro.id);
+            }
+          });
+          
+          console.log(`[ResultadoBusqueda] Usuario tiene ${this.librosEnBiblioteca.size} libros en su biblioteca`);
+        }
+      },
+      error: (error) => {
+        console.error('[ResultadoBusqueda] Error al verificar libros en biblioteca', error);
+      }
+    });
+  }
+  
+  /**
+   * Comprueba si un libro ya está en la biblioteca del usuario
+   */
+  libroEstaEnBiblioteca(libroId: number): boolean {
+    return this.librosEnBiblioteca.has(libroId);
+  }
+  
+  /**
+   * Obtiene el ID de la relación usuario-libro para un libro específico
+   */
+  getUsuarioLibroId(libroId: number): number | undefined {
+    return this.librosEnBiblioteca.get(libroId);
+  }
+
   /**
    * Calcula la paginación basándose en el total de items y el tamaño de página
    */
@@ -206,17 +262,77 @@ export class ResultadoBusquedaComponent implements OnChanges {
     });
   }
 
+  /**
+   * Elimina un libro de la biblioteca personal del usuario
+   * @param libro El libro a eliminar
+   * @param event El evento del click para evitar navegación
+   */
+  eliminarDeColeccion(libro: any, event: Event): void {
+    event.stopPropagation(); // Evitar que se abra la página de detalles
+    
+    if (!this.isLoggedIn || !this.usuarioId) {
+      return;
+    }
+    
+    const usuarioLibroId = this.getUsuarioLibroId(libro.id);
+    if (!usuarioLibroId) {
+      return;
+    }
+    
+    console.log(`[ResultadoBusqueda] Eliminando libro ${libro.id} de la biblioteca, relación: ${usuarioLibroId}`);
+    
+    // Mostrar confirmación
+    this.notificationService.confirm({
+      title: '¿Eliminar libro?',
+      text: '¿Estás seguro de eliminar este libro de tu biblioteca?',
+      icon: 'warning',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(resultado => {
+      if (resultado) {
+        // Marcar como "eliminando" para deshabilitar el botón
+        this.librosEliminando.add(libro.id);
+        
+        this.usuarioLibroService.deleteUsuarioLibro(usuarioLibroId as number).subscribe({
+          next: () => {
+            console.log('[ResultadoBusqueda] Libro eliminado correctamente de la biblioteca');
+            this.notificationService.success('Libro eliminado', {
+              description: 'El libro ha sido eliminado de tu biblioteca'
+            });
+            
+            // Actualizar estado local
+            this.librosEnBiblioteca.delete(libro.id);
+            this.librosEliminando.delete(libro.id);
+          },
+          error: (error) => {
+            console.error('[ResultadoBusqueda] Error al eliminar libro de la biblioteca', error);
+            this.librosEliminando.delete(libro.id);
+            this.notificationService.error('Error', {
+              description: 'No se pudo eliminar el libro de tu biblioteca'
+            });
+          }
+        });
+      }
+    });
+  }
+
   getImageUrl(item: any): string {
     if (this.isBooks) {
+      if (!item.portadaUrl) {
+        return this.libroPlaceholder;
+      }
       return this.storageService.getFullImageUrl(item.portadaUrl);
     }
-    return this.storageService.getFullImageUrl(null);
+    return this.libroPlaceholder;
   }
 
   getAuthorImageUrl(item: any): string {
     if (!this.isBooks) {
+      if (!item.fotoUrl) {
+        return this.autorPlaceholder;
+      }
       return this.storageService.getFullImageUrl(item.fotoUrl);
     }
-    return this.storageService.getFullImageUrl('autor/default');
+    return this.autorPlaceholder;
   }
 }

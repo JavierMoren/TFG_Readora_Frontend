@@ -6,6 +6,6 @@ export interface Autor {
     fechaFallecimiento?: Date;
     nacionalidad?: string;
     biografia?: string;
-    fotoUrl?: string;
+    fotoUrl?: string | null;  // Permitir null además de undefined
     libros?: any[];
 }

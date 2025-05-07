@@ -42,6 +42,24 @@ export class StorageService {
     formData.append('file', file, file instanceof File ? file.name : 'autor.jpg');
     return this.uploadFile(formData, 'autor');
   }
+  
+  /**
+   * Alias para uploadLibroImage para mantener compatibilidad con código existente
+   * @param file Archivo de imagen a subir
+   * @returns Observable con la respuesta del servidor
+   */
+  uploadLibroPortada(file: File): Observable<any> {
+    return this.uploadLibroImage(file);
+  }
+  
+  /**
+   * Alias para uploadAutorImage para mantener compatibilidad con código existente
+   * @param file Archivo de imagen a subir
+   * @returns Observable con la respuesta del servidor
+   */
+  uploadAutorFoto(file: File): Observable<any> {
+    return this.uploadAutorImage(file);
+  }
 
   /**
    * Construye la URL completa para un recurso de imagen

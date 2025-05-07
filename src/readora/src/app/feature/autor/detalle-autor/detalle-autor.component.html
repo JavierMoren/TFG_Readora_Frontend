@@ -21,9 +21,9 @@
         <!-- Foto del autor -->
         <div class="col-md-3">
           <div class="text-center p-3">
-            <img [src]="getImageUrl(autor.fotoUrl || null)" 
+            <img [src]="getImageUrl(autor.fotoUrl)" 
                  alt="Foto de {{ autor.nombre }}" 
-                 class="img-fluid rounded-circle author-photo">
+                 class="author-photo rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
           </div>
         </div>
         
@@ -82,7 +82,7 @@
             <!-- Añadimos enlace al detalle del libro -->
             <a [routerLink]="['/libros', libro.id]" class="text-decoration-none">
               <div class="card h-100 book-card">
-                <img [src]="getImageUrl(libro.portadaUrl)" 
+                <img [src]="getBookImageUrl(libro.portadaUrl)" 
                      alt="Portada de {{ libro.titulo }}"
                      class="card-img-top book-cover-sm">
                 <div class="card-body">

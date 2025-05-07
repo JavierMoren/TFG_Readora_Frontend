@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+  <rect width="200" height="300" fill="#f8f9fa"/>
+  <rect x="10" y="10" width="180" height="280" rx="5" ry="5" fill="#e9ecef" stroke="#dee2e6" stroke-width="2"/>
+  <path d="M40,75 L160,75 M40,125 L160,125 M40,175 L160,175 M40,225 L100,225" stroke="#adb5bd" stroke-width="2" stroke-linecap="round"/>
+  <text x="100" y="50" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057">Sin portada</text>
+</svg>

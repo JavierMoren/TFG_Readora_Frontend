@@ -93,10 +93,10 @@
         <div class="row mb-3">
           <div class="col-12 col-md-6">
             <label for="portada" class="form-label">Portada del libro</label>
-            <div class="d-flex gap-3 align-items-start">
+            <div class="preview-container">
               <!-- Vista previa de la imagen actual si existe -->
-              <div *ngIf="previewPortadaUrl" class="mb-2" style="max-width: 100px;">
-                <img [src]="previewPortadaUrl" alt="Vista previa de portada" class="img-fluid rounded">
+              <div *ngIf="previewPortadaUrl" class="mb-2">
+                <img [src]="previewPortadaUrl" alt="Vista previa de portada" class="img-fluid">
               </div>
               <div class="flex-grow-1">
                 <input type="file" class="form-control" id="portada" (change)="onFileSelected($event)" accept="image/*">
@@ -169,11 +169,11 @@
           <td class="small text-secondary">
             {{libro.id}}
           </td>
+          <!-- Portada -->
           <td>
-            <img [src]="libro.portadaUrl ? getImageUrl(libro.portadaUrl) : '/assets/placeholder-book.jpg'" 
+            <img [src]="libro.portadaUrl ? getImageUrl(libro.portadaUrl) : libroPlaceholder" 
               alt="Portada de {{libro.titulo}}" 
-              class="img-thumbnail" 
-              style="height: 50px; width: auto;">
+              class="img-thumbnail">
           </td>
           <td>
             {{libro.titulo}}
