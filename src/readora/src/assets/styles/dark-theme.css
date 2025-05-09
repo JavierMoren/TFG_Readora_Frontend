@@ -1,31 +1,31 @@
 /* Variables del tema - Modo oscuro */
 [data-theme="dark"] {
-  --primary-color: #4D6BFE; /* Color principal del logo */
-  --primary-light: #7791FE; /* Versión más clara */
-  --primary-dark: #3A58D6; /* Versión más oscura */
-  --secondary-color: #2b3035;
-  --accent-color: #FF7B7B;
-  --text-primary: #e9ecef;
-  --text-secondary: #adb5bd; /* Más claro para mejorar contraste */
-  --text-muted: #9ca3af; /* Más claro para mejorar contraste */
-  --background-light: #1e2124; /* Gris oscuro en lugar de negro puro */
-  --background-subtle: #2a2e33;
-  --border-color: #3a4047;
-  --component-bg: #2b3035;
-  --header-bg: #1e2124;
-  --footer-bg: #1a1d20;
-  --card-bg: #2a2e33;
-  --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  --input-bg: #2a2e33;
-  --input-border: #3a4047;
-  --table-bg: #2b3035;
-  --table-header-bg: #2a2e33;
-  --table-hover-bg: #343a40;
-  --modal-bg: #2a2e33;
-  --success-color: #4ade80;
-  --danger-color: #f87171;
-  --warning-color: #fbbf24;
-  --info-color: #60a5fa;
+  --primary-color: #5E7CFF; /* Color principal del logo - más brillante */
+  --primary-light: #8AA2FF; /* Versión más clara y brillante */
+  --primary-dark: #4D68EA; /* Versión más oscura pero aún vibrante */
+  --secondary-color: #2d3338;
+  --accent-color: #FF8F8F; /* Más suave y vibrante */
+  --text-primary: #f1f5f9; /* Más brillante para mejor legibilidad */
+  --text-secondary: #bbc5d0; /* Más claro para mejor contraste */
+  --text-muted: #a8b3c0; /* Más claro para mejor contraste */
+  --background-light: #222528; /* Gris oscuro más cálido */
+  --background-subtle: #2f353a;
+  --border-color: #414a54; /* Más claro para mejor definición */
+  --component-bg: #2d3338;
+  --header-bg: #222528;
+  --footer-bg: #1c2024; /* Ligeramente más cálido */
+  --card-bg: #2f353a;
+  --card-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  --input-bg: #2d3338;
+  --input-border: #414a54;
+  --table-bg: #2d3338;
+  --table-header-bg: #2f353a;
+  --table-hover-bg: #373e45; /* Más claro para mejor feedback */
+  --modal-bg: #2f353a;
+  --success-color: #57E68E; /* Verde más vibrante */
+  --danger-color: #FF8585; /* Rojo más suave */
+  --warning-color: #FFD066; /* Amarillo más visible pero suave */
+  --info-color: #73B4FF; /* Azul más brillante */
   --transition-speed: 0.3s;
 }
 
@@ -120,6 +120,13 @@ html[data-theme="dark"] .admin-content table td {
 [data-theme="dark"] .card {
   background-color: var(--card-bg);
   border-color: var(--border-color);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme="dark"] .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
 }
 
 [data-theme="dark"] .card-header,
@@ -135,22 +142,35 @@ html[data-theme="dark"] .admin-content table td {
   background-color: var(--input-bg);
   border-color: var(--input-border);
   color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
 [data-theme="dark"] .form-control:focus,
 [data-theme="dark"] .form-select:focus,
 [data-theme="dark"] .form-check-input:focus {
   border-color: var(--primary-light);
-  background-color: var(--input-bg);
+  background-color: rgba(94, 124, 255, 0.05);
   color: var(--text-primary);
+  box-shadow: 0 0 0 3px rgba(94, 124, 255, 0.15);
 }
 
 [data-theme="dark"] .form-control::placeholder {
   color: var(--text-muted);
+  opacity: 0.7;
 }
 
 [data-theme="dark"] .form-label {
   color: var(--text-primary);
+  font-weight: 500;
+}
+
+[data-theme="dark"] .form-text {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* Tablas */
@@ -158,28 +178,48 @@ html[data-theme="dark"] .admin-content table td {
   color: var(--text-secondary);
   border-color: var(--border-color);
   background-color: var(--table-bg) !important;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 [data-theme="dark"] .table tr {
   background-color: var(--table-bg) !important;
+  transition: background-color 0.2s ease;
 }
 
 [data-theme="dark"] .table td {
   background-color: var(--table-bg) !important;
+  padding: 12px 16px;
+  vertical-align: middle;
 }
 
 [data-theme="dark"] .table thead th {
   color: var(--text-primary);
   background-color: var(--table-header-bg) !important;
+  border-bottom: 2px solid var(--primary-dark);
+  padding: 14px 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
 }
 
 [data-theme="dark"] .table tbody tr:hover {
-  background-color: var(--table-hover-bg);
+  background-color: var(--table-hover-bg) !important;
+}
+
+[data-theme="dark"] .table tbody tr:hover td {
+  background-color: var(--table-hover-bg) !important;
 }
 
 [data-theme="dark"] .table td, 
 [data-theme="dark"] .table th {
   border-color: var(--border-color);
+}
+
+/* Mejora para tablas en admin */
+[data-theme="dark"] .admin-content .table {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
 
 /* Dropdowns */
@@ -206,24 +246,73 @@ html[data-theme="dark"] .admin-content table td {
 [data-theme="dark"] .modal-content {
   background-color: var(--modal-bg);
   border-color: var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  overflow: hidden;
 }
 
-[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-header {
+  border-color: var(--border-color);
+  background-color: var(--background-subtle);
+  border-bottom: 2px solid var(--primary-dark);
+  padding: 16px 20px;
+}
+
+[data-theme="dark"] .modal-header h5 {
+  font-weight: 600;
+  color: var(--primary-light);
+}
+
 [data-theme="dark"] .modal-footer {
   border-color: var(--border-color);
   background-color: var(--background-subtle);
+  padding: 16px 20px;
+}
+
+[data-theme="dark"] .modal-body {
+  padding: 20px;
 }
 
 /* Botones */
 [data-theme="dark"] .btn-outline-secondary {
   border-color: var(--border-color);
   color: var(--text-primary);
+  transition: all 0.2s ease;
 }
 
 [data-theme="dark"] .btn-outline-secondary:hover {
   background-color: var(--background-subtle);
-  border-color: var(--text-secondary);
-  color: var(--text-primary);
+  border-color: var(--primary-light);
+  color: var(--primary-light);
+  box-shadow: 0 2px 8px rgba(94, 124, 255, 0.2);
+}
+
+[data-theme="dark"] .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-primary:focus {
+  background-color: var(--primary-light);
+  border-color: var(--primary-light);
+  box-shadow: 0 2px 10px rgba(94, 124, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+  color: #222528;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+  color: #222528;
+  font-weight: 500;
 }
 
 [data-theme="dark"] .btn-close {
@@ -260,51 +349,73 @@ html[data-theme="dark"] .admin-content table td {
 
 /* Toasts en modo oscuro */
 [data-theme="dark"] .toast {
-  background-color: var(--component-bg);
+  background-color: rgba(45, 51, 56, 0.95);
   color: var(--text-primary);
   border-color: var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  border: none;
+  overflow: hidden;
 }
 
 [data-theme="dark"] .toast-header {
-  background-color: var(--background-subtle);
+  background-color: rgba(47, 53, 58, 0.95);
   color: var(--text-primary);
   border-color: var(--border-color);
+  padding: 12px 16px;
+  font-weight: 600;
 }
 
 [data-theme="dark"] .toast-body {
-  background-color: var(--component-bg);
+  background-color: transparent;
   color: var(--text-secondary);
+  padding: 16px;
 }
 
-/* Para toasts específicos por tipo - Mejorados para mejor visibilidad con colores más brillantes */
+/* Para toasts específicos por tipo - Diseño moderno con gradientes sutiles */
 [data-theme="dark"] .toast.bg-success,
 [data-theme="dark"] .toast.bg-danger,
 [data-theme="dark"] .toast.bg-warning,
 [data-theme="dark"] .toast.bg-info {
-  background-color: var(--component-bg) !important;
-  border-left: 5px solid;
+  background: var(--component-bg) !important;
   position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
 }
 
-/* Estilo mejorado para toast de éxito en modo oscuro - Verde más brillante */
-[data-theme="dark"] .toast.bg-success {
-  border-left-color: #4ade80;
+[data-theme="dark"] .toast.bg-success::before,
+[data-theme="dark"] .toast.bg-danger::before,
+[data-theme="dark"] .toast.bg-warning::before,
+[data-theme="dark"] .toast.bg-info::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
-/* Estilo mejorado para toast de error en modo oscuro - Rojo más brillante */
-[data-theme="dark"] .toast.bg-danger {
-  border-left-color: #f87171;
+/* Estilo mejorado para toast de éxito en modo oscuro */
+[data-theme="dark"] .toast.bg-success::before {
+  background: linear-gradient(90deg, var(--success-color), #6EFFA9);
 }
 
-/* Estilo mejorado para toast de advertencia en modo oscuro - Amarillo más brillante */
-[data-theme="dark"] .toast.bg-warning {
-  border-left-color: #fbbf24;
+/* Estilo mejorado para toast de error en modo oscuro */
+[data-theme="dark"] .toast.bg-danger::before {
+  background: linear-gradient(90deg, var(--danger-color), #FFA5A5);
 }
 
-/* Estilo mejorado para toast de información en modo oscuro - Azul más brillante */
-[data-theme="dark"] .toast.bg-info {
-  border-left-color: #60a5fa;
+/* Estilo mejorado para toast de advertencia en modo oscuro */
+[data-theme="dark"] .toast.bg-warning::before {
+  background: linear-gradient(90deg, var(--warning-color), #FFDF8A);
+}
+
+/* Estilo mejorado para toast de información en modo oscuro */
+[data-theme="dark"] .toast.bg-info::before {
+  background: linear-gradient(90deg, var(--info-color), #95C8FF);
 }
 
 /* Mejoras de accesibilidad para contrastes en texto */
@@ -318,12 +429,40 @@ html[data-theme="dark"] .admin-content table td {
 
 /* Biblioteca, estante de libros */
 [data-theme="dark"] .libro-titulo {
-  color: #e9ecef;
+  color: var(--text-primary);
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+[data-theme="dark"] .libro-card:hover .libro-titulo {
+  color: var(--primary-light);
 }
 
 [data-theme="dark"] .libro-autor,
 [data-theme="dark"] .libro-meta {
-  color: #adb5bd;
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .libro-card {
+  transition: all 0.3s ease;
+  background: linear-gradient(145deg, var(--card-bg), var(--background-light));
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .libro-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .libro-cover {
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .libro-card:hover .libro-cover {
+  transform: scale(1.03);
 }
 
 /* Home - Cuadrado del fondo en tema oscuro */
@@ -389,4 +528,47 @@ html[data-theme="dark"] .admin-content table td {
 [data-theme="dark"] .biografia,
 [data-theme="dark"] .sinopsis {
   color: #adb5bd;
+}
+
+/* Scroll personalizado para tema oscuro */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background-color: var(--background-light);
+  border-radius: 10px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--primary-dark), var(--primary-color));
+  border-radius: 10px;
+  border: 3px solid var(--background-light);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(var(--primary-color), var(--primary-light));
+}
+
+/* Efecto de enfoque/desenfoque al pasar por encima de elementos interactivos */
+[data-theme="dark"] .nav-item,
+[data-theme="dark"] .btn,
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .book-cover,
+[data-theme="dark"] .author-photo,
+[data-theme="dark"] .libro-card {
+  filter: brightness(0.95);
+  transition: filter 0.3s ease;
+}
+
+[data-theme="dark"] .nav-item:hover,
+[data-theme="dark"] .btn:hover,
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .book-cover:hover,
+[data-theme="dark"] .author-photo:hover,
+[data-theme="dark"] .libro-card:hover {
+  filter: brightness(1.05);
 }
