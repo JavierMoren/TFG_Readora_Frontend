@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LibrosService } from '../../core/services/libros.service';
 import { AutorService } from '../../core/services/autor.service';
-import { ResultadoBusquedaComponent } from './resultado-busqueda/resultado-busqueda.component';
+import { ResultadoBusquedaComponent, PageChangeEvent } from './resultado-busqueda/resultado-busqueda.component';
 
 @Component({
   selector: 'app-buscador',
@@ -112,11 +112,19 @@ export class BuscadorComponent implements OnInit {
       });
   }
 
-  pageChanged(page: number): void {
+  pageChanged(event: PageChangeEvent): void {
+    // Obtenemos la página desde el evento
+    const page = event.page;
+    
+    // Si hay un cambio en el tamaño de página, lo actualizamos
+    if (event.pageSize !== undefined && event.pageSize !== this.pageSize) {
+      this.pageSize = event.pageSize;
+    }
+    
     console.log(`[Buscador] Cambiando a página: ${page + 1} (anterior: ${this.currentPage + 1})`);
     console.log(`[Buscador] DEBUG: Contenido actual de results antes de cambiar:`, this.results);
     
-    if (this.currentPage !== page) {
+    if (this.currentPage !== page || event.pageSize !== undefined) {
       this.currentPage = page;
       this.loading = true; // Mostrar indicador de carga
       

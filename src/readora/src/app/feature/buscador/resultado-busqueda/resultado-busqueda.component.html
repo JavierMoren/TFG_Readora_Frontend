@@ -75,28 +75,73 @@
   </div>
   
   <!-- Paginación -->
-  <nav aria-label="Navegación de páginas" class="mt-4">
-    <ul class="pagination justify-content-center">
-      <li class="page-item" [ngClass]="{'disabled': currentPage === 0}">
-        <button class="page-link" (click)="changePage(currentPage - 1)" aria-label="Anterior">
-          <span aria-hidden="true">&laquo;</span>
-        </button>
-      </li>
+  <div *ngIf="totalPages > 0" class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
+    <!-- Información de paginación -->
+    <div class="text-secondary small">
+      Mostrando {{ results.length ? (currentPage * pageSize + 1) : 0 }} a 
+      {{ results.length ? Math.min((currentPage + 1) * pageSize, totalItems) : 0 }} 
+      de {{ totalItems }} resultados
+    </div>
+    
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <!-- Selector de tamaño de página -->
+      <div class="d-flex align-items-center">
+        <span class="text-secondary me-2 small">Mostrar:</span>
+        <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" 
+                [ngModel]="pageSize" (ngModelChange)="pageSize = $event; changePageSize()">
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+      </div>
       
-      <ng-container *ngFor="let page of pages">
-        <li *ngIf="page !== -1" class="page-item" [ngClass]="{'active': page === currentPage}">
-          <button class="page-link" (click)="changePage(page)">{{ page + 1 }}</button>
-        </li>
-        <li *ngIf="page === -1" class="page-item disabled">
-          <span class="page-link">...</span>
-        </li>
-      </ng-container>
-      
-      <li class="page-item" [ngClass]="{'disabled': currentPage === totalPages - 1 || totalPages === 0}">
-        <button class="page-link" (click)="changePage(currentPage + 1)" aria-label="Siguiente">
-          <span aria-hidden="true">&raquo;</span>
-        </button>
-      </li>
-    </ul>
-  </nav>
+      <!-- Paginación -->
+      <nav aria-label="Navegación de resultados">
+        <ul class="pagination pagination-sm mb-0">
+          <!-- Botón Anterior -->
+          <li class="page-item" [class.disabled]="currentPage === 0">
+            <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">
+              <span class="material-icons small">navigate_before</span>
+            </button>
+          </li>
+          
+          <!-- Primera página siempre visible -->
+          <li class="page-item" [class.active]="currentPage === 0">
+            <button class="page-link" (click)="changePage(0)">1</button>
+          </li>
+          
+          <!-- Elipsis inicial si estamos lejos del inicio -->
+          <li class="page-item disabled" *ngIf="currentPage > 2">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Páginas cercanas a la actual (máximo 3 páginas visibles) -->
+          <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
+            <li class="page-item" [class.active]="currentPage === i + 1" 
+                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
+              <button class="page-link" (click)="changePage(i + 1)">{{ i + 2 }}</button>
+            </li>
+          </ng-container>
+          
+          <!-- Elipsis final si estamos lejos del final -->
+          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Última página siempre visible si hay más de una página -->
+          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
+            <button class="page-link" (click)="changePage(totalPages - 1)">{{ totalPages }}</button>
+          </li>
+          
+          <!-- Botón Siguiente -->
+          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+            <button class="page-link" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+              <span class="material-icons small">navigate_next</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
 </div>

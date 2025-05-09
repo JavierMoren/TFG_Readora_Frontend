@@ -1,17 +1,24 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { StorageService } from '../../../core/services/storage.service';
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
+// Interfaz para el evento de cambio de página
+export interface PageChangeEvent {
+  page: number;
+  pageSize?: number;
+}
+
 @Component({
   selector: 'app-resultado-busqueda',
   templateUrl: './resultado-busqueda.component.html',
   styleUrls: ['./resultado-busqueda.component.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   providers: [StorageService]
 })
 export class ResultadoBusquedaComponent implements OnChanges {
@@ -20,7 +27,7 @@ export class ResultadoBusquedaComponent implements OnChanges {
   @Input() totalItems: number = 0;
   @Input() currentPage: number = 0;
   @Input() pageSize: number = 10;
-  @Output() pageChange = new EventEmitter<number>();
+  @Output() pageChange = new EventEmitter<PageChangeEvent>();
 
   totalPages: number = 0;
   pages: number[] = [];
@@ -34,6 +41,9 @@ export class ResultadoBusquedaComponent implements OnChanges {
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
   readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
 
+  // Exponiendo Math para su uso en el template
+  Math = Math;
+  
   constructor(
     private router: Router,
     private storageService: StorageService,
@@ -70,9 +80,9 @@ export class ResultadoBusquedaComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Si hay cambios en totalItems o pageSize, recalcular la paginación
+    // Si hay cambios en totalItems o pageSize, recalcular el número total de páginas
     if (changes['totalItems'] || changes['pageSize']) {
-      this.calcularPaginacion();
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize);
     }
     
     // Si hay cambios en los resultados, hacer scroll hacia arriba y verificar libros en biblioteca
@@ -187,8 +197,20 @@ export class ResultadoBusquedaComponent implements OnChanges {
   changePage(page: number): void {
     console.log(`[ResultadoBusqueda] Usuario seleccionó página: ${page + 1}`);
     if (page !== this.currentPage && page >= 0 && page < this.totalPages) {
-      this.pageChange.emit(page);
+      this.pageChange.emit({ page });
     }
+  }
+  
+  /**
+   * Cambia el tamaño de página y reinicia a la primera página
+   */
+  changePageSize(): void {
+    console.log(`[ResultadoBusqueda] Usuario cambió tamaño de página a: ${this.pageSize}`);
+    // Al cambiar el tamaño de página, enviamos un objeto con la información
+    this.pageChange.emit({
+      page: 0,
+      pageSize: Number(this.pageSize) // Aseguramos que sea número
+    });
   }
 
   /**
