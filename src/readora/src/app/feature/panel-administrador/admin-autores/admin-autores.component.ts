@@ -15,7 +15,6 @@ import { Autor } from '../../../models/autor/autor.model';
 })
 export class AdminAutoresComponent implements OnInit {
   autores: Autor[] = [];
-  displayedAutores: Autor[] = [];
   currentAutor: any = {
     nombre: '',
     apellido: '',
@@ -30,13 +29,21 @@ export class AdminAutoresComponent implements OnInit {
   isEditing: boolean = false;
   isUploading: boolean = false;
   
-  // Paginación
-  pageSize: number = 12;
-  currentPage: number = 1;
+  // Propiedades para la paginación del servidor
+  currentPage: number = 0; // Paginación basada en 0 para el backend
+  pageSize: number = 10;
+  totalElements: number = 0;
   totalPages: number = 0;
+  sortBy: string = 'id';
+  sortDirection: string = 'asc';
+  
+  // Exponer Math para usarlo en la plantilla
+  Math = Math;
   
   // Rutas para imágenes predeterminadas
   readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
+
+  // La función getPagesArray() se ha eliminado ya que ahora usamos una paginación simplificada
 
   constructor(
     private autorService: AutorService,
@@ -45,48 +52,73 @@ export class AdminAutoresComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadAutores();
+    this.loadAutoresPaginados();
   }
 
+  loadAutoresPaginados(): void {
+    this.autorService.getAllAutoresPaginados(this.currentPage, this.pageSize, this.sortBy, this.sortDirection).subscribe({
+      next: (data) => {
+        this.autores = data.content;
+        this.totalElements = data.totalElements;
+        this.totalPages = data.totalPages;
+      },
+      error: (error) => {
+        console.error('Error al cargar autores paginados', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar los autores'
+        });
+      }
+    });
+  }
+
+  /**
+   * Cambia a la página especificada
+   * @param page - Número de página (0-based)
+   */
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.loadAutoresPaginados();
+    }
+  }
+
+  /**
+   * Cambia el ordenamiento de los datos
+   * @param sortBy - Campo por el que ordenar
+   */
+  changeSort(sortBy: string): void {
+    if (this.sortBy === sortBy) {
+      // Si ya está ordenando por este campo, cambia la dirección
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = sortBy;
+      this.sortDirection = 'asc';
+    }
+    this.currentPage = 0; // Vuelve a la primera página
+    this.loadAutoresPaginados();
+  }
+
+  /**
+   * Cambia el tamaño de página
+   * @param size - Nuevo tamaño de página
+   */
+  changePageSize(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0; // Vuelve a la primera página
+    this.loadAutoresPaginados();
+  }
+
+  // Método legacy para cargar todos los autores, ahora es un respaldo
   loadAutores(): void {
     this.autorService.getAllAutores().subscribe({
       next: (autores) => {
         this.autores = autores;
-        this.calculateTotalPages();
-        this.updateDisplayedAutores();
       },
       error: (error) => {
         console.error('Error al cargar autores', error);
         this.notificationService.error('Error', { description: 'No se pudo cargar la lista de autores' });
       }
     });
-  }
-
-  calculateTotalPages(): void {
-    this.totalPages = Math.ceil(this.autores.length / this.pageSize);
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = 1;
-    }
-  }
-
-  updateDisplayedAutores(): void {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.displayedAutores = this.autores.slice(start, end);
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updateDisplayedAutores();
-    }
-  }
-
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updateDisplayedAutores();
-    }
   }
 
   prepareCreateAutor(): void {
@@ -155,7 +187,7 @@ export class AdminAutoresComponent implements OnInit {
             this.notificationService.success('Éxito', { description: 'Autor actualizado correctamente' });
             this.showForm = false;
             this.isUploading = false;
-            this.loadAutores();
+            this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
             console.error('Error al actualizar autor', error);
@@ -169,7 +201,7 @@ export class AdminAutoresComponent implements OnInit {
             this.notificationService.success('Éxito', { description: 'Autor creado correctamente' });
             this.showForm = false;
             this.isUploading = false;
-            this.loadAutores();
+            this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
             console.error('Error al crear autor', error);
@@ -210,7 +242,7 @@ export class AdminAutoresComponent implements OnInit {
         this.autorService.deleteAutor(id).subscribe({
           next: () => {
             this.notificationService.success('Éxito', { description: 'Autor eliminado correctamente' });
-            this.loadAutores();
+            this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
             console.error('Error al eliminar autor', error);

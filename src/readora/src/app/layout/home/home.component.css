@@ -1,0 +1,356 @@
+/* Estilos generales de la página de inicio */
+.home-container {
+  overflow-x: hidden;
+}
+
+/* Sección principal (Hero) */
+.hero-section {
+  padding: 5rem 0;
+  position: relative;
+  background-color: var(--background-light);
+}
+
+.hero-content {
+  min-height: 500px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  animation: fadeInUp 1s ease;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  max-width: 500px;
+  line-height: 1.6;
+  animation: fadeInUp 1s ease 0.2s both;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  animation: fadeInUp 1s ease 0.4s both;
+}
+
+.hero-actions .btn {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.hero-actions .icon {
+  margin-right: 0.5rem;
+}
+
+/* Animación de libros flotando */
+.hero-image {
+  position: relative;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  animation: fadeIn 1s ease;
+}
+
+.floating-books {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+.book {
+  position: absolute;
+  border-radius: 5px;
+  overflow: hidden;
+  transform-origin: center bottom;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.book-cover {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+}
+
+.book-1 {
+  width: 180px;
+  height: 260px;
+  top: 10%;
+  left: 10%;
+  background-color: var(--primary-color);
+  transform: rotate(-5deg);
+  z-index: 3;
+  animation: float 4s infinite;
+}
+
+.book-1 .book-cover {
+  background-image: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.book-2 {
+  width: 160px;
+  height: 240px;
+  top: 20%;
+  left: 40%;
+  background-color: var(--accent-color);
+  transform: rotate(8deg);
+  z-index: 2;
+  animation: float 4.5s 0.5s infinite;
+}
+
+.book-2 .book-cover {
+  background-image: linear-gradient(45deg, #4a93e0, var(--primary-light));
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.book-3 {
+  width: 170px;
+  height: 250px;
+  top: 40%;
+  left: 25%;
+  background-color: #5e9ae2;
+  transform: rotate(2deg);
+  z-index: 1;
+  animation: float 5s 1s infinite;
+}
+
+.book-3 .book-cover {
+  background-image: linear-gradient(45deg, #2b5b8c, var(--primary-dark));
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Animación de flotación */
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(var(--rotation, 0deg));
+  }
+  50% {
+    transform: translateY(-15px) rotate(var(--rotation, 0deg));
+  }
+  100% {
+    transform: translateY(0px) rotate(var(--rotation, 0deg));
+  }
+}
+
+/* Sección de características */
+.features-section {
+  padding: 5rem 0;
+  background-color: var(--background-subtle);
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.divider {
+  width: 80px;
+  height: 4px;
+  background-color: var(--primary-color);
+  border-radius: 2px;
+  margin-bottom: 3rem;
+}
+
+.feature-card {
+  height: 100%;
+  padding: 2rem;
+  background-color: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  text-align: center;
+  transition: all var(--transition-speed) ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  width: 70px;
+  height: 70px;
+  background-color: rgba(58, 110, 165, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: all var(--transition-speed) ease;
+}
+
+.feature-card:hover .feature-icon {
+  background-color: var(--primary-color);
+}
+
+.feature-icon .material-icons {
+  font-size: 2rem;
+  color: var(--primary-color);
+  transition: all var(--transition-speed) ease;
+}
+
+.feature-card:hover .feature-icon .material-icons {
+  color: white;
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.feature-text {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* Sección de llamado a la acción (CTA) */
+.cta-section {
+  padding: 5rem 0;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+}
+
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.cta-text {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.cta-button {
+  background-color: white;
+  color: var(--primary-color);
+  border: none;
+  font-weight: 500;
+  padding: 0.75rem 2rem;
+  display: inline-flex;
+  align-items: center;
+  transition: all var(--transition-speed) ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  background-color: white;
+  color: var(--primary-dark);
+}
+
+.cta-button .icon {
+  margin-right: 0.5rem;
+  transition: transform var(--transition-speed) ease;
+}
+
+.cta-button:hover .icon {
+  transform: translateX(3px);
+}
+
+/* Animaciones adicionales */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .hero-content {
+    text-align: center;
+  }
+
+  .hero-text {
+    margin-bottom: 3rem;
+  }
+  
+  .hero-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .hero-image {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 0;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .features-section,
+  .cta-section {
+    padding: 3rem 0;
+  }
+  
+  .feature-card {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Modo oscuro específico */
+[data-theme="dark"] .feature-icon {
+  background-color: rgba(86, 135, 189, 0.15);
+}
+
+[data-theme="dark"] .cta-section {
+  background: linear-gradient(135deg, var(--primary-color), #2a5280);
+}
+
+[data-theme="dark"] .cta-button {
+  color: var(--primary-dark);
+}
+
+[data-theme="dark"] .cta-button:hover {
+  color: var(--primary-color);
+}

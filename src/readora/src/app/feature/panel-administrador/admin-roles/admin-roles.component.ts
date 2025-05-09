@@ -25,6 +25,17 @@ export class AdminRolesComponent implements OnInit {
   
   // Propiedades para el modal de confirmación
   roleIdToDelete: number | null = null;
+  
+  // Propiedades para la paginación
+  currentPage: number = 0;
+  pageSize: number = 10;
+  totalElements: number = 0;
+  totalPages: number = 0;
+  sortBy: string = 'id';
+  sortDirection: string = 'asc';
+  
+  // Exponer Math para usarlo en la plantilla
+  Math = Math;
 
   constructor(
     private roleService: RoleService,
@@ -32,11 +43,68 @@ export class AdminRolesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getAllRoles();
+    this.getRolesPaginados();
+  }
+
+  /**
+   * Obtiene los roles paginados mediante el servicio
+   */
+  getRolesPaginados(): void {
+    this.roleService.getRolesPaginados(this.currentPage, this.pageSize, this.sortBy, this.sortDirection).subscribe({
+      next: (data) => {
+        this.roles = data.content;
+        this.totalElements = data.totalElements;
+        this.totalPages = data.totalPages;
+      },
+      error: (error) => {
+        console.error('Error al cargar roles paginados', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar los roles'
+        });
+      }
+    });
+  }
+
+  /**
+   * Cambia a la página especificada
+   * @param page - Número de página (0-based)
+   */
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.getRolesPaginados();
+    }
+  }
+
+  /**
+   * Cambia el ordenamiento de los datos
+   * @param sortBy - Campo por el que ordenar
+   */
+  changeSort(sortBy: string): void {
+    if (this.sortBy === sortBy) {
+      // Si ya está ordenando por este campo, cambia la dirección
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = sortBy;
+      this.sortDirection = 'asc';
+    }
+    this.currentPage = 0; // Vuelve a la primera página
+    this.getRolesPaginados();
+  }
+
+  /**
+   * Cambia el tamaño de página
+   * @param size - Nuevo tamaño de página
+   */
+  changePageSize(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0; // Vuelve a la primera página
+    this.getRolesPaginados();
   }
 
   /**
    * Obtiene todos los roles del sistema mediante el servicio
+   * Método de respaldo que mantiene la compatibilidad con el código existente
    */
   getAllRoles(): void {
     this.roleService.getAllRoles().subscribe({
@@ -109,7 +177,7 @@ export class AdminRolesComponent implements OnInit {
         this.notificationService.success('Éxito', { 
           description: 'Rol creado correctamente'
         });
-        this.getAllRoles();
+        this.getRolesPaginados(); // Usar paginación en lugar de getAllRoles
         this.cancelEdit();
       },
       error: (error) => {
@@ -130,7 +198,7 @@ export class AdminRolesComponent implements OnInit {
         this.notificationService.success('Éxito', { 
           description: 'Rol actualizado correctamente'
         });
-        this.getAllRoles();
+        this.getRolesPaginados(); // Usar paginación en lugar de getAllRoles
         this.cancelEdit();
       },
       error: (error) => {
@@ -174,7 +242,7 @@ export class AdminRolesComponent implements OnInit {
           this.notificationService.success('Eliminado', { 
             description: 'El rol ha sido eliminado correctamente'
           });
-          this.getAllRoles();
+          this.getRolesPaginados(); // Usar paginación en lugar de getAllRoles
           this.roleIdToDelete = null;
         },
         error: (error) => {

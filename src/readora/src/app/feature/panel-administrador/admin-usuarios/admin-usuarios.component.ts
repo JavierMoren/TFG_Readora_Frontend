@@ -31,6 +31,17 @@ export class AdminUsuariosComponent implements OnInit {
   
   // Variables para el modal de confirmación
   userIdToDelete: number | null = null;
+  
+  // Propiedades para la paginación
+  currentPage: number = 0;
+  pageSize: number = 10;
+  totalElements: number = 0;
+  totalPages: number = 0;
+  sortBy: string = 'id';
+  sortDirection: string = 'asc';
+  
+  // Exponer Math para usarlo en la plantilla
+  Math = Math;
 
   constructor(
     private usuarioService: UsuarioService,
@@ -40,10 +51,66 @@ export class AdminUsuariosComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('AdminUsuariosComponent inicializado');
-    // Carga todos los usuarios al inicializar el componente
-    this.getAllUsuarios();
     // Inicializar formularios
     this.initForms();
+    // Carga los usuarios paginados al inicializar el componente
+    this.getUsuariosPaginados();
+  }
+
+  /**
+   * Obtiene los usuarios paginados mediante el servicio
+   */
+  getUsuariosPaginados(): void {
+    this.usuarioService.getUsuariosPaginados(this.currentPage, this.pageSize, this.sortBy, this.sortDirection).subscribe({
+      next: (data) => {
+        this.usuarios = data.content;
+        this.totalElements = data.totalElements;
+        this.totalPages = data.totalPages;
+      },
+      error: (error) => {
+        console.error('Error al cargar usuarios paginados', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar los usuarios'
+        });
+      }
+    });
+  }
+
+  /**
+   * Cambia a la página especificada
+   * @param page - Número de página (0-based)
+   */
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.getUsuariosPaginados();
+    }
+  }
+
+  /**
+   * Cambia el ordenamiento de los datos
+   * @param sortBy - Campo por el que ordenar
+   */
+  changeSort(sortBy: string): void {
+    if (this.sortBy === sortBy) {
+      // Si ya está ordenando por este campo, cambia la dirección
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = sortBy;
+      this.sortDirection = 'asc';
+    }
+    this.currentPage = 0; // Vuelve a la primera página
+    this.getUsuariosPaginados();
+  }
+
+  /**
+   * Cambia el tamaño de página
+   * @param size - Nuevo tamaño de página
+   */
+  changePageSize(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 0; // Vuelve a la primera página
+    this.getUsuariosPaginados();
   }
 
   /**
@@ -91,6 +158,7 @@ export class AdminUsuariosComponent implements OnInit {
 
   /**
    * Obtiene todos los usuarios del sistema mediante el servicio
+   * Método de respaldo que mantiene la compatibilidad con el código existente
    */
   getAllUsuarios(): void {
     console.log('Solicitando usuarios al servicio...');
@@ -227,7 +295,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.notificationService.success('Éxito', { 
           description: 'Usuario creado correctamente'
         });
-        this.getAllUsuarios();
+        this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
         this.cancelEdit();
       },
       error: (error) => {
@@ -250,7 +318,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.notificationService.success('Éxito', { 
           description: 'Usuario actualizado correctamente'
         });
-        this.getAllUsuarios();
+        this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
         this.cancelEdit();
       },
       error: (error) => {
@@ -310,7 +378,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.notificationService.success('Éxito', { 
           description: 'Usuario y contraseña actualizados correctamente'
         });
-        this.getAllUsuarios();
+        this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
         this.cancelEdit();
       },
       error: (error) => {
@@ -356,7 +424,7 @@ export class AdminUsuariosComponent implements OnInit {
           this.notificationService.success('Eliminado', { 
             description: 'El usuario ha sido eliminado'
           });
-          this.getAllUsuarios();
+          this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
         },
         error: (error) => {
           console.error('Error al eliminar usuario', error);

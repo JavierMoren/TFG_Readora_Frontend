@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Role } from '../../models/role/role.model';
@@ -15,6 +15,18 @@ export class RoleService {
 
   getAllRoles(): Observable<Role[]> {
     return this.http.get<Role[]>(this.apiUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getRolesPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+    
+    return this.http.get<any>(`${this.apiUrl}/paginados`, { params }).pipe(
       catchError(this.handleError)
     );
   }

@@ -7,4 +7,7 @@ export interface UsuarioLibro {
     comentario: string | null;
     fechaInicioLectura: Date | null;
     fechaFinLectura: Date | null;
+    // Campos adicionales para mostrar información del usuario y libro
+    usuarioNombre?: string;
+    libroTitulo?: string;
 }

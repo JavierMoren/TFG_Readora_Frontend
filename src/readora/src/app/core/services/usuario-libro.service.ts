@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { UsuarioLibro } from '../../models/usuario-libro/usuario-libro.model';
@@ -15,6 +15,18 @@ export class UsuarioLibroService {
 
   getAllUsuarioLibros(): Observable<UsuarioLibro[]> {
     return this.http.get<UsuarioLibro[]>(this.apiUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUsuarioLibrosPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+    
+    return this.http.get<any>(`${this.apiUrl}/paginados`, { params }).pipe(
       catchError(this.handleError)
     );
   }
@@ -50,6 +62,26 @@ export class UsuarioLibroService {
    */
   getLibrosByUsuarioId(usuarioId: number): Observable<UsuarioLibro[]> {
     return this.http.get<UsuarioLibro[]>(`${this.apiUrl}/usuario/${usuarioId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene las relaciones usuario-libro paginadas con información detallada (nombres de usuario y libro)
+   * @param page Número de página (base 0)
+   * @param size Tamaño de página
+   * @param sort Campo para ordenar
+   * @param direction Dirección del ordenamiento ('asc' o 'desc')
+   * @returns Observable con los resultados paginados con detalles ampliados
+   */
+  getUsuarioLibrosDetalladosPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort)
+      .set('direction', direction);
+    
+    return this.http.get<any>(`${this.apiUrl}/detallados/paginados`, { params }).pipe(
       catchError(this.handleError)
     );
   }

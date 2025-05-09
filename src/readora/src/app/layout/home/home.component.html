@@ -1,42 +1,97 @@
-<div class="section-padding">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8 text-center mb-5">
-        <h1 class="display-4 fw-bold mb-4 text-highlight">
-          Bienvenido a Readora
-        </h1>
-        <p class="fs-5 text-secondary mx-auto" style="max-width: 700px;">
-          Tu plataforma minimalista para gestionar lecturas y descubrir nuevos mundos a través de los libros
-        </p>
-        <div class="border-2 border-top border-primary mx-auto mt-4" style="width: 80px;"></div>
-      </div>
-    </div>
-    
-    <div class="row justify-content-center">
-      <div class="col-md-7 col-lg-5">
-        <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
-          <div class="card-body p-4 p-lg-5">
-            <div class="d-grid gap-4">
-              <a routerLink="/api/v1/register" 
-                class="btn btn-outline-primary d-flex align-items-center justify-content-center py-3 transition-all">
-                <span class="material-icons me-2" style="font-size: 1.5rem;">person_add</span>
-                <span class="fw-medium">Registro</span>
-              </a>
-              
-              <a routerLink="/api/v1/authenticate" 
-                class="btn btn-outline-primary d-flex align-items-center justify-content-center py-3 transition-all">
-                <span class="material-icons me-2" style="font-size: 1.5rem;">login</span>
-                <span class="fw-medium">Autenticación</span>
-              </a>
+<div class="home-container">
+  <!-- Sección principal (hero) -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row align-items-center hero-content">
+        <div class="col-lg-6 hero-text">
+          <h1 class="hero-title">
+            Tu biblioteca personal en <span class="text-highlight">Readora</span>
+          </h1>
+          <p class="hero-subtitle">
+            Gestiona tus lecturas, descubre nuevos títulos y lleva un registro de tu viaje literario de manera simple y elegante.
+          </p>
+          <div class="hero-actions">
+            <a routerLink="/api/v1/register" class="btn btn-primary btn-lg me-3">
+              <span class="material-icons icon">person_add</span>
+              Crear cuenta
+            </a>
+            <a routerLink="/api/v1/authenticate" class="btn btn-outline-primary btn-lg">
+              <span class="material-icons icon">login</span>
+              Iniciar sesión
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-6 hero-image">
+          <div class="floating-books">
+            <div class="book book-1">
+              <div class="book-cover shadow-lg"></div>
             </div>
-            
-            <div class="mt-4 text-center">
-              <p class="text-secondary small">Plataforma de gestión de lecturas</p>
-              <p class="text-secondary smaller mt-1">© 2025 Readora</p>
+            <div class="book book-2">
+              <div class="book-cover shadow-lg"></div>
+            </div>
+            <div class="book book-3">
+              <div class="book-cover shadow-lg"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- Sección de características -->
+  <section class="features-section">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center mb-5">
+          <h2 class="section-title">Lo que te ofrece <span class="text-highlight">Readora</span></h2>
+          <div class="divider mx-auto"></div>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <span class="material-icons">bookmark</span>
+            </div>
+            <h3 class="feature-title">Organiza tu colección</h3>
+            <p class="feature-text">Clasifica tus libros en categorías y estados de lectura para tener un control completo.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <span class="material-icons">auto_stories</span>
+            </div>
+            <h3 class="feature-title">Control de progreso</h3>
+            <p class="feature-text">Realiza un seguimiento de tus lecturas, valoraciones y comentarios personales.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <span class="material-icons">search</span>
+            </div>
+            <h3 class="feature-title">Descubre nuevos libros</h3>
+            <p class="feature-text">Encuentra nuevos títulos y autores para ampliar tu horizonte literario.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección de acción final -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+          <h2 class="cta-title">¿Listo para organizar tu biblioteca?</h2>
+          <p class="cta-text">Comienza tu experiencia con Readora hoy mismo</p>
+          <a routerLink="/api/v1/register" class="btn btn-primary btn-lg mt-4 cta-button">
+            <span class="material-icons icon">arrow_forward</span>
+            Empieza ahora
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>

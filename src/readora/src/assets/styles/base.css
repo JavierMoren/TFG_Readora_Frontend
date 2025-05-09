@@ -1,22 +1,32 @@
 /* Variables del tema - Modo claro (predeterminado) */
 :root {
-  --primary-color: #3a6ea5;
+  --primary-color: #4D6BFE; /* Color azul del logo como base */
+  --primary-light: #6F88FE; /* Versión más clara */
+  --primary-dark: #3A58D6; /* Versión más oscura */
   --secondary-color: #f8f9fa;
   --accent-color: #FF6B6B;
   --text-primary: #212529;
   --text-secondary: #6c757d;
+  --text-muted: #8a94a6;
   --background-light: #ffffff;
-  --background-subtle: #f9f9f9;
-  --border-color: #dee2e6;
+  --background-subtle: #f9f9fa;
+  --border-color: #e6eaf0;
   --component-bg: #ffffff;
   --header-bg: #ffffff;
   --footer-bg: #f8f9fa;
   --card-bg: #ffffff;
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
   --input-bg: #ffffff;
+  --input-border: #e6eaf0;
   --table-bg: #ffffff;
   --table-header-bg: #f8f9fa;
   --table-hover-bg: #f9fafb;
   --modal-bg: #ffffff;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --transition-speed: 0.3s;
 }
 
 /* Estilos base */

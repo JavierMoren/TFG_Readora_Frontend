@@ -1,0 +1,81 @@
+/* Estilos para el panel de administración - simplificado y funcional */
+
+.admin-container {
+  padding: 20px 0;
+}
+
+.admin-sidebar {
+  background-color: var(--background-subtle);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+/* Navegación vertical más simple y funcional */
+.admin-nav {
+  padding: 10px 0;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  margin-bottom: 5px;
+  transition: all 0.2s ease;
+}
+
+.admin-nav-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+.admin-nav-link.active {
+  background-color: rgba(77, 107, 254, 0.1);
+  border-left-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.admin-nav-icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+/* Contenedor principal del contenido */
+.admin-content {
+  background-color: var(--card-bg);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  min-height: 500px;
+}
+
+/* Encabezado del panel */
+.admin-header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.admin-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+}
+
+.admin-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Modo oscuro */
+[data-theme="dark"] .admin-sidebar {
+  background-color: var(--component-bg);
+}
+
+[data-theme="dark"] .admin-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}

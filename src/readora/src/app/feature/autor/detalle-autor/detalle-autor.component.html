@@ -15,50 +15,71 @@
   </div>
 
   <!-- Detalles del autor -->
-  <div class="author-detail" *ngIf="autor && !loading">
-    <div class="card shadow-sm mb-4">
+  <div class="autor-detalle-container" *ngIf="autor && !loading">
+    <div class="card shadow-sm autor-card-principal">
       <div class="row g-0">
         <!-- Foto del autor -->
-        <div class="col-md-3">
-          <div class="text-center p-3">
+        <div class="col-md-4 col-lg-3">
+          <div class="autor-foto-container">
             <img [src]="getImageUrl(autor.fotoUrl)" 
-                 alt="Foto de {{ autor.nombre }}" 
-                 class="author-photo rounded-circle" style="width: 200px; height: 200px; object-fit: cover;">
+                 alt="Foto de {{ autor.nombre }} {{ autor.apellido }}" 
+                 class="autor-foto">
           </div>
         </div>
         
         <!-- Información básica del autor -->
-        <div class="col-md-9">
-          <div class="card-body">
-            <h1 class="card-title">{{ autor.nombre }} {{ autor.apellido }}</h1>
+        <div class="col-md-8 col-lg-9">
+          <div class="card-body autor-info-container">
+            <h1 class="autor-nombre-titulo">{{ autor.nombre }} {{ autor.apellido }}</h1>
             
-            <div class="mb-3">
-              <span class="badge bg-primary me-2">Autor</span>
-              <span class="badge bg-secondary" *ngIf="autor.fechaNacimiento">
-                {{ autor.fechaNacimiento | date:'yyyy' }} - {{ autor.fechaFallecimiento ? (autor.fechaFallecimiento | date:'yyyy') : 'Presente' }}
+            <div class="autor-badges">
+              <span class="badge autor-badge">Autor</span>
+              <span class="badge year-badge" *ngIf="autor.fechaNacimiento">
+                <span class="material-icons small">event</span>
+                {{ autor.fechaNacimiento | date:'yyyy' }} 
+                <ng-container *ngIf="autor.fechaFallecimiento">
+                  - {{ autor.fechaFallecimiento | date:'yyyy' }}
+                </ng-container>
+                <ng-container *ngIf="!autor.fechaFallecimiento">
+                  - Presente
+                </ng-container>
               </span>
-              <span class="badge bg-info ms-2" *ngIf="libros?.length">
+              <span class="badge obras-badge" *ngIf="libros?.length">
+                <span class="material-icons small">auto_stories</span>
                 {{ libros.length }} {{ libros.length === 1 ? 'obra' : 'obras' }}
               </span>
             </div>
             
-            <div class="author-details mt-4">
-              <table class="table">
-                <tbody>
-                  <tr *ngIf="autor.nacionalidad">
-                    <th>Nacionalidad:</th>
-                    <td>{{ autor.nacionalidad }}</td>
-                  </tr>
-                  <tr *ngIf="autor.fechaNacimiento">
-                    <th>Fecha de nacimiento:</th>
-                    <td>{{ autor.fechaNacimiento | date:'dd/MM/yyyy' }}</td>
-                  </tr>
-                  <tr *ngIf="autor.fechaFallecimiento">
-                    <th>Fecha de fallecimiento:</th>
-                    <td>{{ autor.fechaFallecimiento | date:'dd/MM/yyyy' }}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="autor-meta">
+              <div class="meta-item" *ngIf="autor.nacionalidad">
+                <span class="meta-icon">
+                  <span class="material-icons">public</span>
+                </span>
+                <div class="meta-content">
+                  <span class="meta-label">Nacionalidad</span>
+                  <span class="meta-value">{{ autor.nacionalidad }}</span>
+                </div>
+              </div>
+              
+              <div class="meta-item" *ngIf="autor.fechaNacimiento">
+                <span class="meta-icon">
+                  <span class="material-icons">cake</span>
+                </span>
+                <div class="meta-content">
+                  <span class="meta-label">Nacimiento</span>
+                  <span class="meta-value">{{ autor.fechaNacimiento | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+              
+              <div class="meta-item" *ngIf="autor.fechaFallecimiento">
+                <span class="meta-icon">
+                  <span class="material-icons">offline_bolt</span>
+                </span>
+                <div class="meta-content">
+                  <span class="meta-label">Fallecimiento</span>
+                  <span class="meta-value">{{ autor.fechaFallecimiento | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -66,29 +87,46 @@
     </div>
     
     <!-- Biografía -->
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm biografia-card mt-4">
       <div class="card-body">
-        <h3 class="card-title">Biografía</h3>
-        <p class="card-text biografia">{{ autor.biografia || 'No hay información biográfica disponible.' }}</p>
+        <h2 class="seccion-titulo">
+          <span class="material-icons seccion-icon">history_edu</span>
+          <span>Biografía</span>
+        </h2>
+        <p class="biografia-texto">{{ autor.biografia || 'No hay información biográfica disponible para este autor.' }}</p>
       </div>
     </div>
     
     <!-- Libros del autor -->
-    <div class="card shadow-sm mb-4" *ngIf="libros?.length">
-      <div class="card-body">
-        <h3 class="card-title">Obras</h3>
-        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+    <div class="obras-section mt-4" *ngIf="libros && libros.length > 0">
+      <h2 class="seccion-titulo">
+        <span class="material-icons seccion-icon">auto_stories</span>
+        <span>Obras</span>
+      </h2>
+      
+      <div class="obras-container mt-3">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
           <div class="col" *ngFor="let libro of libros">
-            <!-- Añadimos enlace al detalle del libro -->
-            <a [routerLink]="['/libros', libro.id]" class="text-decoration-none">
-              <div class="card h-100 book-card">
-                <img [src]="getBookImageUrl(libro.portadaUrl)" 
-                     alt="Portada de {{ libro.titulo }}"
-                     class="card-img-top book-cover-sm">
-                <div class="card-body">
-                  <h6 class="card-title">{{ libro.titulo }}</h6>
-                  <p class="card-text text-muted small">{{ libro.anioPublicacion }}</p>
-                  <span class="badge bg-secondary" *ngIf="libro.genero">{{ libro.genero }}</span>
+            <a [routerLink]="['/libros', libro.id]" class="libro-card-link">
+              <div class="libro-card">
+                <div class="libro-portada-container">
+                  <img [src]="getBookImageUrl(libro.portadaUrl)" 
+                      alt="Portada de {{ libro.titulo }}"
+                      class="libro-portada">
+                  <div class="libro-overlay">
+                    <span class="ver-libro-texto">Ver libro</span>
+                    <span class="material-icons ver-libro-icon">visibility</span>
+                  </div>
+                </div>
+                <div class="libro-info">
+                  <h3 class="libro-titulo">{{ libro.titulo }}</h3>
+                  <div class="libro-meta-info" *ngIf="libro.anioPublicacion">
+                    <span class="material-icons small">event</span>
+                    <span class="libro-anio">{{ libro.anioPublicacion | date: 'yyyy' }}</span>
+                  </div>
+                  <div class="libro-genero" *ngIf="libro.genero">
+                    <span class="genero-badge">{{ libro.genero }}</span>
+                  </div>
                 </div>
               </div>
             </a>
@@ -98,8 +136,14 @@
     </div>
     
     <!-- Mensaje si no hay libros -->
-    <div class="alert alert-info" *ngIf="!libros?.length">
-      No hay información sobre obras de este autor.
+    <div class="sin-obras-mensaje mt-4" *ngIf="!libros || !libros.length">
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <span class="material-icons sin-obras-icon">menu_book</span>
+          <h3 class="sin-obras-titulo">No hay obras disponibles</h3>
+          <p class="sin-obras-texto">No se encontraron libros registrados para este autor.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -54,6 +54,9 @@ export class AdminLibrosComponent implements OnInit {
   // Rutas para imágenes predeterminadas
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
 
+  // Exponer Math para usar en la plantilla
+  Math = Math;
+
   constructor(
     private librosService: LibroService,
     private autorService: AutorService,
@@ -98,6 +101,20 @@ export class AdminLibrosComponent implements OnInit {
         this.libros = data.content;
         this.totalElements = data.totalElements;
         this.totalPages = data.totalPages;
+        
+        // Para cada libro, cargar sus autores asociados
+        this.libros.forEach(libro => {
+          if (libro.id) {
+            this.librosService.getAutoresByLibroId(libro.id).subscribe({
+              next: (autores) => {
+                libro.autores = autores;
+              },
+              error: (error) => {
+                console.error(`Error al cargar autores del libro ${libro.id}`, error);
+              }
+            });
+          }
+        });
       },
       error: (error) => {
         console.error('Error al cargar libros', error);
@@ -409,4 +426,6 @@ export class AdminLibrosComponent implements OnInit {
     }
     return this.librosService.getImageUrl(path);
   }
+
+  // La función getPagesArray() se ha eliminado ya que ahora usamos una paginación simplificada
 }

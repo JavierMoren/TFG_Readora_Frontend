@@ -1,65 +1,82 @@
 <div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
   <div class="col-12 col-md-6 col-lg-5 col-xl-4">
     <div class="text-center mb-4">
-      <h1 class="h2 fw-bold text-highlight">Iniciar Sesión</h1>
-      <p class="text-secondary small">Ingresa tus credenciales para acceder</p>
+      <img src="assets/logos/Logo.svg" alt="Logo Readora" class="auth-logo mb-3">
+      <h1 class="h2 fw-bold text-highlight">¡Bienvenido de nuevo!</h1>
+      <p class="text-secondary small">Inicia sesión para acceder a tu biblioteca personal</p>
     </div>
     
-    <div class="card shadow-sm border-0">
-      <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" class="p-4">
-        <div class="mb-3">
-          <label for="usuario" class="form-label">Usuario <span class="text-danger">*</span></label>
-          <input 
-            type="text" 
-            id="usuario" 
-            [(ngModel)]="authRequest.usuario" 
-            name="usuario" 
-            required
-            minlength="3"
-            maxlength="50" 
-            #usuario="ngModel"
-            class="form-control"
-            [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}">
-          <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback">
-            <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
-            <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
-            <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
-          </div>
-        </div>
-  
-        <div class="mb-3">
-          <label for="contrasenna" class="form-label">Contraseña <span class="text-danger">*</span></label>
-          <input 
-            type="password" 
-            id="contrasenna" 
-            [(ngModel)]="authRequest.contrasenna" 
-            name="contrasenna" 
-            required
-            minlength="6"
-            maxlength="100" 
-            #contrasenna="ngModel"
-            class="form-control"
-            [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}">
-          <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback">
-            <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
-            <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
-            <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
-          </div>
-        </div>
+    <div class="card shadow border-0 auth-card">
+      <div class="card-body p-0">
         
-        <button 
-          type="submit" 
-          [disabled]="loginForm.invalid"
-          class="btn btn-primary w-100 py-2">
-          Iniciar Sesión
-        </button>
-        
-        <div class="text-center mt-3">
-          <a routerLink="/api/v1/register" class="text-primary small text-decoration-none">
-            ¿No tienes cuenta? Regístrate aquí
-          </a>
-        </div>
-      </form>
+        <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" class="auth-form p-4">
+          <div class="mb-4">
+            <label for="usuario" class="form-label fw-medium">Usuario <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="material-icons small">person</i></span>
+              <input 
+                type="text" 
+                id="usuario" 
+                [(ngModel)]="authRequest.usuario" 
+                name="usuario" 
+                required
+                minlength="3"
+                maxlength="50" 
+                #usuario="ngModel"
+                class="form-control border-start-0"
+                [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}"
+                placeholder="Ingresa tu nombre de usuario">
+            </div>
+            <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback d-block small mt-1">
+              <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
+              <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
+              <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
+            </div>
+          </div>
+    
+          <div class="mb-4">
+            <label for="contrasenna" class="form-label fw-medium">Contraseña <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="material-icons small">lock</i></span>
+              <input 
+                type="password" 
+                id="contrasenna" 
+                [(ngModel)]="authRequest.contrasenna" 
+                name="contrasenna" 
+                required
+                minlength="6"
+                maxlength="100" 
+                #contrasenna="ngModel"
+                class="form-control border-start-0"
+                [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}"
+                placeholder="Ingresa tu contraseña">
+            </div>
+            <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback d-block small mt-1">
+              <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
+              <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
+              <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
+            </div>
+          </div>
+          
+          <button 
+            type="submit" 
+            [disabled]="loginForm.invalid"
+            class="btn btn-primary w-100 py-2 mb-3 auth-btn">
+            <span class="d-flex align-items-center justify-content-center">
+              <i class="material-icons me-2">login</i>
+              Iniciar Sesión
+            </span>
+          </button>
+          
+          <div class="text-center mt-4">
+            <p class="mb-0">
+              <a routerLink="/api/v1/register" class="text-primary text-decoration-none auth-link">
+                ¿No tienes cuenta? <span class="fw-medium">Regístrate aquí</span>
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
     
     <div class="text-center mt-4">

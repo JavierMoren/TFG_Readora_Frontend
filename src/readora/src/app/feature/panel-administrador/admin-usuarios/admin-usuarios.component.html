@@ -1,23 +1,29 @@
-<div class="mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="admin-container mb-4">
+  <!-- Encabezado de la sección -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
     <h2 class="h5 fw-medium text-highlight mb-0">Gestión de Usuarios</h2>
     
-    <!-- Botón para añadir nuevo usuario -->
-    <button *ngIf="!showForm" (click)="prepareCreateUsuario()" 
-      class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
-      <span class="material-icons small me-1">add</span>
-      <span>Añadir Usuario</span>
-    </button>
+    <div class="d-flex flex-wrap gap-2">
+      <!-- Botón para añadir nuevo usuario -->
+      <button *ngIf="!showForm" (click)="prepareCreateUsuario()" 
+        class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+        <span class="material-icons small me-1">add</span>
+        <span>Añadir Usuario</span>
+      </button>
+    </div>
   </div>
 
   <!-- Formulario para añadir/editar usuario -->
-  <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center border-bottom">
-      <h3 class="h6 fw-medium text-highlight mb-0">{{isEditing ? 'Editar Usuario' : 'Añadir Usuario'}}</h3>
+  <div *ngIf="showForm" class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title mb-0">
+        <span class="material-icons card-icon">{{isEditing ? 'edit' : 'add_circle'}}</span>
+        {{isEditing ? 'Editar Usuario' : 'Añadir Usuario'}}
+      </h3>
       <button (click)="cancelEdit()" class="btn-close btn-sm" aria-label="Cerrar"></button>
     </div>
     
-    <div class="card-body">
+    <div class="card-body p-4">
       <form [formGroup]="usuarioForm" (ngSubmit)="saveUsuario()">
         <div class="row mb-3">
           <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -56,9 +62,14 @@
         <div class="row mb-3">
           <div class="col-12 col-md-6 mb-3 mb-md-0">
             <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
-            <input type="text" id="nombre" formControlName="nombre" 
-              class="form-control"
-              [ngClass]="{'is-invalid': usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched}">
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">badge</span>
+              </span>
+              <input type="text" id="nombre" formControlName="nombre" 
+                class="form-control"
+                [ngClass]="{'is-invalid': usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched}">
+            </div>
             <div *ngIf="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('nombre')?.errors?.['required']">El nombre es obligatorio</span>
               <span *ngIf="usuarioForm.get('nombre')?.errors?.['pattern']">El nombre solo puede contener letras y espacios</span>
@@ -67,9 +78,14 @@
           
           <div class="col-12 col-md-6">
             <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
-            <input type="text" id="apellido" formControlName="apellido" 
-              class="form-control"
-              [ngClass]="{'is-invalid': usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched}">
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">badge</span>
+              </span>
+              <input type="text" id="apellido" formControlName="apellido" 
+                class="form-control"
+                [ngClass]="{'is-invalid': usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched}">
+            </div>
             <div *ngIf="usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('apellido')?.errors?.['required']">El apellido es obligatorio</span>
               <span *ngIf="usuarioForm.get('apellido')?.errors?.['pattern']">El apellido solo puede contener letras y espacios</span>
@@ -82,7 +98,7 @@
           <label for="contrasenna" class="form-label">Contraseña <span class="text-danger">*</span></label>
           <div class="input-group">
             <span class="input-group-text">
-              <span class="material-icons small">key</span>
+              <span class="material-icons small">vpn_key</span>
             </span>
             <input type="password" id="contrasenna" formControlName="contrasenna" 
               class="form-control"
@@ -92,24 +108,31 @@
             <span *ngIf="usuarioForm.get('contrasenna')?.errors?.['required']">La contraseña es obligatoria</span>
             <span *ngIf="usuarioForm.get('contrasenna')?.errors?.['pattern']">La contraseña debe contener al menos una mayúscula, una minúscula, un número y tener 8 caracteres mínimo</span>
           </div>
+          <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
         </div>
         
         <!-- Opción para cambiar la contraseña solo en modo edición -->
         <div *ngIf="isEditing" class="form-check mb-3">
           <input type="checkbox" id="cambiarContrasenna" [(ngModel)]="cambiarContrasenna" [ngModelOptions]="{standalone: true}" 
             class="form-check-input">
-          <label for="cambiarContrasenna" class="form-check-label small">Cambiar contraseña</label>
+          <label for="cambiarContrasenna" class="form-check-label">Cambiar contraseña</label>
         </div>
         
         <!-- Formulario de cambio de contraseña que solo aparece si se marca la casilla -->
         <div *ngIf="isEditing && cambiarContrasenna" class="card border-primary mb-3">
-          <div class="card-body">
+          <div class="card-header bg-transparent">
+            <h3 class="card-title mb-0">
+              <span class="material-icons card-icon">password</span>
+              Cambio de Contraseña
+            </h3>
+          </div>
+          <div class="card-body p-4">
             <form [formGroup]="passwordForm">
               <div class="mb-3">
-                <label for="contrasennaActual" class="form-label text-primary">Contraseña Actual <span class="text-danger">*</span></label>
+                <label for="contrasennaActual" class="form-label">Contraseña Actual <span class="text-danger">*</span></label>
                 <div class="input-group">
                   <span class="input-group-text">
-                    <span class="material-icons small">key</span>
+                    <span class="material-icons small">lock</span>
                   </span>
                   <input type="password" id="contrasennaActual" formControlName="contrasennaActual" 
                     class="form-control"
@@ -121,10 +144,10 @@
               </div>
               
               <div class="mb-3">
-                <label for="nuevaContrasenna" class="form-label text-primary">Nueva Contraseña <span class="text-danger">*</span></label>
+                <label for="nuevaContrasenna" class="form-label">Nueva Contraseña <span class="text-danger">*</span></label>
                 <div class="input-group">
                   <span class="input-group-text">
-                    <span class="material-icons small">key</span>
+                    <span class="material-icons small">vpn_key</span>
                   </span>
                   <input type="password" id="nuevaContrasenna" formControlName="nuevaContrasenna" 
                     class="form-control"
@@ -134,13 +157,14 @@
                   <span *ngIf="passwordForm.get('nuevaContrasenna')?.errors?.['required']">La nueva contraseña es obligatoria</span>
                   <span *ngIf="passwordForm.get('nuevaContrasenna')?.errors?.['pattern']">La contraseña debe contener al menos una mayúscula, una minúscula, un número y tener 8 caracteres mínimo</span>
                 </div>
+                <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
               </div>
               
               <div class="mb-3">
-                <label for="confirmarContrasenna" class="form-label text-primary">Confirmar Contraseña <span class="text-danger">*</span></label>
+                <label for="confirmarContrasenna" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
                 <div class="input-group">
                   <span class="input-group-text">
-                    <span class="material-icons small">key</span>
+                    <span class="material-icons small">check_circle</span>
                   </span>
                   <input type="password" id="confirmarContrasenna" formControlName="confirmarContrasenna" 
                     class="form-control"
@@ -156,10 +180,14 @@
         </div>
         
         <!-- Opción para activar/desactivar usuario SOLO en modo edición -->
-        <div *ngIf="isEditing" class="form-check mb-3">
-          <input type="checkbox" id="enabled" formControlName="enabled" 
-            class="form-check-input">
-          <label for="enabled" class="form-check-label small">Usuario Activo</label>
+        <div *ngIf="isEditing" class="form-check mb-4">
+          <input type="checkbox" id="enabled" formControlName="enabled" class="form-check-input">
+          <label for="enabled" class="form-check-label d-flex align-items-center">
+            <span class="material-icons small me-1" [ngClass]="{'text-success': usuarioForm.get('enabled')?.value, 'text-danger': !usuarioForm.get('enabled')?.value}">
+              {{ usuarioForm.get('enabled')?.value ? 'check_circle' : 'cancel' }}
+            </span>
+            Usuario Activo
+          </label>
         </div>
         
         <div class="d-flex gap-2">
@@ -184,22 +212,55 @@
     <table class="table table-hover table-striped">
       <thead class="table-light">
         <tr>
-          <th scope="col" class="text-primary small">ID</th>
-          <th scope="col" class="text-primary small">Usuario</th>
-          <th scope="col" class="text-primary small">Nombre</th>
-          <th scope="col" class="text-primary small">Apellido</th>
-          <th scope="col" class="text-primary small">Email</th>
-          <th scope="col" class="text-primary small text-center">Estado</th>
+          <th scope="col" class="text-primary small" (click)="changeSort('id')">
+            ID
+            <span *ngIf="sortBy === 'id'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('usuario')">
+            Usuario
+            <span *ngIf="sortBy === 'usuario'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('nombre')">
+            Nombre
+            <span *ngIf="sortBy === 'nombre'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('apellido')">
+            Apellido
+            <span *ngIf="sortBy === 'apellido'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('gmail')">
+            Email
+            <span *ngIf="sortBy === 'gmail'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small text-center" (click)="changeSort('enabled')">
+            Estado
+            <span *ngIf="sortBy === 'enabled'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
           <th scope="col" class="text-primary small text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let usuario of usuarios">
-          <td class="small text-secondary">
+          <td class="text-secondary">
             {{usuario.id}}
           </td>
           <td>
-            {{usuario.usuario}}
+            <div class="d-flex align-items-center">
+              <span class="material-icons text-primary me-2">account_circle</span>
+              {{usuario.usuario}}
+            </div>
           </td>
           <td>
             {{usuario.nombre}}
@@ -207,12 +268,13 @@
           <td>
             {{usuario.apellido}}
           </td>
-          <td class="small text-secondary">
+          <td class="text-secondary">
             {{usuario.gmail}}
           </td>
           <td class="text-center">
             <span class="badge rounded-pill"
               [ngClass]="usuario.enabled ? 'bg-success' : 'bg-danger'">
+              <span class="material-icons small me-1">{{ usuario.enabled ? 'check_circle' : 'cancel' }}</span>
               {{usuario.enabled ? 'Activo' : 'Inactivo'}}
             </span>
           </td>
@@ -232,11 +294,84 @@
         
         <!-- Mensaje cuando no hay usuarios -->
         <tr *ngIf="usuarios.length === 0">
-          <td colspan="7" class="text-center text-secondary py-4">
-            No hay usuarios disponibles
+          <td colspan="7" class="text-center py-4">
+            <div class="d-flex flex-column align-items-center">
+              <span class="material-icons text-muted mb-2" style="font-size: 3rem;">sentiment_dissatisfied</span>
+              <p class="text-muted mb-0">No hay usuarios disponibles</p>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Navegador de paginación y controles -->
+  <div *ngIf="totalPages > 0" class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
+    <!-- Información de paginación -->
+    <div class="text-secondary small">
+      Mostrando {{ usuarios.length ? (currentPage * pageSize + 1) : 0 }} a 
+      {{ usuarios.length ? Math.min((currentPage + 1) * pageSize, totalElements) : 0 }} 
+      de {{ totalElements }} registros
+    </div>
+    
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <!-- Selector de tamaño de página -->
+      <div class="d-flex align-items-center">
+        <span class="text-secondary me-2 small">Mostrar:</span>
+        <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+      
+      <!-- Paginación -->
+      <nav aria-label="Paginación de usuarios">
+        <ul class="pagination pagination-sm mb-0">
+          <!-- Botón Anterior -->
+          <li class="page-item" [class.disabled]="currentPage === 0">
+            <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+              <span class="material-icons small">navigate_before</span>
+            </button>
+          </li>
+          
+          <!-- Primera página siempre visible -->
+          <li class="page-item" [class.active]="currentPage === 0">
+            <button class="page-link" (click)="goToPage(0)">1</button>
+          </li>
+          
+          <!-- Elipsis inicial si estamos lejos del inicio -->
+          <li class="page-item disabled" *ngIf="currentPage > 2">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Páginas cercanas a la actual (máximo 5 páginas visibles) -->
+          <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
+            <li class="page-item" [class.active]="currentPage === i + 1" 
+                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
+              <button class="page-link" (click)="goToPage(i + 1)">{{ i + 2 }}</button>
+            </li>
+          </ng-container>
+          
+          <!-- Elipsis final si estamos lejos del final -->
+          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Última página siempre visible si hay más de una página -->
+          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
+            <button class="page-link" (click)="goToPage(totalPages - 1)">{{ totalPages }}</button>
+          </li>
+          
+          <!-- Botón Siguiente -->
+          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+            <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+              <span class="material-icons small">navigate_next</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   </div>
 </div>

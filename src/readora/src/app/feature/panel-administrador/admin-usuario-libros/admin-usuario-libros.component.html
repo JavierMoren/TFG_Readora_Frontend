@@ -176,11 +176,36 @@
     <table class="table table-hover table-striped">
       <thead class="table-light">
         <tr>
-          <th scope="col" class="text-primary small">ID</th>
-          <th scope="col" class="text-primary small">Usuario</th>
-          <th scope="col" class="text-primary small">Libro</th>
-          <th scope="col" class="text-primary small">Fecha Inicio</th>
-          <th scope="col" class="text-primary small">Estado</th>
+          <th scope="col" class="text-primary small" (click)="changeSort('id')">
+            ID
+            <span *ngIf="sortBy === 'id'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('usuarioId')">
+            Usuario
+            <span *ngIf="sortBy === 'usuarioId'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('libroId')">
+            Libro
+            <span *ngIf="sortBy === 'libroId'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('fechaInicioLectura')">
+            Fecha Inicio
+            <span *ngIf="sortBy === 'fechaInicioLectura'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('estadoLectura')">
+            Estado
+            <span *ngIf="sortBy === 'estadoLectura'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
           <th scope="col" class="text-primary small text-center">Acciones</th>
         </tr>
       </thead>
@@ -190,10 +215,16 @@
             {{usuarioLibro.id}}
           </td>
           <td class="fw-medium">
-            {{usuarioLibro.usuarioId}}
+            <div class="d-flex flex-column">
+              <span class="fw-medium">{{usuarioLibro.usuarioNombre || 'Sin nombre'}}</span>
+              <span class="text-secondary small">#{{usuarioLibro.usuarioId}}</span>
+            </div>
           </td>
-          <td class="small text-secondary">
-            {{usuarioLibro.libroId}}
+          <td>
+            <div class="d-flex flex-column">
+              <span class="fw-medium">{{usuarioLibro.libroTitulo || 'Sin título'}}</span>
+              <span class="text-secondary small">#{{usuarioLibro.libroId}}</span>
+            </div>
           </td>
           <td class="small text-secondary">
             {{usuarioLibro.fechaInicioLectura ? formatDate(usuarioLibro.fechaInicioLectura) : '-'}}
@@ -231,5 +262,75 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Navegador de paginación y controles -->
+  <div *ngIf="totalPages > 0" class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
+    <!-- Información de paginación -->
+    <div class="text-secondary small">
+      Mostrando {{ usuarioLibros.length ? (currentPage * pageSize + 1) : 0 }} a 
+      {{ usuarioLibros.length ? Math.min((currentPage + 1) * pageSize, totalElements) : 0 }} 
+      de {{ totalElements }} registros
+    </div>
+    
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <!-- Selector de tamaño de página -->
+      <div class="d-flex align-items-center">
+        <span class="text-secondary me-2 small">Mostrar:</span>
+        <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+      
+      <!-- Paginación -->
+      <nav aria-label="Paginación de lecturas">
+        <ul class="pagination pagination-sm mb-0">
+          <!-- Botón Anterior -->
+          <li class="page-item" [class.disabled]="currentPage === 0">
+            <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+              <span class="material-icons small">navigate_before</span>
+            </button>
+          </li>
+          
+          <!-- Primera página siempre visible -->
+          <li class="page-item" [class.active]="currentPage === 0">
+            <button class="page-link" (click)="goToPage(0)">1</button>
+          </li>
+          
+          <!-- Elipsis inicial si estamos lejos del inicio -->
+          <li class="page-item disabled" *ngIf="currentPage > 2">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Páginas cercanas a la actual (máximo 5 páginas visibles) -->
+          <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
+            <li class="page-item" [class.active]="currentPage === i + 1" 
+                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
+              <button class="page-link" (click)="goToPage(i + 1)">{{ i + 2 }}</button>
+            </li>
+          </ng-container>
+          
+          <!-- Elipsis final si estamos lejos del final -->
+          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Última página siempre visible si hay más de una página -->
+          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
+            <button class="page-link" (click)="goToPage(totalPages - 1)">{{ totalPages }}</button>
+          </li>
+          
+          <!-- Botón Siguiente -->
+          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+            <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+              <span class="material-icons small">navigate_next</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   </div>
 </div>

@@ -4,7 +4,7 @@ import { Router, RouterOutlet, RouterLink, ActivatedRoute } from '@angular/route
 
 @Component({
   selector: 'app-panel-administrador',
-  imports: [CommonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './panel-administrador.component.html',
   styleUrl: './panel-administrador.component.css'
 })

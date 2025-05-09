@@ -1,48 +1,119 @@
-/* ============== ESTILOS ESPECÍFICOS PARA COMPONENTES DE ADMINISTRACIÓN ============== */
+/* ============== ESTILOS SIMPLIFICADOS PARA EL PANEL DE ADMINISTRACIÓN ============== */
 
-/* Tablas en modo oscuro */
-[data-theme="dark"] .table-light,
-[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd),
-[data-theme="dark"] .table>:not(caption)>*>* {
+/* Estilo básico para todos los componentes de administración */
+.admin-section {
+  margin-bottom: 20px;
+}
+
+/* Tablas con diseño más funcional y cuadrado */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Botones simplificados */
+.btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* Cards con diseño más cuadrado y funcional */
+.card {
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.card-header {
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+/* Formularios más limpios */
+.form-control {
+  border-radius: 4px;
+  padding: 8px 10px;
+  height: auto;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.input-group-text {
+  border-radius: 4px 0 0 4px;
+  background-color: #f8f9fa;
+}
+
+/* Badges simplificados */
+.badge {
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Paginación más sencilla */
+.pagination .page-link {
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+/* Modo oscuro - mantenemos los estilos existentes pero simplificados */
+[data-theme="dark"] .table th {
+  background-color: var(--table-header-bg);
   color: var(--text-primary);
-  background-color: var(--table-bg);
   border-color: var(--border-color);
 }
 
-[data-theme="dark"] .table-hover>tbody>tr:hover>* {
-  background-color: var(--table-hover-bg);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] thead.table-light {
-  background-color: var(--table-header-bg) !important;
-  color: var(--text-primary);
+[data-theme="dark"] .table td {
   border-color: var(--border-color);
 }
 
-[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd)>* {
+[data-theme="dark"] .table-hover tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* Formularios del panel de administración */
-[data-theme="dark"] .form-check-input {
-  background-color: var(--input-bg);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .form-check-input:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-/* Tarjetas dentro de formularios del panel de administración */
 [data-theme="dark"] .card-header {
   background-color: var(--background-subtle);
   border-color: var(--border-color);
 }
 
-[data-theme="dark"] .card.border-primary {
-  border-color: var(--primary-color) !important;
+[data-theme="dark"] .input-group-text {
+  background-color: var(--background-subtle);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
 }
 
 /* Fix para el botón de cierre en modales y tarjetas */
@@ -59,25 +130,6 @@
   background-color: var(--background-subtle);
   border-color: var(--primary-color) var(--border-color) var(--background-subtle);
   color: var(--primary-color);
-}
-
-/* Estilos específicos para admin-libros */
-[data-theme="dark"] thead th.text-primary,
-[data-theme="dark"] .table th.text-primary {
-  color: var(--primary-color) !important;
-}
-
-[data-theme="dark"] .cursor-pointer {
-  cursor: pointer;
-}
-
-/* Badges */
-[data-theme="dark"] .badge.bg-success {
-  background-color: rgba(25, 135, 84, 0.8) !important;
-}
-
-[data-theme="dark"] .badge.bg-danger {
-  background-color: rgba(220, 53, 69, 0.8) !important;
 }
 
 /* Paginación */

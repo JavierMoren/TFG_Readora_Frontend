@@ -1,221 +1,290 @@
 <div class="container biblioteca-container">
-    <h1 class="display-5 fw-bold mb-4">Mi Biblioteca Personal</h1>
+  <div class="biblioteca-header">
+    <h1 class="biblioteca-title mb-2">Mi Biblioteca Personal</h1>
+    <p class="biblioteca-subtitle">Organiza y gestiona todas tus lecturas en un solo lugar</p>
+  </div>
 
-    <!-- Filtros para seleccionar qué libros mostrar -->
-    <div class="filtros-container">
-        <div class="d-flex flex-wrap justify-content-center justify-content-md-start">
-            <button type="button" class="filtro-btn" 
-                [class.btn-primary]="filtroActual === 'todos'" 
-                [class.btn-outline-primary]="filtroActual !== 'todos'"
-                (click)="cambiarFiltro('todos')">
-                Todos
-            </button>
-            <button type="button" class="filtro-btn" 
-                [class.btn-primary]="filtroActual === 'leyendo'" 
-                [class.btn-outline-primary]="filtroActual !== 'leyendo'"
-                (click)="cambiarFiltro('leyendo')">
-                Leyendo 
-                <span class="filtro-btn-count">{{librosLeyendo.length}}</span>
-            </button>
-            <button type="button" class="filtro-btn" 
-                [class.btn-primary]="filtroActual === 'pendientes'" 
-                [class.btn-outline-primary]="filtroActual !== 'pendientes'"
-                (click)="cambiarFiltro('pendientes')">
-                Por leer 
-                <span class="filtro-btn-count">{{librosPendientes.length}}</span>
-            </button>
-            <button type="button" class="filtro-btn" 
-                [class.btn-primary]="filtroActual === 'terminados'" 
-                [class.btn-outline-primary]="filtroActual !== 'terminados'"
-                (click)="cambiarFiltro('terminados')">
-                Leídos 
-                <span class="filtro-btn-count">{{librosTerminados.length}}</span>
-            </button>
-            <button type="button" class="filtro-btn" 
-                [class.btn-primary]="filtroActual === 'abandonados'" 
-                [class.btn-outline-primary]="filtroActual !== 'abandonados'"
-                (click)="cambiarFiltro('abandonados')">
-                Abandonados 
-                <span class="filtro-btn-count">{{librosAbandonados.length}}</span>
-            </button>
-        </div>
+  <!-- Filtros rediseñados para seleccionar qué libros mostrar -->
+  <div class="filtros-container">
+    <div class="filtros-wrapper">
+      <button type="button" class="filtro-btn" 
+          [class.active]="filtroActual === 'todos'" 
+          (click)="cambiarFiltro('todos')">
+          <span class="filtro-text">Todos</span>
+          <span class="filtro-count">{{librosLeyendo.length + librosPendientes.length + librosTerminados.length + librosAbandonados.length}}</span>
+      </button>
+      <button type="button" class="filtro-btn" 
+          [class.active]="filtroActual === 'leyendo'" 
+          (click)="cambiarFiltro('leyendo')">
+          <span class="filtro-icon"><span class="material-icons">auto_stories</span></span>
+          <span class="filtro-text">Leyendo</span>
+          <span class="filtro-count" [class.has-items]="librosLeyendo.length > 0">{{librosLeyendo.length}}</span>
+      </button>
+      <button type="button" class="filtro-btn" 
+          [class.active]="filtroActual === 'pendientes'" 
+          (click)="cambiarFiltro('pendientes')">
+          <span class="filtro-icon"><span class="material-icons">bookmark</span></span>
+          <span class="filtro-text">Por leer</span>
+          <span class="filtro-count" [class.has-items]="librosPendientes.length > 0">{{librosPendientes.length}}</span>
+      </button>
+      <button type="button" class="filtro-btn" 
+          [class.active]="filtroActual === 'terminados'" 
+          (click)="cambiarFiltro('terminados')">
+          <span class="filtro-icon"><span class="material-icons">check_circle</span></span>
+          <span class="filtro-text">Leídos</span>
+          <span class="filtro-count" [class.has-items]="librosTerminados.length > 0">{{librosTerminados.length}}</span>
+      </button>
+      <button type="button" class="filtro-btn" 
+          [class.active]="filtroActual === 'abandonados'" 
+          (click)="cambiarFiltro('abandonados')">
+          <span class="filtro-icon"><span class="material-icons">cancel</span></span>
+          <span class="filtro-text">Abandonados</span>
+          <span class="filtro-count" [class.has-items]="librosAbandonados.length > 0">{{librosAbandonados.length}}</span>
+      </button>
     </div>
+  </div>
 
-    <!-- Mensaje cuando no hay libros -->
-    <div *ngIf="!librosLeyendo.length && !librosPendientes.length && !librosTerminados.length && !librosAbandonados.length"
-         class="sin-libros">
-        <div class="sin-libros-icon">📚</div>
-        <h3>Tu biblioteca está vacía</h3>
-        <p class="text-muted">
-            No tienes libros en tu biblioteca personal. 
-            Utiliza el buscador para encontrar libros y añadirlos a tu colección.
-        </p>
-    </div>
-    
-    <!-- Indicador de carga -->
-    <div *ngIf="cargando" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Cargando...</span>
-        </div>
-        <p class="mt-2">Cargando tu biblioteca...</p>
-    </div>
+  <!-- Mensaje cuando no hay libros -->
+  <div *ngIf="!librosLeyendo.length && !librosPendientes.length && !librosTerminados.length && !librosAbandonados.length && !cargando"
+       class="sin-libros">
+      <div class="sin-libros-icon">
+        <span class="material-icons">menu_book</span>
+      </div>
+      <h3 class="sin-libros-title">Tu biblioteca está vacía</h3>
+      <p class="sin-libros-text">
+          No tienes libros en tu biblioteca personal. 
+          Utiliza el buscador para encontrar libros y añadirlos a tu colección.
+      </p>
+      <a routerLink="/buscador" class="btn btn-primary mt-3">
+        <span class="material-icons me-2">search</span>
+        Buscar libros
+      </a>
+  </div>
+  
+  <!-- Indicador de carga -->
+  <div *ngIf="cargando" class="loading-state">
+      <div class="spinner">
+          <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+          </div>
+      </div>
+      <p class="loading-text">Cargando tu biblioteca...</p>
+  </div>
 
-    <!-- Sección de libros que estoy leyendo -->
-    <div *ngIf="(filtroActual === 'todos' || filtroActual === 'leyendo') && librosLeyendo.length > 0" class="mb-5">
-        <h2 class="seccion-titulo">Estoy leyendo</h2>
-        <div class="libros-grid">
-            <div class="libro-item" *ngFor="let libro of librosLeyendo">
-                <div class="libro-card">
-                    <div class="libro-img-container">
-                        <img [src]="libro.portadaUrl ? storageService.getFullImageUrl(libro.portadaUrl) : libroPlaceholder" 
-                             class="book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-                        <span class="libro-estado" [ngClass]="getColorEstado('LEYENDO')">
-                            Leyendo
-                        </span>
-                    </div>
-                    <div class="libro-info">
-                        <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                        <p class="libro-autor">{{libro.autor?.nombre}} {{libro.autor?.apellido}}</p>
-                        <p class="libro-meta">
-                            <strong>Inicio lectura:</strong> {{formatearFecha(libro.fechaInicioLectura)}}
-                        </p>
-                        <div class="libro-actions">
-                            <button class="btn btn-sm btn-outline-primary" (click)="editarLibro(libro)">
-                                <i class="bi bi-pencil-fill me-1"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" (click)="eliminarDeColeccion(libro)">
-                                <i class="bi bi-trash-fill me-1"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Sección de libros que estoy leyendo -->
+  <div *ngIf="(filtroActual === 'todos' || filtroActual === 'leyendo') && librosLeyendo.length > 0" class="biblioteca-section">
+      <div class="section-header">
+          <h2 class="section-title">
+            <span class="material-icons section-icon">auto_stories</span>
+            Estoy leyendo
+          </h2>
+          <span class="section-count">{{librosLeyendo.length}} {{librosLeyendo.length === 1 ? 'libro' : 'libros'}}</span>
+      </div>
+      <div class="libros-grid">
+          <div class="libro-item" *ngFor="let libro of librosLeyendo">
+              <div class="libro-card">
+                  <div class="libro-img-container">
+                      <img [src]="getImageUrl(libro.portadaUrl)" 
+                           class="libro-portada" alt="Portada del libro {{libro.titulo}}">
+                      <div class="libro-overlay">
+                          <div class="libro-estado-badge" [ngClass]="getColorEstado('LEYENDO')">
+                              <span class="material-icons estado-icon">auto_stories</span>
+                              <span>Leyendo</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="libro-info">
+                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
+                      <div class="libro-autor">
+                          <span class="material-icons autor-icon">person</span>
+                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
+                      </div>
+                      <div class="libro-meta">
+                          <div class="meta-item">
+                              <span class="meta-label">Inicio:</span>
+                              <span class="meta-value">{{formatearFecha(libro.fechaInicioLectura)}}</span>
+                          </div>
+                      </div>
+                      <div class="libro-actions">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                              <span class="material-icons">edit</span>
+                          </button>
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                              <span class="material-icons">delete</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
 
-    <!-- Sección de libros pendientes por leer -->
-    <div *ngIf="(filtroActual === 'todos' || filtroActual === 'pendientes') && librosPendientes.length > 0" class="mb-5">
-        <h2 class="seccion-titulo">Pendientes por leer</h2>
-        <div class="libros-grid">
-            <div class="libro-item" *ngFor="let libro of librosPendientes">
-                <div class="libro-card">
-                    <div class="libro-img-container">
-                        <img [src]="libro.portadaUrl ? storageService.getFullImageUrl(libro.portadaUrl) : libroPlaceholder" 
-                             class="book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-                        <span class="libro-estado" [ngClass]="getColorEstado('PENDIENTE')">
-                            Por leer
-                        </span>
-                    </div>
-                    <div class="libro-info">
-                        <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                        <p class="libro-autor">{{libro.autor?.nombre}} {{libro.autor?.apellido}}</p>
-                        <div class="libro-actions">
-                            <button class="btn btn-sm btn-outline-primary" (click)="editarLibro(libro)">
-                                <i class="bi bi-pencil-fill me-1"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" (click)="eliminarDeColeccion(libro)">
-                                <i class="bi bi-trash-fill me-1"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Sección de libros pendientes por leer -->
+  <div *ngIf="(filtroActual === 'todos' || filtroActual === 'pendientes') && librosPendientes.length > 0" class="biblioteca-section">
+      <div class="section-header">
+          <h2 class="section-title">
+            <span class="material-icons section-icon">bookmark</span>
+            Pendientes por leer
+          </h2>
+          <span class="section-count">{{librosPendientes.length}} {{librosPendientes.length === 1 ? 'libro' : 'libros'}}</span>
+      </div>
+      <div class="libros-grid">
+          <div class="libro-item" *ngFor="let libro of librosPendientes">
+              <div class="libro-card">
+                  <div class="libro-img-container">
+                      <img [src]="getImageUrl(libro.portadaUrl)" 
+                           class="libro-portada" alt="Portada del libro {{libro.titulo}}">
+                      <div class="libro-overlay">
+                          <div class="libro-estado-badge" [ngClass]="getColorEstado('PENDIENTE')">
+                              <span class="material-icons estado-icon">bookmark</span>
+                              <span>Por leer</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="libro-info">
+                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
+                      <div class="libro-autor">
+                          <span class="material-icons autor-icon">person</span>
+                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
+                      </div>
+                      <div class="libro-actions">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                              <span class="material-icons">edit</span>
+                          </button>
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                              <span class="material-icons">delete</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
 
-    <!-- Sección de libros terminados -->
-    <div *ngIf="(filtroActual === 'todos' || filtroActual === 'terminados') && librosTerminados.length > 0" class="mb-5">
-        <h2 class="seccion-titulo">Libros leídos</h2>
-        <div class="libros-grid">
-            <div class="libro-item" *ngFor="let libro of librosTerminados">
-                <div class="libro-card">
-                    <div class="libro-img-container">
-                        <img [src]="libro.portadaUrl ? storageService.getFullImageUrl(libro.portadaUrl) : libroPlaceholder" 
-                             class="book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-                        <span class="libro-estado" [ngClass]="getColorEstado('TERMINADO')">
-                            Leído
-                        </span>
-                    </div>
-                    <div class="libro-info">
-                        <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                        <p class="libro-autor">{{libro.autor?.nombre}} {{libro.autor?.apellido}}</p>
-                        <div *ngIf="libro.valoracion" class="libro-valoracion">
-                            <strong>Valoración:</strong> 
-                            <span class="star-rating">
-                                <span *ngFor="let star of estrellasPorValoracion(libro.valoracion)">★</span>
-                            </span>
-                        </div>
-                        <p class="libro-meta">
-                            <strong>Terminado:</strong> {{formatearFecha(libro.fechaFinLectura)}}
-                        </p>
-                        <p *ngIf="libro.comentario" class="libro-comentario">
-                            "{{truncarTexto(libro.comentario, 150)}}"
-                        </p>
-                        <div class="libro-actions">
-                            <button class="btn btn-sm btn-outline-primary" (click)="editarLibro(libro)">
-                                <i class="bi bi-pencil-fill me-1"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" (click)="eliminarDeColeccion(libro)">
-                                <i class="bi bi-trash-fill me-1"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Sección de libros terminados -->
+  <div *ngIf="(filtroActual === 'todos' || filtroActual === 'terminados') && librosTerminados.length > 0" class="biblioteca-section">
+      <div class="section-header">
+          <h2 class="section-title">
+            <span class="material-icons section-icon">check_circle</span>
+            Libros leídos
+          </h2>
+          <span class="section-count">{{librosTerminados.length}} {{librosTerminados.length === 1 ? 'libro' : 'libros'}}</span>
+      </div>
+      <div class="libros-grid">
+          <div class="libro-item" *ngFor="let libro of librosTerminados">
+              <div class="libro-card">
+                  <div class="libro-img-container">
+                      <img [src]="getImageUrl(libro.portadaUrl)" 
+                           class="libro-portada" alt="Portada del libro {{libro.titulo}}">
+                      <div class="libro-overlay">
+                          <div class="libro-estado-badge" [ngClass]="getColorEstado('TERMINADO')">
+                              <span class="material-icons estado-icon">check_circle</span>
+                              <span>Leído</span>
+                          </div>
+                          <div *ngIf="libro.valoracion" class="libro-valoracion">
+                              <span class="stars-rating">
+                                  <span *ngFor="let star of estrellasPorValoracion(libro.valoracion)">★</span>
+                              </span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="libro-info">
+                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
+                      <div class="libro-autor">
+                          <span class="material-icons autor-icon">person</span>
+                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
+                      </div>
+                      <div class="libro-meta">
+                          <div class="meta-item">
+                              <span class="meta-label">Terminado:</span>
+                              <span class="meta-value">{{formatearFecha(libro.fechaFinLectura)}}</span>
+                          </div>
+                      </div>
+                      <p *ngIf="libro.comentario" class="libro-comentario">
+                          "{{truncarTexto(libro.comentario, 120)}}"
+                      </p>
+                      <div class="libro-actions">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                              <span class="material-icons">edit</span>
+                          </button>
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                              <span class="material-icons">delete</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
 
-    <!-- Sección de libros abandonados -->
-    <div *ngIf="(filtroActual === 'todos' || filtroActual === 'abandonados') && librosAbandonados.length > 0" class="mb-5">
-        <h2 class="seccion-titulo">Libros abandonados</h2>
-        <div class="libros-grid">
-            <div class="libro-item" *ngFor="let libro of librosAbandonados">
-                <div class="libro-card">
-                    <div class="libro-img-container">
-                        <img [src]="libro.portadaUrl ? storageService.getFullImageUrl(libro.portadaUrl) : libroPlaceholder" 
-                             class="book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-                        <span class="libro-estado" [ngClass]="getColorEstado('ABANDONADO')">
-                            Abandonado
-                        </span>
-                    </div>
-                    <div class="libro-info">
-                        <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                        <p class="libro-autor">{{libro.autor?.nombre}} {{libro.autor?.apellido}}</p>
-                        <p *ngIf="libro.comentario" class="libro-comentario">
-                            "{{truncarTexto(libro.comentario, 150)}}"
-                        </p>
-                        <div class="libro-actions">
-                            <button class="btn btn-sm btn-outline-primary" (click)="editarLibro(libro)">
-                                <i class="bi bi-pencil-fill me-1"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" (click)="eliminarDeColeccion(libro)">
-                                <i class="bi bi-trash-fill me-1"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Sección de libros abandonados -->
+  <div *ngIf="(filtroActual === 'todos' || filtroActual === 'abandonados') && librosAbandonados.length > 0" class="biblioteca-section">
+      <div class="section-header">
+          <h2 class="section-title">
+            <span class="material-icons section-icon">cancel</span>
+            Libros abandonados
+          </h2>
+          <span class="section-count">{{librosAbandonados.length}} {{librosAbandonados.length === 1 ? 'libro' : 'libros'}}</span>
+      </div>
+      <div class="libros-grid">
+          <div class="libro-item" *ngFor="let libro of librosAbandonados">
+              <div class="libro-card">
+                  <div class="libro-img-container">
+                      <img [src]="getImageUrl(libro.portadaUrl)" 
+                           class="libro-portada" alt="Portada del libro {{libro.titulo}}">
+                      <div class="libro-overlay">
+                          <div class="libro-estado-badge" [ngClass]="getColorEstado('ABANDONADO')">
+                              <span class="material-icons estado-icon">cancel</span>
+                              <span>Abandonado</span>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="libro-info">
+                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
+                      <div class="libro-autor">
+                          <span class="material-icons autor-icon">person</span>
+                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
+                      </div>
+                      <p *ngIf="libro.comentario" class="libro-comentario">
+                          "{{truncarTexto(libro.comentario, 120)}}"
+                      </p>
+                      <div class="libro-actions">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                              <span class="material-icons">edit</span>
+                          </button>
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                              <span class="material-icons">delete</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
 </div>
 
 <!-- Modal de edición de estado de lectura -->
-<div *ngIf="mostrarEdicion" class="modal d-block modal-custom" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar estado de lectura</h5>
-                <button type="button" class="btn-close" (click)="cerrarEdicion()"></button>
+<div *ngIf="mostrarEdicion" class="modal-custom-backdrop">
+    <div class="modal-custom-container">
+        <div class="modal-custom-content">
+            <div class="modal-custom-header">
+                <h5 class="modal-title">
+                    <span class="material-icons me-2">edit</span>
+                    Editar estado de lectura
+                </h5>
+                <button type="button" class="modal-close-btn" (click)="cerrarEdicion()">
+                    <span class="material-icons">close</span>
+                </button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
+            <div class="modal-custom-body">
+                <div class="form-group">
                     <label for="estadoLectura" class="form-label">Estado de lectura</label>
                     <select class="form-select" id="estadoLectura" [(ngModel)]="libroSeleccionado.estadoLectura">
                         <option *ngFor="let estado of estadosLectura" [value]="estado.valor">{{estado.etiqueta}}</option>
                     </select>
                 </div>
 
-                <div class="mb-3" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO'">
+                <div class="form-group" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO'">
                     <label for="valoracion" class="form-label">Valoración</label>
                     <select class="form-select" id="valoracion" [(ngModel)]="libroSeleccionado.valoracion">
                         <option [ngValue]="null">Sin valoración</option>
@@ -227,27 +296,34 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
+                <div class="form-group">
                     <label for="fechaInicioLectura" class="form-label">Fecha de inicio de lectura</label>
                     <input type="date" class="form-control" id="fechaInicioLectura" 
                            [(ngModel)]="libroSeleccionado.fechaInicioLectura">
                 </div>
 
-                <div class="mb-3" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO' || libroSeleccionado?.estadoLectura === 'ABANDONADO'">
+                <div class="form-group" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO' || libroSeleccionado?.estadoLectura === 'ABANDONADO'">
                     <label for="fechaFinLectura" class="form-label">Fecha de finalización</label>
                     <input type="date" class="form-control" id="fechaFinLectura" 
                            [(ngModel)]="libroSeleccionado.fechaFinLectura">
                 </div>
 
-                <div class="mb-3">
+                <div class="form-group">
                     <label for="comentario" class="form-label">Comentarios</label>
-                    <textarea class="form-control" id="comentario" rows="3"
-                              [(ngModel)]="libroSeleccionado.comentario"></textarea>
+                    <textarea class="form-control" id="comentario" rows="4"
+                              [(ngModel)]="libroSeleccionado.comentario"
+                              placeholder="Escribe tus impresiones sobre el libro..."></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="cerrarEdicion()">Cancelar</button>
-                <button type="button" class="btn btn-primary" (click)="actualizarEstadoLectura()">Guardar cambios</button>
+            <div class="modal-custom-footer">
+                <button type="button" class="btn btn-outline-secondary" (click)="cerrarEdicion()">
+                    <span class="material-icons me-1">close</span>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" (click)="actualizarEstadoLectura()">
+                    <span class="material-icons me-1">save</span>
+                    Guardar cambios
+                </button>
             </div>
         </div>
     </div>
