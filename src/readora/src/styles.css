@@ -6,5 +6,5 @@
 @import "assets/styles/admin.css";
 @import "assets/styles/components.css";
 @import "assets/styles/book-covers.css"; /* Estilos estandarizados para portadas */
-@import "assets/styles/toast-custom.css"; /* Estilos personalizados para notificaciones toast */
-
+@import "assets/styles/notifications/toast-custom.css"; /* Estilos personalizados para notificaciones */
+@import "assets/styles/notifications/sweetalert2.css"; /* Estilos de notificaciones */

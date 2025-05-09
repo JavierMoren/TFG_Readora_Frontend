@@ -37,6 +37,45 @@
   background-color: var(--component-bg) !important;
 }
 
+/* Force table background in dark mode to be dark - highest specificity */
+html[data-theme="dark"] body table,
+html[data-theme="dark"] body .table,
+html[data-theme="dark"] body table tbody tr,
+html[data-theme="dark"] body .table tbody tr,
+html[data-theme="dark"] body table td,
+html[data-theme="dark"] body .table td,
+html[data-theme="dark"] .admin-content .table,
+html[data-theme="dark"] .admin-content table tbody tr,
+html[data-theme="dark"] .admin-content table td {
+  background-color: var(--table-bg) !important;
+}
+
+/* Mejora de visibilidad para el panel de administración */
+[data-theme="dark"] .admin-content h1, 
+[data-theme="dark"] .admin-content h2,
+[data-theme="dark"] .admin-content h3,
+[data-theme="dark"] .admin-content .admin-title,
+[data-theme="dark"] .admin-content .card-title {
+  color: var(--text-primary) !important;
+}
+
+/* Mejora específica para los IDs y contenido de la tabla en panel admin */
+[data-theme="dark"] .admin-content .table .text-primary,
+[data-theme="dark"] .admin-content .table th.text-primary {
+  color: #7791FE !important;
+}
+
+/* Panel admin - títulos de libros, autores, etc. */
+[data-theme="dark"] .admin-content .table td a {
+  color: var(--text-primary) !important;
+  text-decoration: none;
+}
+
+[data-theme="dark"] .admin-content .table td a:hover {
+  color: var(--primary-light) !important;
+  text-decoration: underline;
+}
+
 /* Header y navegación */
 [data-theme="dark"] header,
 [data-theme="dark"] nav,
@@ -118,11 +157,20 @@
 [data-theme="dark"] .table {
   color: var(--text-secondary);
   border-color: var(--border-color);
+  background-color: var(--table-bg) !important;
+}
+
+[data-theme="dark"] .table tr {
+  background-color: var(--table-bg) !important;
+}
+
+[data-theme="dark"] .table td {
+  background-color: var(--table-bg) !important;
 }
 
 [data-theme="dark"] .table thead th {
   color: var(--text-primary);
-  background-color: var(--table-header-bg);
+  background-color: var(--table-header-bg) !important;
 }
 
 [data-theme="dark"] .table tbody tr:hover {

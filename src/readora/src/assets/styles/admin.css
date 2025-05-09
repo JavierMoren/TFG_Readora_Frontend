@@ -91,6 +91,10 @@
 }
 
 /* Modo oscuro - mantenemos los estilos existentes pero simplificados */
+[data-theme="dark"] .table {
+  background-color: var(--table-bg);
+}
+
 [data-theme="dark"] .table th {
   background-color: var(--table-header-bg);
   color: var(--text-primary);
@@ -99,6 +103,12 @@
 
 [data-theme="dark"] .table td {
   border-color: var(--border-color);
+  color: var(--text-secondary);
+  background-color: var(--table-bg);
+}
+
+[data-theme="dark"] .table tbody tr {
+  background-color: var(--table-bg);
 }
 
 [data-theme="dark"] .table-hover tbody tr:hover {
@@ -132,6 +142,28 @@
   color: var(--primary-color);
 }
 
+/* Mejoras para la visibilidad del texto en tablas - Modo oscuro */
+[data-theme="dark"] .table {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .table td,
+[data-theme="dark"] .admin-content .table td {
+  color: var(--text-primary) !important;
+}
+
+/* Forzar que todos los textos en tablas del panel admin sean visibles */
+[data-theme="dark"] .table a,
+[data-theme="dark"] .table span,
+[data-theme="dark"] .table div {
+  color: var(--text-primary) !important;
+}
+
+/* Asegurar que los textos en modo oscuro sean visibles */
+[data-theme="dark"] .text-secondary {
+  color: #adb5bd !important;
+}
+
 /* Paginación */
 [data-theme="dark"] .pagination .page-link {
   background-color: var(--background-subtle);
@@ -149,4 +181,84 @@
   background-color: var(--background-subtle);
   border-color: var(--border-color);
   color: var(--text-secondary);
+}
+
+/* Mejoras para tablas con rayas en modo oscuro */
+[data-theme="dark"] .table-striped {
+  background-color: var(--table-bg);
+}
+
+[data-theme="dark"] .table-striped > tbody > tr {
+  background-color: var(--table-bg);
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(even) {
+  background-color: var(--table-bg);
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
+  color: var(--text-primary) !important;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(even) > td {
+  color: var(--text-primary) !important;
+  background-color: var(--table-bg);
+}
+
+/* Garantizar visibilidad en columnas específicas dentro del panel de administración */
+[data-theme="dark"] .admin-content .table td,
+[data-theme="dark"] .admin-content .table th {
+  color: var(--text-primary) !important;
+}
+
+/* Asegurar que las tablas en el panel de administración tengan fondo oscuro */
+[data-theme="dark"] .admin-content table,
+[data-theme="dark"] .admin-content .table {
+  background-color: var(--table-bg) !important;
+}
+
+[data-theme="dark"] .admin-content table > tbody > tr,
+[data-theme="dark"] .admin-content .table > tbody > tr {
+  background-color: var(--table-bg) !important;
+}
+
+[data-theme="dark"] .admin-content .table > tbody > tr > td {
+  background-color: var(--table-bg) !important;
+}
+
+[data-theme="dark"] .admin-content .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: var(--table-header-bg) !important;
+}
+
+[data-theme="dark"] .admin-content .table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: var(--table-header-bg) !important;
+}
+
+/* Mejorar el contraste de los headers de las tablas */
+[data-theme="dark"] .table th.text-primary {
+  color: #7791FE !important;
+}
+
+/* Reglas más específicas para los contenidos de las tablas en tema oscuro */
+[data-theme="dark"] .table-responsive table tbody tr td,
+[data-theme="dark"] .admin-content table tbody tr td,
+[data-theme="dark"] .admin-content .table-striped tbody tr td {
+  color: #e9ecef !important;
+}
+
+/* Estilos específicos para encabezados de columna */
+[data-theme="dark"] th[scope="col"] {
+  color: #7791FE !important;
+}
+
+/* Mejora para los autores y títulos en las tablas */
+[data-theme="dark"] td a,
+[data-theme="dark"] td .badge,
+[data-theme="dark"] td .btn {
+  color: inherit;
 }

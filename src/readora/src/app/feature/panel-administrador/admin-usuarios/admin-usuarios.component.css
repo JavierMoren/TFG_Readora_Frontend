@@ -209,6 +209,16 @@
   background-color: rgba(77, 107, 254, 0.1);
 }
 
+/* Asegurar que los textos en celdas de tablas sean visibles en modo oscuro */
+[data-theme="dark"] .table td {
+  color: var(--text-secondary);
+}
+
+/* Clase específica para textos en celdas que necesitan mayor contraste */
+[data-theme="dark"] .text-secondary {
+  color: #adb5bd !important;
+}
+
 [data-theme="dark"] .border-primary {
   border-color: var(--primary-color) !important;
 }
