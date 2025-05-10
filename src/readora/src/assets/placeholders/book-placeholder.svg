@@ -1,11 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
-  <rect width="200" height="300" fill="#f8f9fa"/>
-  <rect x="10" y="10" width="180" height="280" rx="5" ry="5" fill="#e9ecef" stroke="#dee2e6" stroke-width="2"/>
-  
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="200"
+   height="300"
+   viewBox="0 0 200 300"
+   version="1.1"
+   id="svg3"
+   sodipodi:docname="book-placeholder.svg"
+   inkscape:version="1.4.1 (1:1.4.1+202503302257+93de688d07)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="namedview3"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.7033333"
+     inkscape:cx="100.06165"
+     inkscape:cy="120.40691"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3" />
+  <rect
+     x="0.46740144"
+     y="0.097488351"
+     width="198.6953"
+     height="298.69528"
+     rx="5.5193133"
+     ry="5.3338447"
+     fill="#e9ecef"
+     stroke="#dee2e6"
+     stroke-width="2.1703"
+     id="rect2" />
   <!-- Ícono de imagen -->
-  <rect x="50" y="80" width="100" height="80" rx="5" ry="5" fill="none" stroke="#adb5bd" stroke-width="2" />
-  <circle cx="70" cy="100" r="8" fill="#adb5bd" />
-  <path d="M50,140 L80,120 L100,130 L130,100 L150,130 L150,160 L50,160 Z" fill="#adb5bd" />
-  
-  <text x="100" y="200" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057">Sin portada</text>
+  <rect
+     x="50"
+     y="80"
+     width="100"
+     height="80"
+     rx="5"
+     ry="5"
+     fill="none"
+     stroke="#adb5bd"
+     stroke-width="2"
+     id="rect3" />
+  <circle
+     cx="70"
+     cy="100"
+     r="8"
+     fill="#adb5bd"
+     id="circle3" />
+  <path
+     d="M50,140 L80,120 L100,130 L130,100 L150,130 L150,160 L50,160 Z"
+     fill="#adb5bd"
+     id="path3" />
+  <text
+     x="100"
+     y="200"
+     font-family="Arial"
+     font-size="16"
+     text-anchor="middle"
+     fill="#495057"
+     id="text3">Sin portada</text>
 </svg>
