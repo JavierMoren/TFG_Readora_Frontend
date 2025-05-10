@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '../../../enviroments/enviroments';
 import { Libro } from '../../models/libro/libro.model';
 import { Autor } from '../../models/autor/autor.model';
+import { environment } from '../../../enviroments/enviroments';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +14,14 @@ export class LibrosService {
 
   constructor(private http: HttpClient) { }
 
+  // Obtiene todos los libros sin paginación
   getAllLibros(): Observable<Libro[]> {
     return this.http.get<Libro[]>(this.apiUrl).pipe(
       catchError(this.handleError)
     );
   }
-
+  
+  // Obtiene todos los libros con paginación
   getAllLibrosPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -39,7 +41,8 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
-    /**
+  
+  /**
    * Obtiene el detalle completo de un libro, incluyendo la lista de autores asociados
    */
   getLibroDetalleById(id: number): Observable<Libro> {
@@ -48,24 +51,29 @@ export class LibrosService {
     );
   }
 
-  createLibro(libro: Libro): Observable<Libro> {
-    return this.http.post<Libro>(this.apiUrl, libro).pipe(
+  getAutoresByLibroId(id: number): Observable<Autor[]> {
+    return this.http.get<Autor[]>(`${this.apiUrl}/${id}/autores`).pipe(
       catchError(this.handleError)
     );
   }
-
-  updateLibro(libro: Libro): Observable<Libro> {
-    return this.http.put<Libro>(`${this.apiUrl}/${libro.id}`, libro).pipe(
+  
+  getLibrosPaginados(page: number, size: number, sortBy: string, sortDir: string, query?: string): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sortBy', sortBy)
+      .set('sortDir', sortDir);
+    
+    if (query) {
+      params = params.set('query', query);
+    }
+    
+    return this.http.get<any>(`${this.apiUrl}/paginados`, { params }).pipe(
       catchError(this.handleError)
     );
   }
-
-  deleteLibro(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      catchError(this.handleError)
-    );
-  }
-    /**
+  
+  /**
    * Realiza una búsqueda avanzada de libros según múltiples criterios
    */
   searchLibros(
@@ -106,6 +114,25 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
+  
+  createLibro(libro: Libro): Observable<Libro> {
+    return this.http.post<Libro>(this.apiUrl, libro).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
+  updateLibro(libro: Libro): Observable<Libro> {
+    return this.http.put<Libro>(`${this.apiUrl}/${libro.id}`, libro).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
+  deleteLibro(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
   /**
    * Sube una imagen de portada para un libro
    */
@@ -114,20 +141,20 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
+  
   /**
    * Construye una URL completa para una ruta de imagen relativa
    */
-  getImageUrl(relativePath: string | null): string | null {
-    if (!relativePath) return null;
-    return `${environment.apiUrl}/files/${relativePath}`;
-  }
-  /**
-   * Obtiene los autores de un libro específico
-   */
-  getAutoresByLibroId(id: number): Observable<Autor[]> {
-    return this.http.get<Autor[]>(`${this.apiUrl}/${id}/autores`).pipe(
-      catchError(this.handleError)
-    );
+  getImageUrl(path: string | null): string {
+    if (!path) {
+      return '/assets/placeholder-book.jpg';
+    }
+    
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    
+    return `${environment.apiUrl}/files/${path}`;
   }
 
   private handleError(error: HttpErrorResponse) {
