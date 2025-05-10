@@ -55,25 +55,12 @@ export class UsuarioLibroService {
     );
   }
 
-  /**
-   * Obtiene todas las relaciones usuario-libro para un usuario específico
-   * @param usuarioId ID del usuario
-   * @returns Observable con la lista de relaciones usuario-libro
-   */
   getLibrosByUsuarioId(usuarioId: number): Observable<UsuarioLibro[]> {
     return this.http.get<UsuarioLibro[]>(`${this.apiUrl}/usuario/${usuarioId}`).pipe(
       catchError(this.handleError)
     );
   }
 
-  /**
-   * Obtiene las relaciones usuario-libro paginadas con información detallada (nombres de usuario y libro)
-   * @param page Número de página (base 0)
-   * @param size Tamaño de página
-   * @param sort Campo para ordenar
-   * @param direction Dirección del ordenamiento ('asc' o 'desc')
-   * @returns Observable con los resultados paginados con detalles ampliados
-   */
   getUsuarioLibrosDetalladosPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -89,10 +76,8 @@ export class UsuarioLibroService {
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
     if (error.error instanceof ErrorEvent) {
-      // Error del lado del cliente
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Error del lado del servidor
       errorMessage = `Código de error: ${error.status}\nMensaje: ${error.message}`;
       if (error.error) {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;

@@ -8,8 +8,9 @@ import { AutenticacionService } from '../../../core/services/autenticacion.servi
 import { NotificationService } from '../../../core/services/notification.service';
 import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model';
 import { Libro } from '../../../models/libro/libro.model';
+import { Autor } from '../../../models/autor/autor.model';
 import { HttpClientModule } from '@angular/common/http';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin, map, switchMap, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-biblioteca-personal',
@@ -111,33 +112,45 @@ export class BibliotecaPersonalComponent implements OnInit {
         this.librosAbandonados = [];
         
         // Crear un array de observables para obtener detalles de cada libro
-        const observables = usuarioLibros.map(usuarioLibro => 
-          this.libroService.getLibroById(usuarioLibro.libroId).pipe(
-            // Combinamos la información del libro con la relación usuario-libro
-            map(libro => {
-              console.log(`[BibliotecaPersonal] Detalle del libro ${libro.id} obtenido`);
-              // Crear un nuevo objeto explícitamente con las propiedades combinadas
-              return {
-                id: libro.id,
-                titulo: libro.titulo,
-                isbn: libro.isbn,
-                editorial: libro.editorial,
-                anioPublicacion: libro.anioPublicacion,
-                genero: libro.genero,
-                sinopsis: libro.sinopsis,
-                portadaUrl: libro.portadaUrl,
-                numeroPaginas: libro.numeroPaginas,
-                // Añadimos las propiedades de la relación usuario-libro
-                usuarioLibroId: usuarioLibro.id,
-                estadoLectura: usuarioLibro.estadoLectura,
-                valoracion: usuarioLibro.valoracion,
-                comentario: usuarioLibro.comentario,
-                fechaInicioLectura: usuarioLibro.fechaInicioLectura,
-                fechaFinLectura: usuarioLibro.fechaFinLectura
-              };
+        const observables = usuarioLibros.map(usuarioLibro => {
+          // Primero obtenemos los detalles del libro
+          return this.libroService.getLibroById(usuarioLibro.libroId).pipe(
+            // Luego obtenemos los autores para el libro
+            switchMap((libro: Libro) => {
+              console.log(`[BibliotecaPersonal] Detalle del libro ${libro.id} obtenido, obteniendo autores...`);
+              
+              // Obtenemos los autores del libro
+              return this.libroService.getAutoresByLibroId(libro.id).pipe(
+                map(autores => {
+                  console.log(`[BibliotecaPersonal] Autores obtenidos para libro ${libro.id}: ${autores.length}`);
+                  
+                  // Combinamos toda la información
+                  return {
+                    id: libro.id,
+                    titulo: libro.titulo,
+                    isbn: libro.isbn,
+                    editorial: libro.editorial,
+                    anioPublicacion: libro.anioPublicacion,
+                    genero: libro.genero,
+                    sinopsis: libro.sinopsis,
+                    portadaUrl: libro.portadaUrl,
+                    numeroPaginas: libro.numeroPaginas,
+                    // Añadimos el autor (tomamos el primero) y la lista completa de autores
+                    autor: autores.length > 0 ? autores[0] : null,
+                    autores: autores,
+                    // Añadimos las propiedades de la relación usuario-libro
+                    usuarioLibroId: usuarioLibro.id,
+                    estadoLectura: usuarioLibro.estadoLectura,
+                    valoracion: usuarioLibro.valoracion,
+                    comentario: usuarioLibro.comentario,
+                    fechaInicioLectura: usuarioLibro.fechaInicioLectura,
+                    fechaFinLectura: usuarioLibro.fechaFinLectura
+                  };
+                })
+              );
             })
-          )
-        );
+          );
+        });
         
         console.log(`[BibliotecaPersonal] Realizando ${observables.length} peticiones para obtener detalles de libros`);
         

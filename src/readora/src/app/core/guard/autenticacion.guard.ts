@@ -10,10 +10,9 @@ export const autenticacionGuard: CanActivateFn = (route, state) => {
     return authService.isLoggedIn().pipe(
         map(isAuthenticated => {
             if (isAuthenticated) {
-                return true; // Usuario autenticado
+                return true; 
             }
             
-            // Redirige al forbidden si el usuario no está autenticado
             router.navigate(['/forbidden']);
             return false;
         }),

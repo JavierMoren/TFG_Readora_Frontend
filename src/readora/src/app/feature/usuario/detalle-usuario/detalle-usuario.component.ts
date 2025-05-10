@@ -140,7 +140,7 @@ export class DetalleUsuarioComponent implements OnInit {
         nombre: formValues.nombre,
         apellido: formValues.apellido,
         gmail: formValues.gmail,
-        contrasenna: this.usuario.contrasenna, // Mantener la contraseña existente
+        contrasenna: this.usuario.contrasenna,
         enabled: this.usuario.enabled,
         fechaCreacion: this.usuario.fechaCreacion
       };

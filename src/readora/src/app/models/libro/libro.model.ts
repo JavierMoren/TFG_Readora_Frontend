@@ -1,4 +1,3 @@
-// Importación de la interfaz Autor
 import { Autor } from '../autor/autor.model';
 
 export interface Libro {
@@ -11,7 +10,7 @@ export interface Libro {
   sinopsis: string | null;
   portadaUrl: string | null;
   numeroPaginas: number | null;
-  autor?: Autor; // Para mostrar info del autor principal en la UI
-  autores?: Autor[];
+  autor?: Autor; // Autor principal para vistas simplificadas
+  autores?: Autor[]; // Todos los autores del libro
 }
 

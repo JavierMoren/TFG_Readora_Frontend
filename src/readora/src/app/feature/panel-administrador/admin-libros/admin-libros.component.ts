@@ -15,27 +15,17 @@ import { NotificationService } from '../../../core/services/notification.service
   styleUrl: './admin-libros.component.css'
 })
 export class AdminLibrosComponent implements OnInit {
-  // Array para almacenar todos los libros
   libros: Libro[] = [];
-  // Libro actual que se está creando o editando
   currentLibro: any = this.initializeLibro();
-  // Detalles del libro seleccionado
   libroDetalle: Libro | null = null;
-  // Controla la visibilidad del formulario
   showForm: boolean = false;
-  // Indica si estamos en modo edición
   isEditing: boolean = false;
-  // Variable para guardar el término de búsqueda
   searchTerm: string = '';
   
-  // Control para la carga de imágenes
   selectedFile: File | null = null;
-  // URL para previsualización de la imagen de portada
   previewPortadaUrl: string | null = null;
-  // Indica si se está subiendo una imagen
   isUploading: boolean = false;
   
-  // Propiedades para la paginación
   currentPage: number = 0;
   pageSize: number = 10;
   totalElements: number = 0;
@@ -43,18 +33,14 @@ export class AdminLibrosComponent implements OnInit {
   sortBy: string = 'id';
   sortDirection: string = 'asc';
   
-  // Propiedades para eliminar un libro
   libroIdToDelete: number | null = null;
 
-  // Para selector de autores
   allAutores: Autor[] = [];
   selectedAutorId: number | null = null;
   showAutorSelectorModal: boolean = false;
 
-  // Rutas para imágenes predeterminadas
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
 
-  // Exponer Math para usar en la plantilla
   Math = Math;
 
   constructor(
@@ -70,7 +56,7 @@ export class AdminLibrosComponent implements OnInit {
   }
 
   /**
-   * Carga todos los autores para poder asociarlos a libros
+   * Carga los autores disponibles para la asociación con libros
    */
   loadAutores(): void {
     this.autorService.getAllAutores().subscribe({
@@ -87,7 +73,7 @@ export class AdminLibrosComponent implements OnInit {
   }
 
   /**
-   * Obtiene los libros con paginación
+   * Recupera los libros aplicando filtros y paginación para optimizar la carga
    */
   getLibrosPaginados(): void {
     this.librosService.getLibrosPaginados(

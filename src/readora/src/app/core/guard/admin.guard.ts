@@ -13,10 +13,10 @@ export const adminGuard: CanActivateFn = (route, state) => {
           userInfo.roles && 
           Array.isArray(userInfo.roles) && 
           userInfo.roles.includes('ROLE_ADMIN')) {
-        return true; // Usuario es administrador
+        return true; 
       }
       
-      // Si el usuario no es administrador, redirige a la página forbidden
+      
       router.navigate(['/forbidden']);
       return false;
     }),

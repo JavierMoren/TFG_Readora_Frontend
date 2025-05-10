@@ -14,6 +14,7 @@ import { AdminRolesComponent } from './feature/panel-administrador/admin-roles/a
 import { AdminUsuarioLibrosComponent } from './feature/panel-administrador/admin-usuario-libros/admin-usuario-libros.component';
 import { BuscadorComponent } from './feature/buscador/buscador.component';
 import { DetalleUsuarioComponent } from './feature/usuario/detalle-usuario/detalle-usuario.component';
+import { BibliotecaPersonalComponent } from './feature/biblioteca/biblioteca-personal/biblioteca-personal.component';
 
 export const routes: Routes = [
   {
@@ -37,11 +38,9 @@ export const routes: Routes = [
     path: 'buscador',
     component: BuscadorComponent,
     canActivate: [autenticacionGuard]
-  },
-  {
+  },  {
     path: 'biblioteca',
-    loadComponent: () => import('./feature/biblioteca/biblioteca-personal/biblioteca-personal.component')
-      .then(m => m.BibliotecaPersonalComponent),
+    component: BibliotecaPersonalComponent,
     canActivate: [autenticacionGuard]
   },
   {

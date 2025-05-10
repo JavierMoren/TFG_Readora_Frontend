@@ -52,8 +52,6 @@ export class UsuarioService {
   /**
    * Actualiza un usuario incluyendo la contraseña
    * Este método es específico para cuando se actualiza la contraseña de un usuario
-   * @param usuario Datos del usuario con la nueva contraseña
-   * @returns Observable con el usuario actualizado
    */
   updateUsuarioConPassword(usuario: Usuario): Observable<Usuario> {
     // Utilizamos la misma ruta de actualización estándar pero enviando explícitamente la contraseña
@@ -70,8 +68,6 @@ export class UsuarioService {
   
   /**
    * Verifica si la contraseña proporcionada coincide con la almacenada para el usuario
-   * @param credenciales Objeto con el nombre de usuario y contraseña a verificar
-   * @returns Observable que emite el resultado de la verificación
    */
   verificarContrasenna(credenciales: {usuario: string, contrasenna: string}): Observable<{valida: boolean}> {
     return this.http.post<{valida: boolean}>(`${this.apiUrl}/verificar-contrasenna`, credenciales).pipe(

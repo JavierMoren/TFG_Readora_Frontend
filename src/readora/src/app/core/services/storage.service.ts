@@ -11,80 +11,41 @@ export class StorageService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * Sube un archivo al servidor
-   * @param file FormData con el archivo a subir
-   * @param tipo Tipo de archivo ('autor' o 'libro')
-   * @returns Observable con la respuesta del servidor
-   */
   uploadFile(file: FormData, tipo: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/upload/${tipo}`, file);
   }
   
-  /**
-   * Sube una imagen de libro al servidor
-   * @param file Archivo de imagen a subir
-   * @returns Observable con la respuesta del servidor
-   */
   uploadLibroImage(file: Blob): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file instanceof File ? file.name : 'libro.jpg');
     return this.uploadFile(formData, 'libro');
   }
   
-  /**
-   * Sube una imagen de autor al servidor
-   * @param file Archivo de imagen a subir
-   * @returns Observable con la respuesta del servidor
-   */
   uploadAutorImage(file: Blob): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file instanceof File ? file.name : 'autor.jpg');
     return this.uploadFile(formData, 'autor');
   }
   
-  /**
-   * Alias para uploadLibroImage para mantener compatibilidad con código existente
-   * @param file Archivo de imagen a subir
-   * @returns Observable con la respuesta del servidor
-   */
   uploadLibroPortada(file: File): Observable<any> {
     return this.uploadLibroImage(file);
   }
   
-  /**
-   * Alias para uploadAutorImage para mantener compatibilidad con código existente
-   * @param file Archivo de imagen a subir
-   * @returns Observable con la respuesta del servidor
-   */
   uploadAutorFoto(file: File): Observable<any> {
     return this.uploadAutorImage(file);
   }
 
-  /**
-   * Construye la URL completa para un recurso de imagen
-   * @param path Ruta relativa de la imagen
-   * @returns URL completa para acceder a la imagen
-   */
   getFullImageUrl(path: string | null): string {
     if (!path) {
       return this.getDefaultImageUrl(path);
     }
     
-    // Si la ruta ya es una URL completa, devolverla tal cual
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-    
-    // Si es una ruta relativa, construir la URL completa
     return `${environment.apiUrl}/files/${path}`;
   }
   
-  /**
-   * Devuelve una URL de imagen por defecto según el tipo
-   * @param path Ruta original (si contiene "autor" o "libro")
-   * @returns URL de la imagen por defecto
-   */
   getDefaultImageUrl(path: string | null): string {
     if (path && path.includes('autor')) {
       return 'assets/images/default-author.jpg';
@@ -94,8 +55,6 @@ export class StorageService {
 
   /**
    * Elimina un archivo del servidor
-   * @param path Ruta relativa del archivo a eliminar
-   * @returns Observable con la respuesta del servidor
    */
   deleteFile(path: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${path}`);

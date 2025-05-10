@@ -39,11 +39,8 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
-  
-  /**
+    /**
    * Obtiene el detalle completo de un libro, incluyendo la lista de autores asociados
-   * @param id ID del libro a obtener
-   * @returns Observable con el detalle completo del libro
    */
   getLibroDetalleById(id: number): Observable<Libro> {
     return this.http.get<Libro>(`${this.apiUrl}/${id}/detalle`).pipe(
@@ -68,17 +65,8 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
-  
-  /**
+    /**
    * Realiza una búsqueda avanzada de libros según múltiples criterios
-   * 
-   * @param query Texto a buscar en título o sinopsis
-   * @param filters Filtros adicionales como género, año, etc.
-   * @param page Número de página (base 0)
-   * @param size Tamaño de página
-   * @param sort Campo para ordenar
-   * @param direction Dirección del ordenamiento ('asc' o 'desc')
-   * @returns Observable con los resultados paginados de la búsqueda
    */
   searchLibros(
     query: string, 
@@ -118,36 +106,23 @@ export class LibrosService {
       catchError(this.handleError)
     );
   }
-
   /**
    * Sube una imagen de portada para un libro
-   * 
-   * @param formData FormData que contiene el archivo a subir
-   * @returns Observable con la respuesta del servidor, que incluye la URL de la imagen
    */
   uploadPortadaImage(formData: FormData): Observable<any> {
     return this.http.post(`${environment.apiUrl}/files/upload/libro`, formData).pipe(
       catchError(this.handleError)
     );
   }
-
   /**
    * Construye una URL completa para una ruta de imagen relativa
-   * 
-   * @param relativePath Ruta relativa de la imagen (ej: "libro/uuid-filename.jpg")
-   * @returns URL completa para acceder a la imagen
    */
   getImageUrl(relativePath: string | null): string | null {
     if (!relativePath) return null;
     return `${environment.apiUrl}/files/${relativePath}`;
   }
-
   /**
    * Obtiene los autores de un libro específico
-   * Este método consume el endpoint del backend que hemos creado
-   * 
-   * @param id ID del libro
-   * @returns Observable con la lista de autores del libro
    */
   getAutoresByLibroId(id: number): Observable<Autor[]> {
     return this.http.get<Autor[]>(`${this.apiUrl}/${id}/autores`).pipe(

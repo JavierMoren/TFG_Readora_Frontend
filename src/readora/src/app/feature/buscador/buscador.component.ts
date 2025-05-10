@@ -35,12 +35,11 @@ export class BuscadorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Suscripción a cambios en el tipo de búsqueda
     this.searchForm.get('searchType')?.valueChanges.subscribe(value => {
       this.isSearchingBooks = value === 'libros';
       this.results = [];
       this.totalItems = 0;
-      this.currentPage = 0; // Resetear página al cambiar tipo de búsqueda
+      this.currentPage = 0;
     });
   }
 
@@ -50,11 +49,9 @@ export class BuscadorComponent implements OnInit {
     const searchTerm = this.searchForm.get('searchTerm')?.value;
     const searchType = this.searchForm.get('searchType')?.value;
     
-    // Guardar términos de búsqueda actuales
     this.lastSearchTerm = searchTerm;
     this.lastSearchType = searchType;
     
-    // Resetear a la primera página cuando se realiza una nueva búsqueda
     if (searchTerm !== this.lastSearchTerm || searchType !== this.lastSearchType) {
       this.currentPage = 0;
     }

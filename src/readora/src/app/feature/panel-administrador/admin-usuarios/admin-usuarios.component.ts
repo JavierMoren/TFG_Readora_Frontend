@@ -13,26 +13,17 @@ import { NotificationService } from '../../../core/services/notification.service
   styleUrl: './admin-usuarios.component.css'
 })
 export class AdminUsuariosComponent implements OnInit {
-  // Array para almacenar todos los usuarios
   usuarios: Usuario[] = [];
-  // Usuario actual que se está creando o editando
   currentUsuario: any = this.initializeUsuario();
-  // Detalles del usuario seleccionado
   usuarioDetalle: Usuario | null = null;
-  // Controla la visibilidad del formulario
   showForm: boolean = false;
-  // Indica si estamos en modo edición
   isEditing: boolean = false;
-  // Formulario reactivo
   usuarioForm!: FormGroup;
-  // Variables para el cambio de contraseña
   cambiarContrasenna: boolean = false;
   passwordForm!: FormGroup;
   
-  // Variables para el modal de confirmación
   userIdToDelete: number | null = null;
   
-  // Propiedades para la paginación
   currentPage: number = 0;
   pageSize: number = 10;
   totalElements: number = 0;
@@ -40,7 +31,6 @@ export class AdminUsuariosComponent implements OnInit {
   sortBy: string = 'id';
   sortDirection: string = 'asc';
   
-  // Exponer Math para usarlo en la plantilla
   Math = Math;
 
   constructor(

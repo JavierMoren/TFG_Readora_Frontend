@@ -161,17 +161,12 @@ export class ResultadoBusquedaComponent implements OnChanges {
         this.pages.push(i);
       }
     } else {
-      // Para más de 7 páginas, usar lógica de separadores
-      
-      // Siempre mostrar primera página
       this.pages.push(0);
       
-      // Añadir separador después de la primera página si la página actual está lejos del inicio
       if (this.currentPage > 2) {
         this.pages.push(-1); // -1 representa un separador "..."
       }
       
-      // Páginas alrededor de la actual
       const startPage = Math.max(1, this.currentPage - 1);
       const endPage = Math.min(this.totalPages - 2, this.currentPage + 1);
       
@@ -179,12 +174,10 @@ export class ResultadoBusquedaComponent implements OnChanges {
         this.pages.push(i);
       }
       
-      // Añadir separador antes de la última página si la página actual está lejos del final
       if (this.currentPage < this.totalPages - 3) {
         this.pages.push(-1);
       }
       
-      // Siempre mostrar la última página
       this.pages.push(this.totalPages - 1);
     }
     
@@ -303,7 +296,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
     
     console.log(`[ResultadoBusqueda] Eliminando libro ${libro.id} de la biblioteca, relación: ${usuarioLibroId}`);
     
-    // Mostrar confirmación
     this.notificationService.confirm({
       title: '¿Eliminar libro?',
       text: '¿Estás seguro de eliminar este libro de tu biblioteca?',
@@ -312,7 +304,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
       cancelButtonText: 'Cancelar'
     }).then(resultado => {
       if (resultado) {
-        // Marcar como "eliminando" para deshabilitar el botón
         this.librosEliminando.add(libro.id);
         
         this.usuarioLibroService.deleteUsuarioLibro(usuarioLibroId as number).subscribe({

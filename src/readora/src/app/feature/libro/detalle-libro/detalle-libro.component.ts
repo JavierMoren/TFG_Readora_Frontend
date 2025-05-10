@@ -47,7 +47,6 @@ export class DetalleLibroComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Verificar si el usuario está autenticado
     this.authService.isLoggedIn().subscribe(isLoggedIn => {
       this.isLoggedIn = isLoggedIn;
       if (isLoggedIn) {
@@ -79,9 +78,6 @@ export class DetalleLibroComponent implements OnInit {
     });
   }
 
-  /**
-   * Verifica si el libro actual está en la biblioteca del usuario
-   */
   verificarLibroEnBiblioteca(): void {
     if (!this.usuarioId || !this.libroId) return;
     
@@ -225,9 +221,6 @@ export class DetalleLibroComponent implements OnInit {
     });
   }
 
-  /**
-   * Elimina el libro actual de la biblioteca personal del usuario
-   */
   eliminarDeColeccion(): void {
     if (!this.isLoggedIn || !this.usuarioLibroId) {
       return;

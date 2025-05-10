@@ -20,13 +20,7 @@ export class AutenticacionService {
   constructor(private http: HttpClient, private router: Router) {
     // Comprobar si el usuario está autenticado al inicializar el servicio
     this.checkAuthentication();
-  }
-
-  /**
-   * Verifica si hay una sesión autenticada activa consultando al servidor
-   * Esta función se puede llamar en cualquier momento para refrescar el estado
-   */
-  checkAuthentication(): void {
+  }  checkAuthentication(): void {
     // Consultar al backend sobre el estado de autenticación utilizando las cookies
     this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
       .pipe(
@@ -49,15 +43,7 @@ export class AutenticacionService {
           this.token = response.token;
         }
       });
-  }
-
-  /**
-   * Método para autenticar al usuario.
-   * @param username - Nombre de usuario ingresado.
-   * @param password - Contraseña ingresada.
-   * @returns Observable que emite un objeto con el resultado de la autenticación
-   */
-  authenticateUsuario(usuario: string, contrasenna: string): Observable<any> {
+  }  authenticateUsuario(usuario: string, contrasenna: string): Observable<any> {
     return this.http.post<any>(
       this.apiUrl,
       { usuario, contrasenna },
@@ -82,23 +68,11 @@ export class AutenticacionService {
         }
       })
     );
-  }
-
-  /**
-   * Devuelve un observable que emite el estado de autenticación
-   * @returns Observable<boolean>
-   */
-  isLoggedIn(): Observable<boolean> {
+  }  isLoggedIn(): Observable<boolean> {
     // Al suscribirse a este observable, verificamos primero el estado de autenticación
     this.checkAuthentication();
     return this.isAuthenticated.asObservable();
-  }
-
-  /**
-   * Método para cerrar la sesión del usuario.
-   * Elimina la cookie solicitando al backend y redirige al usuario a la página de inicio.
-   */
-  logout(): void {
+  }  logout(): void {
     // Llamar al endpoint de logout para invalidar la cookie del lado del servidor
     this.http.post<any>(this.logoutUrl, {}, { withCredentials: true })
       .subscribe({
@@ -114,34 +88,13 @@ export class AutenticacionService {
           this.router.navigate(['/']);
         }
       });
-  }
-
-  /**
-   * Obtiene información del usuario decodificando el JWT desde una API segura
-   * @returns Observable con la información del usuario
-   */
-  getUserInfo(): Observable<any> {
+  }  getUserInfo(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/v1/user-info`, { withCredentials: true });
-  }
-
-  /**
-   * Guarda el token JWT para compatibilidad con componentes existentes
-   * @param token - El token JWT a guardar
-   */
-  setToken(token: string): void {
+  }  setToken(token: string): void {
     this.token = token;
     this.isAuthenticated.next(!!token);
-  }
-
-  /**
-   * Obtiene el token JWT actual. Si no existe, intenta obtenerlo del servidor
-   * @returns El token JWT o null si no existe
-   */
-  getToken(): string | null {
-    // Si no tenemos token en memoria, pero estamos autenticados, 
-    // podríamos verificar de nuevo con el servidor
+  }  getToken(): string | null {
     if (!this.token && this.isAuthenticated.getValue()) {
-      // Hacemos una llamada síncrona para intentar obtener el token actualizado
       this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
         .subscribe(response => {
           if (response && response.token) {

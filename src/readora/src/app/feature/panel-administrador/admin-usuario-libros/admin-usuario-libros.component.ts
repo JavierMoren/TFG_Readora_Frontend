@@ -29,13 +29,11 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   // Indica si estamos en modo edición
   isEditing: boolean = false;
   
-  // Propiedades para el modal de confirmación
   showConfirmModal: boolean = false;
   confirmModalTitle: string = '¿Eliminar registro de lectura?';
   confirmModalMessage: string = 'Esta acción no se puede deshacer';
   usuarioLibroIdToDelete: number | null = null;
 
-  // Propiedades para la paginación
   currentPage: number = 0;
   pageSize: number = 10;
   totalElements: number = 0;
@@ -43,7 +41,6 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   sortBy: string = 'id';
   sortDirection: string = 'asc';
   
-  // Exponer Math para usarlo en la plantilla
   Math = Math;
 
   // La función getPagesArray() se ha eliminado ya que ahora usamos una paginación simplificada
@@ -109,10 +106,8 @@ export class AdminUsuarioLibrosComponent implements OnInit {
           }) as Observable<ResultadoCombinado>;
         });
         
-        // Esperamos a que todas las peticiones se completen
         forkJoin(observables).subscribe({
           next: (resultados) => {
-            // Combinamos la información de usuario y libro en cada relación
             this.usuarioLibros = resultados.map((resultado) => {
               return {
                 ...resultado.relacion,

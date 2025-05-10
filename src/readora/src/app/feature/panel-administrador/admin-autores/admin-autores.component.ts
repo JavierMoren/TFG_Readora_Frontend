@@ -71,10 +71,6 @@ export class AdminAutoresComponent implements OnInit {
     });
   }
 
-  /**
-   * Cambia a la página especificada
-   * @param page - Número de página (0-based)
-   */
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
       this.currentPage = page;
@@ -82,10 +78,6 @@ export class AdminAutoresComponent implements OnInit {
     }
   }
 
-  /**
-   * Cambia el ordenamiento de los datos
-   * @param sortBy - Campo por el que ordenar
-   */
   changeSort(sortBy: string): void {
     if (this.sortBy === sortBy) {
       // Si ya está ordenando por este campo, cambia la dirección
