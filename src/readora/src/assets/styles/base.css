@@ -116,20 +116,3 @@ a:hover {
     padding: 2rem 0;
   }
 }
-
-/* Theme toggle button */
-.theme-toggle {
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  background-color: var(--background-subtle);
-  color: var(--text-primary);
-}
-
-.theme-toggle:hover {
-  background-color: var(--border-color);
-}

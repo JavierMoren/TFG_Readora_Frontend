@@ -15,14 +15,14 @@
   </div>
 
   <!-- Detalles del libro -->
-  <div class="libro-detalle-container" *ngIf="libro && !loading">
+  <div class="libro-detalle-container" *ngIf="libro && !loading" role="main" aria-labelledby="titulo-libro">
     <div class="card shadow-sm libro-card">
       <div class="row g-0">
         <!-- Portada del libro -->
         <div class="col-md-4 col-lg-3">
           <div class="libro-portada-container">
             <img [src]="getPortadaUrl(libro.portadaUrl)" 
-                 alt="Portada de {{ libro.titulo }}" 
+                 [attr.alt]="'Portada del libro ' + libro.titulo" 
                  class="libro-portada">
             
             <div class="libro-acciones-container mt-3">
@@ -30,9 +30,10 @@
               <button class="btn btn-primary btn-block" 
                       *ngIf="isLoggedIn && !enBiblioteca" 
                       (click)="agregarABiblioteca()"
-                      [disabled]="agregando">
+                      [disabled]="agregando"
+                      aria-label="Añadir este libro a mi biblioteca">
                 <ng-container *ngIf="!agregando">
-                  <span class="material-icons">bookmark_add</span>
+                  <span class="material-icons" aria-hidden="true">bookmark_add</span>
                   <span>Añadir a mi biblioteca</span>
                 </ng-container>
                 <ng-container *ngIf="agregando">
@@ -45,9 +46,10 @@
               <button class="btn btn-outline-danger btn-block"
                       *ngIf="isLoggedIn && enBiblioteca"
                       (click)="eliminarDeColeccion()"
-                      [disabled]="eliminando">
+                      [disabled]="eliminando"
+                      aria-label="Eliminar este libro de mi biblioteca">
                 <ng-container *ngIf="!eliminando">
-                  <span class="material-icons">delete</span>
+                  <span class="material-icons" aria-hidden="true">delete</span>
                   <span>Eliminar de mi biblioteca</span>
                 </ng-container>
                 <ng-container *ngIf="eliminando">
@@ -60,8 +62,9 @@
               <button class="btn btn-outline-primary btn-block" 
                       *ngIf="!isLoggedIn" 
                       routerLink="/api/v1/authenticate" 
-                      [queryParams]="{returnUrl: '/libros/' + libroId}">
-                <span class="material-icons">login</span>
+                      [queryParams]="{returnUrl: '/libros/' + libroId}"
+                      aria-label="Iniciar sesión para añadir este libro a tu biblioteca">
+                <span class="material-icons" aria-hidden="true">login</span>
                 <span>Iniciar sesión para añadir</span>
               </button>
             </div>
@@ -71,13 +74,14 @@
         <!-- Información del libro -->
         <div class="col-md-8 col-lg-9">
           <div class="card-body libro-info-container">
-            <h1 class="libro-titulo">{{ libro.titulo }}</h1>
+            <h1 class="libro-titulo" id="titulo-libro">{{ libro.titulo }}</h1>
             
             <!-- Mostrar múltiples autores -->
             <div class="libro-autores" *ngIf="autores && autores.length > 0">
               <span class="por-texto">por </span>
               <ng-container *ngFor="let autor of autores; let last = last; let i = index">
-                <a [routerLink]="['/autores', autor.id]" class="autor-link">
+                <a [routerLink]="['/autores', autor.id]" class="autor-link" 
+                   [attr.aria-label]="'Ver perfil del autor ' + autor.nombre">
                   {{ autor.nombre }} {{ autor.apellido }}
                 </a>
                 <ng-container *ngIf="!last">

@@ -1,54 +1,81 @@
 <div class="container biblioteca-container">
   <div class="biblioteca-header">
-    <h1 class="biblioteca-title mb-2">Mi Biblioteca Personal</h1>
+    <h1 class="biblioteca-title mb-2" id="biblioteca-title">Mi Biblioteca Personal</h1>
     <p class="biblioteca-subtitle">Organiza y gestiona todas tus lecturas en un solo lugar</p>
   </div>
 
   <!-- Filtros rediseñados para seleccionar qué libros mostrar -->
-  <div class="filtros-container">
+  <div class="filtros-container" role="tablist" aria-label="Filtros de biblioteca">
     <div class="filtros-wrapper">
       <button type="button" class="filtro-btn" 
           [class.active]="filtroActual === 'todos'" 
-          (click)="cambiarFiltro('todos')">
+          (click)="cambiarFiltro('todos')"
+          role="tab"
+          [attr.aria-selected]="filtroActual === 'todos'"
+          aria-controls="seccion-todos"
+          id="tab-todos">
           <span class="filtro-text">Todos</span>
           <span class="filtro-count">{{librosLeyendo.length + librosPendientes.length + librosTerminados.length + librosAbandonados.length}}</span>
+          <span class="visually-hidden"> libros en total</span>
       </button>
       <button type="button" class="filtro-btn" 
           [class.active]="filtroActual === 'leyendo'" 
-          (click)="cambiarFiltro('leyendo')">
-          <span class="filtro-icon"><span class="material-icons">auto_stories</span></span>
+          (click)="cambiarFiltro('leyendo')"
+          role="tab"
+          [attr.aria-selected]="filtroActual === 'leyendo'"
+          aria-controls="seccion-leyendo"
+          id="tab-leyendo">
+          <span class="filtro-icon"><span class="material-icons" aria-hidden="true">auto_stories</span></span>
           <span class="filtro-text">Leyendo</span>
           <span class="filtro-count" [class.has-items]="librosLeyendo.length > 0">{{librosLeyendo.length}}</span>
+          <span class="visually-hidden"> libros leyendo</span>
       </button>
       <button type="button" class="filtro-btn" 
           [class.active]="filtroActual === 'pendientes'" 
-          (click)="cambiarFiltro('pendientes')">
-          <span class="filtro-icon"><span class="material-icons">bookmark</span></span>
+          (click)="cambiarFiltro('pendientes')"
+          role="tab"
+          [attr.aria-selected]="filtroActual === 'pendientes'"
+          aria-controls="seccion-pendientes"
+          id="tab-pendientes">
+          <span class="filtro-icon"><span class="material-icons" aria-hidden="true">bookmark</span></span>
           <span class="filtro-text">Por leer</span>
           <span class="filtro-count" [class.has-items]="librosPendientes.length > 0">{{librosPendientes.length}}</span>
+          <span class="visually-hidden"> libros por leer</span>
       </button>
       <button type="button" class="filtro-btn" 
           [class.active]="filtroActual === 'terminados'" 
-          (click)="cambiarFiltro('terminados')">
-          <span class="filtro-icon"><span class="material-icons">check_circle</span></span>
+          (click)="cambiarFiltro('terminados')"
+          role="tab"
+          [attr.aria-selected]="filtroActual === 'terminados'"
+          aria-controls="seccion-terminados"
+          id="tab-terminados">
+          <span class="filtro-icon"><span class="material-icons" aria-hidden="true">check_circle</span></span>
           <span class="filtro-text">Leídos</span>
           <span class="filtro-count" [class.has-items]="librosTerminados.length > 0">{{librosTerminados.length}}</span>
+          <span class="visually-hidden"> libros leídos</span>
       </button>
       <button type="button" class="filtro-btn" 
           [class.active]="filtroActual === 'abandonados'" 
-          (click)="cambiarFiltro('abandonados')">
-          <span class="filtro-icon"><span class="material-icons">cancel</span></span>
+          (click)="cambiarFiltro('abandonados')"
+          role="tab"
+          [attr.aria-selected]="filtroActual === 'abandonados'"
+          aria-controls="seccion-abandonados"
+          id="tab-abandonados">
+          <span class="filtro-icon"><span class="material-icons" aria-hidden="true">cancel</span></span>
           <span class="filtro-text">Abandonados</span>
           <span class="filtro-count" [class.has-items]="librosAbandonados.length > 0">{{librosAbandonados.length}}</span>
+          <span class="visually-hidden"> libros abandonados</span>
       </button>
     </div>
   </div>
 
   <!-- Mensaje cuando no hay libros -->
   <div *ngIf="!librosLeyendo.length && !librosPendientes.length && !librosTerminados.length && !librosAbandonados.length && !cargando"
-       class="sin-libros">
+       class="sin-libros"
+       aria-live="polite"
+       role="status">
       <div class="sin-libros-icon">
-        <span class="material-icons">menu_book</span>
+        <span class="material-icons" aria-hidden="true">menu_book</span>
       </div>
       <h3 class="sin-libros-title">Tu biblioteca está vacía</h3>
       <p class="sin-libros-text">
@@ -62,7 +89,7 @@
   </div>
   
   <!-- Indicador de carga -->
-  <div *ngIf="cargando" class="loading-state">
+  <div *ngIf="cargando" class="loading-state" aria-live="polite" role="status">
       <div class="spinner">
           <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Cargando...</span>
@@ -72,10 +99,15 @@
   </div>
 
   <!-- Sección de libros que estoy leyendo -->
-  <div *ngIf="(filtroActual === 'todos' || filtroActual === 'leyendo') && librosLeyendo.length > 0" class="biblioteca-section">
+  <div *ngIf="(filtroActual === 'todos' || filtroActual === 'leyendo') && librosLeyendo.length > 0" 
+       class="biblioteca-section" 
+       role="tabpanel" 
+       id="seccion-leyendo" 
+       aria-labelledby="tab-leyendo"
+       [attr.hidden]="!(filtroActual === 'todos' || filtroActual === 'leyendo')">
       <div class="section-header">
           <h2 class="section-title">
-            <span class="material-icons section-icon">auto_stories</span>
+            <span class="material-icons section-icon" aria-hidden="true">auto_stories</span>
             Estoy leyendo
           </h2>
           <span class="section-count">{{librosLeyendo.length}} {{librosLeyendo.length === 1 ? 'libro' : 'libros'}}</span>

@@ -1,16 +1,21 @@
 <div class="results-container">
-  <h3 class="mb-3">Resultados ({{ totalItems }})</h3>
+  <h3 class="mb-3" id="search-results-heading">Resultados ({{ totalItems }})</h3>
   
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    <div class="col" *ngFor="let item of results">
-      <div class="card h-100" (click)="navigateToDetails(item)">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" aria-labelledby="search-results-heading" role="list">
+    <div class="col" *ngFor="let item of results; let i = index" role="listitem">
+      <div class="card h-100" (click)="navigateToDetails(item)" 
+           (keydown.enter)="navigateToDetails(item)"
+           (keydown.space)="$event.preventDefault(); navigateToDetails(item)"
+           tabindex="0" 
+           role="button"
+           [attr.aria-label]="'Ver detalles de ' + (isBooks ? item.titulo : item.nombre)">
         <div class="card-body">
           <!-- Contenido para Libros -->
           <ng-container *ngIf="isBooks">
             <div class="d-flex">
               <div class="me-3">
                 <img [src]="getImageUrl(item)" 
-                     alt="Portada del libro" 
+                     [alt]="'Portada del libro ' + item.titulo" 
                      class="book-cover-sm">
               </div>
               <div>
@@ -29,13 +34,14 @@
               <button *ngIf="!libroEstaEnBiblioteca(item.id)" 
                       class="btn btn-sm btn-primary w-100"
                       (click)="agregarABiblioteca(item, $event)" 
-                      [disabled]="librosAgregando.has(item.id)">
+                      [disabled]="librosAgregando.has(item.id)"
+                      aria-label="Añadir libro a mi biblioteca">
                 <span *ngIf="!librosAgregando.has(item.id)">
-                  <i class="bi bi-plus-circle me-1"></i> Añadir a mi biblioteca
+                  <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Añadir a mi biblioteca
                 </span>
                 <span *ngIf="librosAgregando.has(item.id)">
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  Añadiendo...
+                  <span>Añadiendo...</span>
                 </span>
               </button>
               
@@ -43,13 +49,14 @@
               <button *ngIf="libroEstaEnBiblioteca(item.id)"
                       class="btn btn-sm btn-outline-danger w-100"
                       (click)="eliminarDeColeccion(item, $event)"
-                      [disabled]="librosEliminando.has(item.id)">
+                      [disabled]="librosEliminando.has(item.id)"
+                      aria-label="Eliminar libro de mi biblioteca">
                 <span *ngIf="!librosEliminando.has(item.id)">
-                  <i class="bi bi-trash me-1"></i> Eliminar de mi biblioteca
+                  <i class="bi bi-trash me-1" aria-hidden="true"></i> Eliminar de mi biblioteca
                 </span>
                 <span *ngIf="librosEliminando.has(item.id)">
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  Eliminando...
+                  <span>Eliminando...</span>
                 </span>
               </button>
             </div>
@@ -60,12 +67,16 @@
             <div class="d-flex align-items-center">
               <div class="author-image me-3">
                 <img [src]="getAuthorImageUrl(item)" 
-                     alt="Foto del autor" 
+                     [alt]="'Foto del autor ' + item.nombre"
                      class="rounded-circle img-author">
               </div>
               <div>
                 <h5 class="card-title">{{ item.nombre }}</h5>
-                <p class="card-text text-muted">{{ item.fechaNacimiento | date:'yyyy' }} - {{ item.fechaFallecimiento ? (item.fechaFallecimiento | date:'yyyy') : 'Presente' }}</p>
+                <p class="card-text text-muted">
+                  <span aria-label="Periodo de vida">
+                    {{ item.fechaNacimiento | date:'yyyy' }} - {{ item.fechaFallecimiento ? (item.fechaFallecimiento | date:'yyyy') : 'Presente' }}
+                  </span>
+                </p>
               </div>
             </div>
           </ng-container>
@@ -86,9 +97,10 @@
     <div class="d-flex flex-wrap align-items-center gap-3">
       <!-- Selector de tamaño de página -->
       <div class="d-flex align-items-center">
-        <span class="text-secondary me-2 small">Mostrar:</span>
-        <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" 
-                [ngModel]="pageSize" (ngModelChange)="pageSize = $event; changePageSize()">
+        <label for="page-size-select" class="text-secondary me-2 small">Mostrar:</label>
+        <select id="page-size-select" class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" 
+                [ngModel]="pageSize" (ngModelChange)="pageSize = $event; changePageSize()"
+                aria-label="Seleccionar número de resultados por página">
           <option [ngValue]="5">5</option>
           <option [ngValue]="10">10</option>
           <option [ngValue]="25">25</option>
@@ -97,47 +109,62 @@
       </div>
       
       <!-- Paginación -->
-      <nav aria-label="Navegación de resultados">
-        <ul class="pagination pagination-sm mb-0">
+      <nav aria-label="Navegación de páginas para resultados de búsqueda">
+        <ul class="pagination pagination-sm mb-0" role="list">
           <!-- Botón Anterior -->
-          <li class="page-item" [class.disabled]="currentPage === 0">
-            <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">
-              <span class="material-icons small">navigate_before</span>
+          <li class="page-item" [class.disabled]="currentPage === 0" role="listitem">
+            <button class="page-link" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0"
+                   aria-label="Ir a página anterior">
+              <span class="material-icons small" aria-hidden="true">navigate_before</span>
             </button>
           </li>
           
           <!-- Primera página siempre visible -->
-          <li class="page-item" [class.active]="currentPage === 0">
-            <button class="page-link" (click)="changePage(0)">1</button>
+          <li class="page-item" [class.active]="currentPage === 0" role="listitem">
+            <button class="page-link" (click)="changePage(0)"
+                   [attr.aria-current]="currentPage === 0 ? 'page' : null"
+                   aria-label="Ir a página 1">1</button>
           </li>
           
           <!-- Elipsis inicial si estamos lejos del inicio -->
-          <li class="page-item disabled" *ngIf="currentPage > 2">
-            <span class="page-link">...</span>
+          <li class="page-item disabled" *ngIf="currentPage > 2" role="listitem">
+            <span class="page-link" aria-hidden="true">...</span>
+            <span class="visually-hidden">Páginas intermedias ocultas</span>
           </li>
           
           <!-- Páginas cercanas a la actual (máximo 3 páginas visibles) -->
           <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
             <li class="page-item" [class.active]="currentPage === i + 1" 
-                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
-              <button class="page-link" (click)="changePage(i + 1)">{{ i + 2 }}</button>
+                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1"
+                role="listitem">
+              <button class="page-link" 
+                     (click)="changePage(i + 1)"
+                     [attr.aria-current]="currentPage === i + 1 ? 'page' : null"
+                     [attr.aria-label]="'Ir a página ' + (i + 2)">{{ i + 2 }}</button>
             </li>
           </ng-container>
           
           <!-- Elipsis final si estamos lejos del final -->
-          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
-            <span class="page-link">...</span>
+          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3" role="listitem">
+            <span class="page-link" aria-hidden="true">...</span>
+            <span class="visually-hidden">Páginas intermedias ocultas</span>
           </li>
           
           <!-- Última página siempre visible si hay más de una página -->
-          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
-            <button class="page-link" (click)="changePage(totalPages - 1)">{{ totalPages }}</button>
+          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1" role="listitem">
+            <button class="page-link" 
+                   (click)="changePage(totalPages - 1)"
+                   [attr.aria-current]="currentPage === totalPages - 1 ? 'page' : null"
+                   [attr.aria-label]="'Ir a página ' + totalPages">{{ totalPages }}</button>
           </li>
           
           <!-- Botón Siguiente -->
-          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-            <button class="page-link" (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
-              <span class="material-icons small">navigate_next</span>
+          <li class="page-item" [class.disabled]="currentPage === totalPages - 1" role="listitem">
+            <button class="page-link" 
+                   (click)="changePage(currentPage + 1)" 
+                   [disabled]="currentPage === totalPages - 1"
+                   aria-label="Ir a página siguiente">
+              <span class="material-icons small" aria-hidden="true">navigate_next</span>
             </button>
           </li>
         </ul>

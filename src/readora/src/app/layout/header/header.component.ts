@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 import { AutenticacionService } from '../../core/services/autenticacion.service';
 import { Observable } from 'rxjs';
@@ -17,7 +17,7 @@ export class HeaderComponent implements OnInit {
   username: string = '';
   isAdmin: boolean = false;
   
-  constructor(private authService: AutenticacionService) {
+  constructor(private authService: AutenticacionService, public router: Router) {
     this.isLoggedIn$ = this.authService.isLoggedIn();
   }
   

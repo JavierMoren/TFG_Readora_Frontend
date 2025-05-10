@@ -1,9 +1,9 @@
 <header class="sticky-top navbar-wrapper">
-  <nav class="navbar navbar-expand-md">
+  <nav class="navbar navbar-expand-md" aria-label="Navegación principal">
     <div class="container py-2">
-      <a class="navbar-brand d-flex align-items-center" routerLink="/">
+      <a class="navbar-brand d-flex align-items-center" routerLink="/" aria-label="Página de inicio">
         <div class="brand-logo me-2">
-          <img src="assets/logos/Logo.svg" alt="Logo Readora" class="logo-img">
+          <img src="assets/logos/Logo.svg" alt="Logo Readora - Aplicación de gestión de biblioteca" class="logo-img">
         </div>
         <span class="brand-text">Readora</span>
       </a>
@@ -12,8 +12,9 @@
         <a class="nav-item nav-link px-3" 
            routerLink="/" 
            routerLinkActive="active" 
-           [routerLinkActiveOptions]="{exact: true}">
-           <span class="material-icons nav-icon">home</span>
+           [routerLinkActiveOptions]="{exact: true}"
+           [attr.aria-current]="router.url === '/' ? 'page' : null">
+           <span class="material-icons nav-icon" aria-hidden="true">home</span>
            <span>Inicio</span>
         </a>
 
@@ -21,8 +22,9 @@
         <ng-container *ngIf="isLoggedIn$ | async">
           <a class="nav-item nav-link px-3" 
              routerLink="/buscador" 
-             routerLinkActive="active">
-             <span class="material-icons nav-icon">search</span>
+             routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/buscador') ? 'page' : null">
+             <span class="material-icons nav-icon" aria-hidden="true">search</span>
              <span>Buscador</span>
           </a>
         </ng-container>
@@ -31,14 +33,16 @@
         <ng-container *ngIf="!(isLoggedIn$ | async)">
           <a class="nav-item nav-link px-3" 
             routerLink="/api/v1/register" 
-            routerLinkActive="active">
-            <span class="material-icons nav-icon">person_add</span>
+            routerLinkActive="active"
+            [attr.aria-current]="router.url.includes('/api/v1/register') ? 'page' : null">
+            <span class="material-icons nav-icon" aria-hidden="true">person_add</span>
             <span>Registro</span>
           </a>
           <a class="nav-item nav-link px-3 ms-1" 
             routerLink="/api/v1/authenticate" 
-            routerLinkActive="active">
-            <span class="material-icons nav-icon">login</span>
+            routerLinkActive="active"
+            [attr.aria-current]="router.url.includes('/api/v1/authenticate') ? 'page' : null">
+            <span class="material-icons nav-icon" aria-hidden="true">login</span>
             <span>Login</span>
           </a>
         </ng-container>
@@ -47,16 +51,18 @@
         <ng-container *ngIf="isLoggedIn$ | async">
           <a class="nav-item nav-link px-3" 
              routerLink="/biblioteca" 
-             routerLinkActive="active">
-             <span class="material-icons nav-icon">book</span>
+             routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/biblioteca') ? 'page' : null">
+             <span class="material-icons nav-icon" aria-hidden="true">book</span>
              <span>Mi Biblioteca</span>
           </a>
           
           <a *ngIf="isAdmin" 
              class="nav-item nav-link px-3" 
              routerLink="/panel-administrador" 
-             routerLinkActive="active">
-             <span class="material-icons nav-icon">admin_panel_settings</span>
+             routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/panel-administrador') ? 'page' : null">
+             <span class="material-icons nav-icon" aria-hidden="true">admin_panel_settings</span>
              <span>Panel Admin</span>
           </a>
           
@@ -66,21 +72,28 @@
                id="userDropdown" 
                role="button" 
                data-bs-toggle="dropdown" 
+               aria-haspopup="true"
                aria-expanded="false">
-               <span class="material-icons nav-icon">account_circle</span>
+               <span class="material-icons nav-icon" aria-hidden="true">account_circle</span>
                <span>{{ username }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li>
-                <a class="dropdown-item" routerLink="/perfil">
-                  <span class="material-icons nav-icon">person</span>
+                <a class="dropdown-item" routerLink="/perfil"
+                   [attr.aria-current]="router.url.includes('/perfil') ? 'page' : null">
+                  <span class="material-icons nav-icon" aria-hidden="true">person</span>
                   <span>Mi Perfil</span>
                 </a>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item" href="#" (click)="logout(); $event.preventDefault()">
-                  <span class="material-icons nav-icon">logout</span>
+                <a class="dropdown-item" href="#" 
+                   (click)="logout(); $event.preventDefault()"
+                   (keydown.enter)="logout(); $event.preventDefault()"
+                   (keydown.space)="logout(); $event.preventDefault()"
+                   role="button"
+                   aria-label="Cerrar sesión">
+                  <span class="material-icons nav-icon" aria-hidden="true">logout</span>
                   <span>Cerrar sesión</span>
                 </a>
               </li>
@@ -99,14 +112,14 @@
               data-bs-target="#offcanvasNavbar" 
               aria-controls="offcanvasNavbar" 
               aria-expanded="false" 
-              aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+              aria-label="Abrir menú de navegación">
+        <span class="navbar-toggler-icon" aria-hidden="true"></span>
       </button>
     </div>
   </nav>
   
   <!-- Menú móvil -->
-  <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+  <div class="offcanvas offcanvas-end d-md-none" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel" role="dialog" aria-modal="true">
     <div class="offcanvas-header">
       <div class="d-flex align-items-center">
         <div class="brand-logo me-2">
@@ -114,16 +127,17 @@
         </div>
         <h5 class="offcanvas-title brand-text mb-0" id="offcanvasNavbarLabel">Readora</h5>
       </div>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar menú"></button>
     </div>
     <div class="offcanvas-body">
-      <div class="d-flex flex-column">
+      <div class="d-flex flex-column" role="navigation" aria-label="Menú móvil">
         <a class="nav-link mobile-nav-link" 
            routerLink="/" 
            routerLinkActive="active" 
            [routerLinkActiveOptions]="{exact: true}"
+           [attr.aria-current]="router.url === '/' ? 'page' : null"
            data-bs-dismiss="offcanvas">
-           <span class="material-icons nav-icon">home</span>
+           <span class="material-icons nav-icon" aria-hidden="true">home</span>
            <span>Inicio</span>
         </a>
 
@@ -132,8 +146,9 @@
           <a class="nav-link mobile-nav-link" 
              routerLink="/buscador" 
              routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/buscador') ? 'page' : null"
              data-bs-dismiss="offcanvas">
-             <span class="material-icons nav-icon">search</span>
+             <span class="material-icons nav-icon" aria-hidden="true">search</span>
              <span>Buscador</span>
           </a>
         </ng-container>
@@ -143,15 +158,17 @@
           <a class="nav-link mobile-nav-link" 
             routerLink="/api/v1/register" 
             routerLinkActive="active"
+            [attr.aria-current]="router.url.includes('/api/v1/register') ? 'page' : null"
             data-bs-dismiss="offcanvas">
-            <span class="material-icons nav-icon">person_add</span>
+            <span class="material-icons nav-icon" aria-hidden="true">person_add</span>
             <span>Registro</span>
           </a>
           <a class="nav-link mobile-nav-link" 
             routerLink="/api/v1/authenticate" 
             routerLinkActive="active"
+            [attr.aria-current]="router.url.includes('/api/v1/authenticate') ? 'page' : null"
             data-bs-dismiss="offcanvas">
-            <span class="material-icons nav-icon">login</span>
+            <span class="material-icons nav-icon" aria-hidden="true">login</span>
             <span>Inicio de sesión</span>
           </a>
         </ng-container>
@@ -161,8 +178,9 @@
           <a class="nav-link mobile-nav-link" 
              routerLink="/biblioteca" 
              routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/biblioteca') ? 'page' : null"
              data-bs-dismiss="offcanvas">
-             <span class="material-icons nav-icon">book</span>
+             <span class="material-icons nav-icon" aria-hidden="true">book</span>
              <span>Mi Biblioteca</span>
           </a>
           
@@ -170,24 +188,30 @@
              class="nav-link mobile-nav-link" 
              routerLink="/panel-administrador" 
              routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/panel-administrador') ? 'page' : null"
              data-bs-dismiss="offcanvas">
-             <span class="material-icons nav-icon">admin_panel_settings</span>
+             <span class="material-icons nav-icon" aria-hidden="true">admin_panel_settings</span>
              <span>Panel Admin</span>
           </a>
           
           <a class="nav-link mobile-nav-link"
              routerLink="/perfil"
              routerLinkActive="active"
+             [attr.aria-current]="router.url.includes('/perfil') ? 'page' : null"
              data-bs-dismiss="offcanvas">
-             <span class="material-icons nav-icon">person</span>
+             <span class="material-icons nav-icon" aria-hidden="true">person</span>
              <span>Mi Perfil</span>
           </a>
           
           <a class="nav-link mobile-nav-link" 
              href="#" 
+             role="button"
              (click)="logout(); $event.preventDefault()"
+             (keydown.enter)="logout(); $event.preventDefault()"
+             (keydown.space)="logout(); $event.preventDefault()"
+             aria-label="Cerrar sesión"
              data-bs-dismiss="offcanvas">
-             <span class="material-icons nav-icon">logout</span>
+             <span class="material-icons nav-icon" aria-hidden="true">logout</span>
              <span>Cerrar sesión</span>
           </a>
         </ng-container>

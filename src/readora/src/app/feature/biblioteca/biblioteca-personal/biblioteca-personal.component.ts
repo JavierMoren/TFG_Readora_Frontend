@@ -320,11 +320,31 @@ export class BibliotecaPersonalComponent implements OnInit {
   }
 
   /**
-   * Cambia el filtro de visualización de libros
+   * Cambia el filtro de visualización de libros y maneja la accesibilidad
    */
-  cambiarFiltro(filtro: string): void {
+  cambiarFiltro(filtro: string, event?: KeyboardEvent): void {
     console.log('[BibliotecaPersonal] Cambiando filtro a:', filtro);
     this.filtroActual = filtro;
+    
+    // Si el evento existe y es un evento de teclado, mover el foco al panel correspondiente
+    if (event) {
+      const tabpanel = document.getElementById('seccion-' + filtro);
+      if (tabpanel) {
+        tabpanel.focus();
+      }
+    }
+    
+    // Anunciar para lectores de pantalla que ha cambiado la pestaña
+    const liveRegion = document.createElement('div');
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.setAttribute('class', 'visually-hidden');
+    liveRegion.textContent = `Mostrando sección: ${filtro}`;
+    document.body.appendChild(liveRegion);
+    
+    // Eliminar después de anunciar
+    setTimeout(() => {
+      document.body.removeChild(liveRegion);
+    }, 1000);
   }
 
   /**

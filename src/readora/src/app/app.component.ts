@@ -24,6 +24,21 @@ export class AppComponent {
   ngOnInit() {
     this.themeService.isDarkTheme$.subscribe(isDark => {
       this.isDarkTheme = isDark;
+      // Actualizar el atributo data-theme en el body para que CSS pueda reaccionar
+      document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    });
+    
+    // Escuchar eventos de navegación para manejar el foco
+    this.router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationEnd) {
+        // Mover el foco al contenido principal después de la navegación
+        setTimeout(() => {
+          const mainContent = document.getElementById('main-content');
+          if (mainContent) {
+            mainContent.focus();
+          }
+        }, 100);
+      }
     });
   }
 }

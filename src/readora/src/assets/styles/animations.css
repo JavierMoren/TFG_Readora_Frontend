@@ -1,0 +1,133 @@
+/* 
+ * Archivo de animaciones compartidas para Readora
+ * Este archivo centraliza todas las animaciones comunes utilizadas en múltiples componentes
+ */
+
+/* Fade In - Aparición suave */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade In Up - Aparición desde abajo */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Float - Flotación para elementos */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(-10px); 
+  }
+}
+
+/* Pulse - Pulsación para elementos de énfasis */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Slide Up - Deslizamiento hacia arriba */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide In - Deslizamiento horizontal */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Rotación */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Clases de utilidad para aplicar animaciones */
+.anim-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.anim-fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.anim-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.anim-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.anim-slide-up {
+  animation: slideUp 0.5s ease forwards;
+}
+
+.anim-slide-in {
+  animation: slideIn 0.5s ease forwards;
+}
+
+.anim-rotate {
+  animation: rotate 2s linear infinite;
+}
+
+/* Retrasos de animación */
+.anim-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.anim-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.anim-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.anim-delay-4 {
+  animation-delay: 0.4s;
+}
+
+.anim-delay-5 {
+  animation-delay: 0.5s;
+}

@@ -1,19 +1,18 @@
 <div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
   <div class="col-12 col-md-6 col-lg-5 col-xl-4">
-    <div class="text-center mb-4">
-      <img src="assets/logos/Logo.svg" alt="Logo Readora" class="auth-logo mb-3">
-      <h1 class="h2 fw-bold text-highlight">¡Bienvenido de nuevo!</h1>
+    <div class="text-center mb-4">      <img src="assets/logos/Logo.svg" alt="Logo de Readora - Aplicación de gestión de biblioteca" class="auth-logo mb-3">
+      <h1 class="h2 fw-bold text-highlight" id="login-heading">¡Bienvenido de nuevo!</h1>
       <p class="text-secondary small">Inicia sesión para acceder a tu biblioteca personal</p>
     </div>
     
     <div class="card shadow border-0 auth-card">
       <div class="card-body p-0">
-        
-        <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" class="auth-form p-4">
+          <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm" class="auth-form p-4" aria-labelledby="login-heading">
+          <div class="visually-hidden" id="required-message">Los campos marcados con asterisco son obligatorios</div>
           <div class="mb-4">
-            <label for="usuario" class="form-label fw-medium">Usuario <span class="text-danger">*</span></label>
+            <label for="usuario" class="form-label fw-medium">Usuario <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">obligatorio</span></label>
             <div class="input-group">
-              <span class="input-group-text bg-light border-end-0"><i class="material-icons small">person</i></span>
+              <span class="input-group-text bg-light border-end-0" aria-hidden="true"><i class="material-icons small">person</i></span>
               <input 
                 type="text" 
                 id="usuario" 
@@ -25,19 +24,19 @@
                 #usuario="ngModel"
                 class="form-control border-start-0"
                 [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}"
-                placeholder="Ingresa tu nombre de usuario">
+                placeholder="Ingresa tu nombre de usuario"
+                aria-required="true"
+                aria-describedby="usuario-error">
             </div>
-            <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback d-block small mt-1">
+            <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback d-block small mt-1" id="usuario-error">
               <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
               <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
               <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
             </div>
-          </div>
-    
-          <div class="mb-4">
-            <label for="contrasenna" class="form-label fw-medium">Contraseña <span class="text-danger">*</span></label>
+          </div>          <div class="mb-4">
+            <label for="contrasenna" class="form-label fw-medium">Contraseña <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">obligatorio</span></label>
             <div class="input-group">
-              <span class="input-group-text bg-light border-end-0"><i class="material-icons small">lock</i></span>
+              <span class="input-group-text bg-light border-end-0" aria-hidden="true"><i class="material-icons small">lock</i></span>
               <input 
                 type="password" 
                 id="contrasenna" 
@@ -49,28 +48,29 @@
                 #contrasenna="ngModel"
                 class="form-control border-start-0"
                 [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}"
-                placeholder="Ingresa tu contraseña">
+                placeholder="Ingresa tu contraseña"
+                aria-required="true"
+                aria-describedby="contrasenna-error">
             </div>
-            <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback d-block small mt-1">
+            <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback d-block small mt-1" id="contrasenna-error">
               <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
               <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
               <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
             </div>
           </div>
-          
-          <button 
+            <button 
             type="submit" 
             [disabled]="loginForm.invalid"
-            class="btn btn-primary w-100 py-2 mb-3 auth-btn">
+            class="btn btn-primary w-100 py-2 mb-3 auth-btn"
+            aria-label="Iniciar sesión en la aplicación">
             <span class="d-flex align-items-center justify-content-center">
-              <i class="material-icons me-2">login</i>
+              <i class="material-icons me-2" aria-hidden="true">login</i>
               Iniciar Sesión
             </span>
           </button>
-          
-          <div class="text-center mt-4">
+            <div class="text-center mt-4">
             <p class="mb-0">
-              <a routerLink="/api/v1/register" class="text-primary text-decoration-none auth-link">
+              <a routerLink="/api/v1/register" class="text-primary text-decoration-none auth-link" aria-label="Ir a la página de registro">
                 ¿No tienes cuenta? <span class="fw-medium">Regístrate aquí</span>
               </a>
             </p>
@@ -80,8 +80,8 @@
     </div>
     
     <div class="text-center mt-4">
-      <a routerLink="/" class="d-inline-flex align-items-center text-primary text-decoration-none transition-all">
-        <span class="material-icons small me-1">arrow_back</span>
+      <a routerLink="/" class="d-inline-flex align-items-center text-primary text-decoration-none transition-all" aria-label="Volver a la página de inicio">
+        <span class="material-icons small me-1" aria-hidden="true">arrow_back</span>
         <span>Volver al inicio</span>
       </a>
     </div>

@@ -1,0 +1,152 @@
+/* Estilos de accesibilidad para Readora */
+
+/* ===== Enlace para saltar al contenido principal ===== */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #4D6BFE;
+  color: white;
+  padding: 8px;
+  z-index: 9999;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus-within {
+  top: 0;
+}
+
+.skip-link a {
+  color: white;
+  text-decoration: none;
+}
+
+/* ===== Mejoras de foco visual ===== */
+:focus {
+  outline: 3px solid rgba(77, 107, 254, 0.7) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  transition: outline 0.2s ease;
+}
+
+:focus:not(:focus-visible) {
+  outline: 0 !important;
+  box-shadow: none;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(77, 107, 254, 0.7) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+/* ===== Mejoras de contraste ===== */
+/* Aseguramos un contraste adecuado para el texto */
+body {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* Texto secundario con mejor contraste */
+.text-secondary {
+  color: rgba(0, 0, 0, 0.67) !important;
+}
+
+/* Modo oscuro: mejor contraste en textos */
+[data-theme="dark"] body {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .text-secondary {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Mejorar contraste de botones */
+.btn-primary {
+  color: #ffffff;
+  background-color: #4D6BFE;
+}
+
+.btn-outline-primary {
+  color: #4D6BFE;
+  border-color: #4D6BFE;
+}
+
+/* ===== Ayudas visuales ===== */
+/* Clase para ocultar visualmente elementos pero mantenerlos accesibles para lectores de pantalla */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Mejorar la indicación visual para elementos interactivos */
+a[role="button"], .admin-nav-link, .card[role="button"] {
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+a[role="button"]:hover, .admin-nav-link:hover, .card[role="button"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Añadir indicador visual para enlaces con atributo aria-current */
+a[aria-current="page"] {
+  font-weight: bold;
+  position: relative;
+}
+
+/* ===== Navegación con teclado ===== */
+/* Asegurar que los elementos con tabindex sean claramente visibles al recibir foco */
+[tabindex]:not([tabindex="-1"]):focus {
+  outline: 3px solid rgba(77, 107, 254, 0.7) !important;
+  outline-offset: 2px !important;
+}
+
+/* ===== Indicadores de formularios ===== */
+/* Mejorar la visibilidad de campos requeridos */
+.form-label .text-danger {
+  font-size: 1.2em;
+  line-height: 0;
+  position: relative;
+  top: 3px;
+}
+
+/* Mejorar contraste de mensajes de error */
+.invalid-feedback, .text-danger {
+  color: #d9040e !important; /* Rojo con mejor contraste */
+  font-weight: 500;
+}
+
+/* ===== Tamaño de texto ===== */
+/* Garantizar un tamaño de texto legible */
+html {
+  font-size: 16px;
+}
+
+/* Garantizar un interlineado adecuado para mejor legibilidad */
+body {
+  line-height: 1.6;
+}
+
+/* ===== Mejoras en componentes específicos ===== */
+/* Mejorar la accesibilidad en cards */
+.card[role="button"]:focus {
+  border-color: #4D6BFE;
+}
+
+/* Mejorar la accesibilidad en la paginación */
+.page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(77, 107, 254, 0.25);
+}
+
+/* Mejorar visibilidad en el panel de administración */
+.admin-nav-link.active {
+  font-weight: bold;
+  background-color: rgba(77, 107, 254, 0.15);
+}
