@@ -94,7 +94,7 @@ La aplicación está preparada para desplegarse mediante Docker y Docker Compose
 
 ## Enlaces a Otros README
 
-- [README Principal del Proyecto](/README.md)
-- [README del Backend](/TFG_Readora_Backend/README.md)
-- [README del código fuente del Backend](/TFG_Readora_Backend/src/README.md)
-- [README del código fuente del Frontend](/TFG_Readora_Frontend/src/README.md)
+- [README Principal del Proyecto](https://github.com/JavierMoren/Proyecto_TFG/blob/main/README.md)
+- [README del Backend](https://github.com/JavierMoren/TFG_Readora_Backend/blob/main/README.md)
+- [README del código fuente del Backend](https://github.com/JavierMoren/TFG_Readora_Backend/blob/main/src/README.md)
+- [README del código fuente del Frontend](https://github.com/JavierMoren/TFG_Readora_Frontend/blob/main/src/README.md)

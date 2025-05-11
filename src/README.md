@@ -75,7 +75,7 @@ El frontend de Readora está configurado exclusivamente para ser desplegado medi
 
 ## Enlaces a Otros README
 
-- [README Principal del Proyecto](/README.md)
-- [README del Backend](/TFG_Readora_Backend/README.md)
-- [README del Frontend](/TFG_Readora_Frontend/README.md)
-- [README del código fuente del Backend](/TFG_Readora_Backend/src/README.md)
+- [README Principal del Proyecto](https://github.com/JavierMoren/Proyecto_TFG/blob/main/README.md)
+- [README del Backend](https://github.com/JavierMoren/TFG_Readora_Backend/blob/main/README.md)
+- [README del Frontend](https://github.com/JavierMoren/TFG_Readora_Frontend/blob/main/README.md)
+- [README del código fuente del Backend](https://github.com/JavierMoren/TFG_Readora_Backend/blob/main/src/README.md)
