@@ -1,6 +1,11 @@
 # Readora Frontend
 
-Este directorio contiene el código fuente del frontend de la aplicación Readora, desarrollado con Angular.
+Este directorio contiene el código **Despliegue con Docker Compose**:
+
+- Ver el archivo [docker-compose.yml](/docker-compose.yml) en la raíz del proyecto
+- Ejecutar: `docker-compose up -d` desde el directorio raíz
+- El frontend estará disponible en: `http://localhost:4200`
+- Este método gestiona automáticamente todas las dependencias y el servidor Nginxe del frontend de la aplicación Readora, desarrollado con Angular.
 
 ## Estructura del Proyecto Frontend
 
@@ -54,7 +59,7 @@ readora/
 El frontend de Readora está configurado exclusivamente para ser desplegado mediante Docker Compose:
 
 **Despliegue con Docker Compose**:
-- Ver el archivo [docker-compose.yml](../../../docker-compose.yml) en la raíz del proyecto
+- Ver el archivo [docker-compose.yml](/docker-compose.yml) en la raíz del proyecto
 - Ejecutar: `docker-compose up -d` desde el directorio raíz
 - El frontend estará disponible en: `http://localhost:4200`
 - Este método gestiona automáticamente todas las dependencias y el servidor Nginx
@@ -70,7 +75,7 @@ El frontend de Readora está configurado exclusivamente para ser desplegado medi
 
 ## Enlaces a Otros README
 
-- [README Principal del Proyecto](../../../README.md)
-- [README del Backend](../../README.md)
-- [README del Frontend](../../../TFG_Readora_Frontend/README.md)
-- [README del código fuente del Backend](../../../TFG_Readora_Backend/src/README.md)
+- [README Principal del Proyecto](/README.md)
+- [README del Backend](/TFG_Readora_Backend/README.md)
+- [README del Frontend](/TFG_Readora_Frontend/README.md)
+- [README del código fuente del Backend](/TFG_Readora_Backend/src/README.md)
