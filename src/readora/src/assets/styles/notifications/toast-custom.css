@@ -1,0 +1,173 @@
+/* Personalización de ngx-sonner toasts para modo claro y oscuro */
+
+/* Estilos base para todos los toasts */
+:root {
+  --toast-bg-light: rgba(255, 255, 255, 0.95);
+  --toast-bg-dark: rgba(30, 33, 36, 0.9);
+  --toast-border-light: rgba(230, 234, 240, 0.5);
+  --toast-border-dark: rgba(58, 64, 71, 0.5);
+  --toast-shadow-light: 0 8px 20px rgba(0, 0, 0, 0.12);
+  --toast-shadow-dark: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --toast-text-light: #212529;
+  --toast-text-dark: #f8f9fa;
+  --toast-success-light: #4ade80;
+  --toast-success-dark: #22c55e;
+  --toast-error-light: #f87171;
+  --toast-error-dark: #ef4444;
+  --toast-warning-light: #fbbf24;
+  --toast-warning-dark: #f59e0b;
+  --toast-info-light: #60a5fa;
+  --toast-info-dark: #3b82f6;
+}
+
+/* Contenedor principal de toast */
+.sonner-toast {
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  padding: 14px !important;
+  font-weight: 500 !important;
+  max-width: 350px !important;
+  box-shadow: var(--toast-shadow-light) !important;
+  border: 1px solid var(--toast-border-light) !important;
+  background: var(--toast-bg-light) !important;
+  overflow: hidden;
+}
+
+/* Posicionamiento de los toasts */
+.sonner-toast-container {
+  --front-card-offset: 8px !important;
+  --offset: 16px !important;
+  margin-bottom: 10px !important;
+}
+
+/* Título del toast */
+.sonner-toast-title {
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  margin-bottom: 2px !important;
+  color: var(--toast-text-light) !important;
+}
+
+/* Descripción del toast */
+.sonner-toast-description {
+  font-weight: normal !important;
+  font-size: 0.9rem !important;
+  color: var(--toast-text-light) !important;
+  opacity: 0.85 !important;
+  line-height: 1.4 !important;
+}
+
+/* Botón de acción en el toast */
+.sonner-toast-action {
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  background-color: rgba(77, 107, 254, 0.1) !important;
+  color: var(--primary-color) !important;
+  border: none !important;
+}
+
+.sonner-toast-action:hover {
+  background-color: rgba(77, 107, 254, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Icono del toast */
+.sonner-toast-icon {
+  margin-right: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Toast de éxito */
+.sonner-toast-success {
+  border-left: 4px solid var(--toast-success-light) !important;
+}
+
+/* Toast de error */
+.sonner-toast-error {
+  border-left: 4px solid var(--toast-error-light) !important;
+}
+
+/* Toast de advertencia */
+.sonner-toast-warning {
+  border-left: 4px solid var(--toast-warning-light) !important;
+}
+
+/* Toast de información */
+.sonner-toast-info {
+  border-left: 4px solid var(--toast-info-light) !important;
+}
+
+/* Animación de entrada */
+@keyframes sonner-toast-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animación de salida */
+@keyframes sonner-toast-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+}
+
+/* Personalización para tema oscuro */
+[data-theme="dark"] .sonner-toast {
+  background: var(--toast-bg-dark) !important;
+  border-color: var(--toast-border-dark) !important;
+  box-shadow: var(--toast-shadow-dark) !important;
+}
+
+[data-theme="dark"] .sonner-toast-title {
+  color: var(--toast-text-dark) !important;
+}
+
+[data-theme="dark"] .sonner-toast-description {
+  color: var(--toast-text-dark) !important;
+  opacity: 0.85 !important;
+}
+
+[data-theme="dark"] .sonner-toast-action {
+  background-color: rgba(77, 107, 254, 0.2) !important;
+  color: #7791FE !important;
+}
+
+[data-theme="dark"] .sonner-toast-action:hover {
+  background-color: rgba(77, 107, 254, 0.3) !important;
+  color: #a0b4fe !important;
+}
+
+/* Toast tipo oscuros */
+[data-theme="dark"] .sonner-toast-success {
+  border-left: 4px solid var(--toast-success-dark) !important;
+}
+
+[data-theme="dark"] .sonner-toast-error {
+  border-left: 4px solid var(--toast-error-dark) !important;
+}
+
+[data-theme="dark"] .sonner-toast-warning {
+  border-left: 4px solid var(--toast-warning-dark) !important;
+}
+
+[data-theme="dark"] .sonner-toast-info {
+  border-left: 4px solid var(--toast-info-dark) !important;
+}

@@ -1,0 +1,90 @@
+<div class="admin-container" role="main">
+  <div class="container">
+    <!-- Cabecera simple -->
+    <div class="admin-header">
+      <h1 class="admin-title" id="admin-panel-title">Panel de administración</h1>
+      <p class="admin-subtitle" id="admin-panel-description">Gestión de contenidos del sistema</p>
+    </div>
+    
+    <div class="row">
+      <!-- Menú lateral simplificado -->
+      <div class="col-12 col-md-3 mb-4">
+        <div class="admin-sidebar" role="navigation" aria-labelledby="admin-panel-title">
+          <nav class="admin-nav" aria-label="Menú de administración">
+            <a (click)="navigateTo('usuarios')" 
+               (keydown.enter)="navigateTo('usuarios')"
+               (keydown.space)="$event.preventDefault(); navigateTo('usuarios')"
+               class="admin-nav-link" 
+               tabindex="0"
+               role="tab"
+               id="tab-usuarios"
+               [attr.aria-selected]="activeTab === 'usuarios'"
+               [ngClass]="{'active': activeTab === 'usuarios'}">
+              <span class="material-icons admin-nav-icon" aria-hidden="true">people</span>
+              <span>Usuarios</span>
+            </a>
+            
+            <a (click)="navigateTo('libros')" 
+               (keydown.enter)="navigateTo('libros')"
+               (keydown.space)="$event.preventDefault(); navigateTo('libros')"
+               class="admin-nav-link" 
+               tabindex="0"
+               role="tab"
+               id="tab-libros"
+               [attr.aria-selected]="activeTab === 'libros'"
+               [ngClass]="{'active': activeTab === 'libros'}">
+              <span class="material-icons admin-nav-icon" aria-hidden="true">book</span>
+              <span>Libros</span>
+            </a>
+            
+            <a (click)="navigateTo('autores')" 
+               (keydown.enter)="navigateTo('autores')"
+               (keydown.space)="$event.preventDefault(); navigateTo('autores')"
+               class="admin-nav-link" 
+               tabindex="0"
+               role="tab"
+               id="tab-autores"
+               [attr.aria-selected]="activeTab === 'autores'"
+               [ngClass]="{'active': activeTab === 'autores'}">
+              <span class="material-icons admin-nav-icon" aria-hidden="true">history_edu</span>
+              <span>Autores</span>
+            </a>
+            
+            <a (click)="navigateTo('roles')" 
+               (keydown.enter)="navigateTo('roles')"
+               (keydown.space)="$event.preventDefault(); navigateTo('roles')"
+               class="admin-nav-link" 
+               tabindex="0"
+               role="tab"
+               id="tab-roles"
+               [attr.aria-selected]="activeTab === 'roles'"
+               [ngClass]="{'active': activeTab === 'roles'}">
+              <span class="material-icons admin-nav-icon" aria-hidden="true">shield</span>
+              <span>Roles</span>
+            </a>
+            
+            <a (click)="navigateTo('usuario-libros')" 
+               (keydown.enter)="navigateTo('usuario-libros')"
+               (keydown.space)="$event.preventDefault(); navigateTo('usuario-libros')"
+               class="admin-nav-link" 
+               tabindex="0"
+               role="tab"
+               id="tab-usuario-libros"
+               [attr.aria-selected]="activeTab === 'usuario-libros'"
+               [ngClass]="{'active': activeTab === 'usuario-libros'}">
+              <span class="material-icons admin-nav-icon" aria-hidden="true">bookmark</span>
+              <span>Lecturas</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+      
+      <!-- Contenido principal simplificado -->
+      <div class="col-12 col-md-9">
+        <div class="admin-content" role="tabpanel" [attr.aria-labelledby]="'tab-' + activeTab">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

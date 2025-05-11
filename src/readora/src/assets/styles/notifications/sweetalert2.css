@@ -1,0 +1,71 @@
+/* Estilos para SweetAlert2 (compatibles con el tema claro y oscuro) */
+
+/* Base de modales SweetAlert */
+.swal2-popup {
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+}
+
+/* Estilo para modo oscuro */
+[data-theme="dark"] .swal2-popup {
+  background-color: #212529;
+  color: #f8f9fa;
+}
+
+[data-theme="dark"] .swal2-title,
+[data-theme="dark"] .swal2-html-container,
+[data-theme="dark"] .swal2-input-label {
+  color: #fff;
+}
+
+[data-theme="dark"] .swal2-input {
+  background-color: #343a40;
+  color: #fff;
+  border-color: #495057;
+}
+
+[data-theme="dark"] .swal2-input:focus {
+  border-color: #3a6ea5;
+  box-shadow: 0 0 0 0.25rem rgba(58, 110, 165, 0.25);
+}
+
+/* Hacer que las alertas sean más consistentes con el diseño general */
+.swal-theme-compatible {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+.swal-theme-compatible .swal2-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.swal-theme-compatible .swal2-html-container {
+  font-size: 1rem;
+}
+
+.swal-theme-compatible .swal2-confirm {
+  font-weight: 500;
+  border-radius: 0.375rem;
+}
+
+.swal-theme-compatible .swal2-cancel {
+  font-weight: 500;
+  border-radius: 0.375rem;
+}
+
+/* Ajustes para el input */
+.swal-theme-compatible .swal2-input {
+  height: auto;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+}
+
+/* Ajuste para modales con foco en el botón de cancelar */
+.swal-theme-compatible .swal2-cancel:focus {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.swal-theme-compatible .swal2-confirm:focus {
+  box-shadow: 0 0 0 0.25rem rgba(58, 110, 165, 0.25);
+}

@@ -1,0 +1,14 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+/* Importar estilos organizados */
+@import "assets/styles/base.css";
+@import "assets/styles/dark-theme.css";
+@import "assets/styles/admin.css";
+@import "assets/styles/components.css";
+@import "assets/styles/animations.css"; /* Animaciones compartidas */
+@import "assets/styles/book-covers.css"; /* Estilos estandarizados para portadas */
+@import "assets/styles/libro-cards.css"; /* Estilos compartidos para tarjetas de libros */
+@import "assets/styles/auth-components.css"; /* Estilos compartidos para login/registro */
+@import "assets/styles/notifications/toast-custom.css"; /* Estilos personalizados para notificaciones */
+@import "assets/styles/notifications/sweetalert2.css"; /* Estilos de notificaciones */
+@import "assets/styles/accessibility.css"; /* Estilos de accesibilidad */

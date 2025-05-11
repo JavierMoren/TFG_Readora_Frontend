@@ -1,0 +1,353 @@
+/* Estilos para la biblioteca personal */
+.biblioteca-container {
+  padding: 2rem 0;
+}
+
+/* Encabezado de la biblioteca */
+.biblioteca-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.biblioteca-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.biblioteca-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Estilos para los filtros */
+.filtros-container {
+  margin-bottom: 2.5rem;
+  background-color: var(--background-subtle);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.filtros-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.filtro-btn {
+  border: none;
+  background-color: transparent;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all var(--transition-speed) ease;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.filtro-btn:hover {
+  background-color: rgba(58, 110, 165, 0.08);
+  transform: translateY(-2px);
+}
+
+.filtro-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 8px rgba(58, 110, 165, 0.25);
+}
+
+.filtro-icon {
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.filtro-icon .material-icons {
+  font-size: 1.1rem;
+}
+
+.filtro-text {
+  margin-right: 0.5rem;
+}
+
+.filtro-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.filtro-btn:not(.active) .filtro-count {
+  background-color: var(--background-subtle);
+  color: var(--text-secondary);
+}
+
+.filtro-count.has-items {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+/* Biblioteca sección y encabezados */
+.biblioteca-section {
+  margin-bottom: 3rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.section-icon {
+  margin-right: 0.75rem;
+  color: var(--primary-color);
+}
+
+.section-count {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  background-color: var(--background-subtle);
+  padding: 0.35rem 0.75rem;
+  border-radius: 1rem;
+}
+
+/* Grid para libros */
+.libros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Estilos para las tarjetas de libros */
+/* Los estilos principales para tarjetas de libros ahora están en libro-cards.css */
+.libro-item {
+  height: 100%;
+}
+
+/* Estos estilos ahora se encuentran en libro-cards.css */
+
+/* Overlay para información del estado */
+.libro-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity var(--transition-speed) ease;
+}
+
+.libro-card:hover .libro-overlay {
+  opacity: 1;
+}
+
+.libro-estado-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+/* Estos estilos ahora se encuentran en libro-cards.css */
+
+/* Estos estilos ahora se encuentran en libro-cards.css */
+
+/* Estos estilos ahora se encuentran en libro-cards.css */
+
+/* Estado de carga */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+}
+
+.spinner {
+  margin-bottom: 1.5rem;
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Modal personalizado */
+.modal-custom-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(3px);
+}
+
+.modal-custom-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem;
+  margin: 0 1rem;
+}
+
+.modal-custom-content {
+  background-color: var(--modal-bg);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-custom-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  color: var(--text-primary);
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-speed) ease;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+}
+
+.modal-custom-body {
+  padding: 1.5rem;
+}
+
+.modal-custom-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Estas animaciones ahora se encuentran en animations.css */
+
+/* Responsive */
+@media (max-width: 992px) {
+  .biblioteca-title {
+    font-size: 2rem;
+  }
+  
+  .filtros-wrapper {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .libros-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .libro-img-container {
+    height: 240px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .section-count {
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .filtro-btn {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    flex: 1;
+  }
+  
+  .filtro-text {
+    font-size: 0.85rem;
+  }
+  
+  .filtro-count {
+    font-size: 0.75rem;
+    min-width: 1.3rem;
+    height: 1.3rem;
+  }
+  
+  .filtro-icon {
+    margin-right: 0.25rem;
+  }
+  
+  .libros-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .libro-img-container {
+    height: 220px;
+  }
+}

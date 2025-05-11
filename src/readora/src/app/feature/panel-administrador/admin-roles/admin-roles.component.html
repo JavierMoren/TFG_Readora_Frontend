@@ -1,0 +1,177 @@
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h5 fw-medium text-highlight mb-0">Gestión de Roles</h2>
+    
+    <!-- Botón para añadir nuevo rol -->
+    <button *ngIf="!showForm" (click)="prepareCreateRole()" 
+      class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+      <span class="material-icons small me-1">add</span>
+      <span>Añadir Rol</span>
+    </button>
+  </div>
+
+  <!-- Formulario para añadir/editar rol -->
+  <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+      <h3 class="h6 fw-medium text-highlight mb-0">{{isEditing ? 'Editar Rol' : 'Añadir Rol'}}</h3>
+      <button (click)="cancelEdit()" class="btn-close btn-sm" aria-label="Cerrar"></button>
+    </div>
+    
+    <div class="card-body">
+      <form (submit)="saveRole()" #roleForm="ngForm" class="mb-3">
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre del Rol <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <span class="material-icons small">shield</span>
+            </span>
+            <input type="text" id="nombre" [(ngModel)]="currentRole.nombre" name="nombre" 
+              class="form-control" 
+              required
+              #nombreInput="ngModel"
+              pattern="^ROLE_[A-Z0-9_]{1,20}$"
+              [ngClass]="{'is-invalid': nombreInput.invalid && (nombreInput.dirty || nombreInput.touched)}">
+          </div>
+          <div *ngIf="nombreInput.invalid && (nombreInput.dirty || nombreInput.touched)" class="text-danger small mt-1">
+            <span *ngIf="nombreInput.errors?.['required']">El nombre del rol es obligatorio</span>
+            <span *ngIf="nombreInput.errors?.['pattern']">El formato debe ser ROLE_NOMBRE (en mayúsculas)</span>
+          </div>
+          <p class="form-text text-secondary small">Ejemplo: ROLE_ADMIN, ROLE_USER, etc.</p>
+        </div>
+        
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" [disabled]="roleForm.invalid"
+            class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
+            <span class="material-icons small me-1">save</span>
+            <span>Guardar</span>
+          </button>
+          <button type="button" (click)="cancelEdit()" 
+            class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center transition-all">
+            <span class="material-icons small me-1">close</span>
+            <span>Cancelar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de roles -->
+  <div class="table-responsive">
+    <table class="table table-hover table-striped">
+      <thead class="table-light">
+        <tr>
+          <th scope="col" class="text-primary small" (click)="changeSort('id')">
+            ID
+            <span *ngIf="sortBy === 'id'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small" (click)="changeSort('nombre')">
+            Nombre
+            <span *ngIf="sortBy === 'nombre'" class="material-icons small align-middle">
+              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+          </th>
+          <th scope="col" class="text-primary small text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles">
+          <td class="small text-secondary">
+            {{role.id}}
+          </td>
+          <td>
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-medium py-2 px-3 rounded-pill">
+              {{role.nombre}}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="d-flex justify-content-center gap-2">
+              <button (click)="prepareUpdateRole(role)" 
+                class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">
+                <span class="material-icons small">edit</span>
+              </button>
+              <button (click)="deleteRole(role.id)" 
+                class="btn btn-sm btn-outline-danger border-0 transition-all" title="Eliminar">
+                <span class="material-icons small">delete</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+        
+        <!-- Mensaje cuando no hay roles -->
+        <tr *ngIf="roles.length === 0">
+          <td colspan="3" class="text-center text-secondary py-4">
+            No hay roles disponibles
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Navegador de paginación y controles -->
+  <div *ngIf="totalPages > 0" class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
+    <!-- Información de paginación -->
+    <div class="text-secondary small">
+      Mostrando {{ roles.length ? (currentPage * pageSize + 1) : 0 }} a 
+      {{ roles.length ? Math.min((currentPage + 1) * pageSize, totalElements) : 0 }} 
+      de {{ totalElements }} registros
+    </div>
+    
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <!-- Selector de tamaño de página -->
+      <div class="d-flex align-items-center">
+        <span class="text-secondary me-2 small">Mostrar:</span>
+        <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+      
+      <!-- Paginación -->
+      <nav aria-label="Paginación de roles">
+        <ul class="pagination pagination-sm mb-0">
+          <!-- Botón Anterior -->
+          <li class="page-item" [class.disabled]="currentPage === 0">
+            <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">&laquo;</button>
+          </li>
+          
+          <!-- Primera página siempre visible -->
+          <li class="page-item" [class.active]="currentPage === 0">
+            <button class="page-link" (click)="goToPage(0)">1</button>
+          </li>
+          
+          <!-- Elipsis inicial si estamos lejos del inicio -->
+          <li class="page-item disabled" *ngIf="currentPage > 2">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Páginas cercanas a la actual (máximo 5 páginas visibles) -->
+          <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
+            <li class="page-item" [class.active]="currentPage === i + 1" 
+                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
+              <button class="page-link" (click)="goToPage(i + 1)">{{ i + 2 }}</button>
+            </li>
+          </ng-container>
+          
+          <!-- Elipsis final si estamos lejos del final -->
+          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
+            <span class="page-link">...</span>
+          </li>
+          
+          <!-- Última página siempre visible si hay más de una página -->
+          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
+            <button class="page-link" (click)="goToPage(totalPages - 1)">{{ totalPages }}</button>
+          </li>
+          
+          <!-- Botón Siguiente -->
+          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+            <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">&raquo;</button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

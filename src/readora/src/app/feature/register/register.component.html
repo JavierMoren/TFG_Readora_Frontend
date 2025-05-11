@@ -1,0 +1,165 @@
+<div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+  <div class="col-12 col-md-8 col-lg-7 col-xl-6">
+    <div class="text-center mb-4">
+      <img src="assets/logos/Logo.svg" alt="Logo Readora" class="auth-logo mb-3">
+      <h1 class="h2 fw-bold text-highlight">Únete a Readora</h1>
+      <p class="text-secondary small">Crea tu cuenta y comienza a gestionar tu biblioteca personal</p>
+    </div>
+
+    <div class="card shadow border-0 auth-card">
+      <div class="card-body p-0">
+        
+        <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="auth-form p-4">
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label for="usuario" class="form-label fw-medium">Usuario <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="material-icons small">account_circle</i></span>
+                <input 
+                  type="text" 
+                  id="usuario" 
+                  [(ngModel)]="registerRequest.usuario" 
+                  name="usuario"
+                  required 
+                  minlength="3"
+                  maxlength="50"
+                  #usuario="ngModel"
+                  class="form-control border-start-0"
+                  [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}"
+                  placeholder="Elige un nombre de usuario">
+              </div>
+              <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback d-block small mt-1">
+                <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
+                <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
+                <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label for="gmail" class="form-label fw-medium">Correo electrónico <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="material-icons small">mail</i></span>
+                <input 
+                  type="email" 
+                  id="gmail" 
+                  [(ngModel)]="registerRequest.gmail" 
+                  name="gmail"
+                  required 
+                  email
+                  #gmail="ngModel"
+                  class="form-control border-start-0"
+                  [ngClass]="{'is-invalid': gmail.invalid && (gmail.dirty || gmail.touched)}"
+                  placeholder="Ingresa tu correo electrónico">
+              </div>
+              <div *ngIf="gmail.invalid && (gmail.dirty || gmail.touched)" class="invalid-feedback d-block small mt-1">
+                <div *ngIf="gmail.errors?.['required']">El correo electrónico es requerido.</div>
+                <div *ngIf="gmail.errors?.['email']">Ingresa un correo electrónico válido.</div>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label for="nombre" class="form-label fw-medium">Nombre <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="material-icons small">badge</i></span>
+                <input 
+                  type="text" 
+                  id="nombre" 
+                  [(ngModel)]="registerRequest.nombre" 
+                  name="nombre"
+                  required 
+                  minlength="2"
+                  maxlength="50"
+                  #nombre="ngModel"
+                  class="form-control border-start-0"
+                  [ngClass]="{'is-invalid': nombre.invalid && (nombre.dirty || nombre.touched)}"
+                  placeholder="Ingresa tu nombre">
+              </div>
+              <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="invalid-feedback d-block small mt-1">
+                <div *ngIf="nombre.errors?.['required']">El nombre es requerido.</div>
+                <div *ngIf="nombre.errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</div>
+                <div *ngIf="nombre.errors?.['maxlength']">El nombre no puede exceder 50 caracteres.</div>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label for="apellido" class="form-label fw-medium">Apellido <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="material-icons small">badge</i></span>
+                <input 
+                  type="text" 
+                  id="apellido" 
+                  [(ngModel)]="registerRequest.apellido" 
+                  name="apellido"
+                  required 
+                  minlength="2"
+                  maxlength="50"
+                  #apellido="ngModel"
+                  class="form-control border-start-0"
+                  [ngClass]="{'is-invalid': apellido.invalid && (apellido.dirty || apellido.touched)}"
+                  placeholder="Ingresa tu apellido">
+              </div>
+              <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="invalid-feedback d-block small mt-1">
+                <div *ngIf="apellido.errors?.['required']">El apellido es requerido.</div>
+                <div *ngIf="apellido.errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</div>
+                <div *ngIf="apellido.errors?.['maxlength']">El apellido no puede exceder 50 caracteres.</div>
+              </div>
+            </div>
+
+            <div class="col-12 mb-4">
+              <label for="contrasenna" class="form-label fw-medium">Contraseña <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="material-icons small">lock</i></span>
+                <input 
+                  type="password" 
+                  id="contrasenna" 
+                  [(ngModel)]="registerRequest.contrasenna" 
+                  name="contrasenna"
+                  required
+                  minlength="6"
+                  maxlength="100" 
+                  #contrasenna="ngModel"
+                  class="form-control border-start-0"
+                  [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}"
+                  placeholder="Crea una contraseña segura (mínimo 6 caracteres)">
+              </div>
+              <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback d-block small mt-1">
+                <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
+                <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
+                <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
+              </div>
+              <small class="form-text text-muted mt-2">
+                <i class="material-icons small align-middle">info</i>
+                La contraseña debe tener al menos 6 caracteres. Te recomendamos usar letras, números y símbolos.
+              </small>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            [disabled]="registerForm.invalid"
+            class="btn btn-primary w-100 py-2 mb-3 auth-btn mt-2">
+            <span class="d-flex align-items-center justify-content-center">
+              <i class="material-icons me-2">how_to_reg</i>
+              Crear cuenta
+            </span>
+          </button>
+          
+          <div class="text-center mt-4">
+            <p class="mb-0">
+              <a routerLink="/api/v1/authenticate" class="text-primary text-decoration-none auth-link">
+                ¿Ya tienes cuenta? <span class="fw-medium">Inicia sesión</span>
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="text-center mt-4">
+      <a routerLink="/" class="d-inline-flex align-items-center text-primary text-decoration-none transition-all">
+        <span class="material-icons small me-1">arrow_back</span>
+        <span>Volver al inicio</span>
+      </a>
+    </div>
+  </div>
+</div>

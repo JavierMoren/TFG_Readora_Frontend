@@ -1,0 +1,180 @@
+<div class="container mt-4">
+  <!-- Indicador de carga -->
+  <div class="text-center my-5" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div class="alert alert-danger" *ngIf="error">
+    {{ error }}
+    <button class="btn btn-link" (click)="reloadLibro()">
+      Intentar de nuevo
+    </button>
+  </div>
+
+  <!-- Detalles del libro -->
+  <div class="libro-detalle-container" *ngIf="libro && !loading" role="main" aria-labelledby="titulo-libro">
+    <div class="card shadow-sm libro-card">
+      <div class="row g-0">
+        <!-- Portada del libro -->
+        <div class="col-md-4 col-lg-3">
+          <div class="libro-portada-container">
+            <img [src]="getPortadaUrl(libro.portadaUrl)" 
+                 [attr.alt]="'Portada del libro ' + libro.titulo" 
+                 class="libro-portada">
+            
+            <div class="libro-acciones-container mt-3">
+              <!-- Botón para añadir a biblioteca (visible cuando no está en la biblioteca) -->
+              <button class="btn btn-primary btn-block" 
+                      *ngIf="isLoggedIn && !enBiblioteca" 
+                      (click)="agregarABiblioteca()"
+                      [disabled]="agregando"
+                      aria-label="Añadir este libro a mi biblioteca">
+                <ng-container *ngIf="!agregando">
+                  <span class="material-icons" aria-hidden="true">bookmark_add</span>
+                  <span>Añadir a mi biblioteca</span>
+                </ng-container>
+                <ng-container *ngIf="agregando">
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  <span>Añadiendo...</span>
+                </ng-container>
+              </button>
+              
+              <!-- Botón para eliminar de biblioteca (visible cuando está en la biblioteca) -->
+              <button class="btn btn-outline-danger btn-block"
+                      *ngIf="isLoggedIn && enBiblioteca"
+                      (click)="eliminarDeColeccion()"
+                      [disabled]="eliminando"
+                      aria-label="Eliminar este libro de mi biblioteca">
+                <ng-container *ngIf="!eliminando">
+                  <span class="material-icons" aria-hidden="true">delete</span>
+                  <span>Eliminar de mi biblioteca</span>
+                </ng-container>
+                <ng-container *ngIf="eliminando">
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  <span>Eliminando...</span>
+                </ng-container>
+              </button>
+              
+              <!-- Botón para iniciar sesión (solo visible cuando no hay sesión) -->
+              <button class="btn btn-outline-primary btn-block" 
+                      *ngIf="!isLoggedIn" 
+                      routerLink="/api/v1/authenticate" 
+                      [queryParams]="{returnUrl: '/libros/' + libroId}"
+                      aria-label="Iniciar sesión para añadir este libro a tu biblioteca">
+                <span class="material-icons" aria-hidden="true">login</span>
+                <span>Iniciar sesión para añadir</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Información del libro -->
+        <div class="col-md-8 col-lg-9">
+          <div class="card-body libro-info-container">
+            <h1 class="libro-titulo" id="titulo-libro">{{ libro.titulo }}</h1>
+            
+            <!-- Mostrar múltiples autores -->
+            <div class="libro-autores" *ngIf="autores && autores.length > 0">
+              <span class="por-texto">por </span>
+              <ng-container *ngFor="let autor of autores; let last = last; let i = index">
+                <a [routerLink]="['/autores', autor.id]" class="autor-link" 
+                   [attr.aria-label]="'Ver perfil del autor ' + autor.nombre">
+                  {{ autor.nombre }} {{ autor.apellido }}
+                </a>
+                <ng-container *ngIf="!last">
+                  <ng-container *ngIf="i < autores.length - 2">, </ng-container>
+                  <ng-container *ngIf="i === autores.length - 2"> y </ng-container>
+                </ng-container>
+              </ng-container>
+            </div>
+            
+            <!-- Mensaje si no hay autores -->
+            <div class="libro-autores sin-autores-mensaje" *ngIf="!autores || autores.length === 0">
+              <span class="autor-desconocido">
+                <span class="material-icons small me-1">person_off</span>
+                No Tiene Autor
+              </span>
+            </div>
+            
+            <div class="libro-badges">
+              <span class="badge genre-badge" *ngIf="libro.genero">
+                <span class="material-icons small">category</span>
+                {{ libro.genero }}
+              </span>
+              <span class="badge year-badge" *ngIf="libro.anioPublicacion">
+                <span class="material-icons small">event</span>
+                {{ libro.anioPublicacion | date: 'yyyy' }}
+              </span>
+              <span class="badge editorial-badge" *ngIf="libro.editorial">
+                <span class="material-icons small">business</span>
+                {{ libro.editorial }}
+              </span>
+            </div>
+            
+            <div class="libro-meta">
+              <div class="meta-item" *ngIf="libro.isbn">
+                <span class="meta-value">{{ libro.isbn }}</span>
+                <span class="meta-label">ISBN</span>
+              </div>
+              <div class="meta-item" *ngIf="libro.numeroPaginas">
+                <span class="meta-value">{{ libro.numeroPaginas }}</span>
+                <span class="meta-label">Páginas</span>
+              </div>
+              <div class="meta-item" *ngIf="libro.anioPublicacion">
+                <span class="meta-value">{{ libro.anioPublicacion | date: 'yyyy' }}</span>
+                <span class="meta-label">Publicación</span>
+              </div>
+              <div class="meta-item" *ngIf="libro.editorial">
+                <span class="meta-value">{{ libro.editorial }}</span>
+                <span class="meta-label">Editorial</span>
+              </div>
+            </div>
+            
+            <h2 class="sinopsis-title">Sinopsis</h2>
+            <div class="libro-sinopsis">
+              <p class="sinopsis-texto">{{ libro.sinopsis || 'No hay sinopsis disponible para este libro.' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sección de autores -->
+    <div class="autores-section mt-4" *ngIf="autores && autores.length > 0">
+      <h2 class="section-title">
+        <span class="material-icons section-icon">people</span>
+        <span>Autores</span>
+      </h2>
+      
+      <div class="autores-container">
+        <div class="row g-4">
+          <div class="col-12 col-md-6 col-lg-4" *ngFor="let autor of autores">
+            <a [routerLink]="['/autores', autor.id]" class="autor-card-link">
+              <div class="autor-card">
+                <div class="autor-card-content">
+                  <div class="autor-imagen">
+                    <img [src]="getAutorImageUrl(autor.fotoUrl)" 
+                         alt="Foto de {{ autor.nombre }}"
+                         class="autor-avatar">
+                  </div>
+                  <div class="autor-info">
+                    <h3 class="autor-nombre">{{ autor.nombre }} {{ autor.apellido }}</h3>
+                    <p class="autor-nacionalidad" *ngIf="autor.nacionalidad">
+                      {{ autor.nacionalidad }}
+                    </p>
+                    <div class="autor-arrow">
+                      <span class="material-icons">arrow_forward</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

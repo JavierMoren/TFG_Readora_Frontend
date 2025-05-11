@@ -1,0 +1,69 @@
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background-color: var(--background-subtle);
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.25);
+}
+
+.theme-toggle:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.icon-container {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.material-icons {
+  font-size: 1.25rem;
+  position: absolute;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-in {
+  transform: rotate(0deg);
+  opacity: 1;
+}
+
+.animate-out {
+  transform: rotate(100deg);
+  opacity: 0;
+}
+
+/* Efecto ripple cuando se hace clic */
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle:active::after {
+  transform: scale(1.5);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.3s ease 0.1s;
+}

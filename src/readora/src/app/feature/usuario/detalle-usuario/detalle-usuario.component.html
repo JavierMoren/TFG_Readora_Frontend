@@ -1,0 +1,218 @@
+<div class="container py-5 profile-container">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="mb-2 h2 fw-bold d-flex align-items-center">
+        <span class="material-icons me-2 text-primary">account_circle</span>
+        Mi perfil
+      </h1>
+      <p class="text-muted">Gestiona tu información personal y configuración de seguridad</p>
+    </div>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div *ngIf="cargando" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando datos...</p>
+  </div>
+
+  <!-- Error de carga -->
+  <div *ngIf="errorCarga" class="alert alert-danger d-flex align-items-center">
+    <span class="material-icons me-2">error_outline</span>
+    <p class="mb-0">No se pudieron cargar los datos del usuario. Por favor, intenta de nuevo más tarde.</p>
+  </div>
+
+  <!-- Datos del usuario -->
+  <div *ngIf="!cargando && !errorCarga" class="row">
+    <!-- Columna de información del perfil -->
+    <div class="col-12 col-lg-7 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-icons card-icon">person</span>
+            Información personal
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="usuarioForm" (submit)="guardarCambios()">
+            <div class="mb-3">
+              <label for="usuario" class="form-label">Nombre de usuario</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">alternate_email</span>
+                </span>
+                <input type="text" id="usuario" formControlName="usuario" class="form-control" readonly>
+              </div>
+              <small class="form-text text-muted">El nombre de usuario no se puede cambiar.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">badge</span>
+                </span>
+                <input type="text" id="nombre" formControlName="nombre" class="form-control" 
+                  [ngClass]="{'is-invalid': usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched}">
+              </div>
+              <div *ngIf="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched" class="invalid-feedback">
+                <span *ngIf="usuarioForm.get('nombre')?.errors?.['required']">El nombre es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('nombre')?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">badge</span>
+                </span>
+                <input type="text" id="apellido" formControlName="apellido" class="form-control"
+                  [ngClass]="{'is-invalid': usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched}">
+              </div>
+              <div *ngIf="usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched" class="invalid-feedback">
+                <span *ngIf="usuarioForm.get('apellido')?.errors?.['required']">El apellido es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('apellido')?.errors?.['pattern']">El apellido solo puede contener letras y espacios.</span>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="gmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">email</span>
+                </span>
+                <input type="email" id="gmail" formControlName="gmail" class="form-control"
+                  [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched}">
+              </div>
+              <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback">
+                <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El correo electrónico es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Formato de correo electrónico inválido.</span>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid">
+                <span class="material-icons">save</span>
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna de seguridad y opciones -->
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-icons card-icon">lock</span>
+            Seguridad
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <!-- Formulario para cambio de contraseña -->
+          <div *ngIf="!cambiarContrasenna">
+            <div class="d-flex align-items-center mb-3">
+              <span class="material-icons text-primary me-3" style="font-size: 2.5rem;">password</span>
+              <div>
+                <h3 class="h6 fw-bold mb-1">Actualiza tu contraseña</h3>
+                <p class="mb-0 text-muted">Mantén tu cuenta segura cambiando tu contraseña regularmente</p>
+              </div>
+            </div>
+            <button class="btn btn-outline-primary w-100" (click)="cambiarContrasenna = true">
+              <span class="material-icons">key</span>
+              Cambiar contraseña
+            </button>
+          </div>
+
+          <form *ngIf="cambiarContrasenna" [formGroup]="passwordForm" (submit)="verificarContrasenna()">
+            <div class="mb-3">
+              <label for="contrasennaActual" class="form-label">Contraseña actual <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">lock</span>
+                </span>
+                <input type="password" id="contrasennaActual" formControlName="contrasennaActual" class="form-control"
+                  [ngClass]="{'is-invalid': passwordForm.get('contrasennaActual')?.invalid && passwordForm.get('contrasennaActual')?.touched}">
+              </div>
+              <div *ngIf="passwordForm.get('contrasennaActual')?.invalid && passwordForm.get('contrasennaActual')?.touched" class="invalid-feedback">
+                <span *ngIf="passwordForm.get('contrasennaActual')?.errors?.['required']">Debes introducir tu contraseña actual.</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="nuevaContrasenna" class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">vpn_key</span>
+                </span>
+                <input type="password" id="nuevaContrasenna" formControlName="nuevaContrasenna" class="form-control"
+                  [ngClass]="{'is-invalid': passwordForm.get('nuevaContrasenna')?.invalid && passwordForm.get('nuevaContrasenna')?.touched}">
+              </div>
+              <div *ngIf="passwordForm.get('nuevaContrasenna')?.invalid && passwordForm.get('nuevaContrasenna')?.touched" class="invalid-feedback">
+                <span *ngIf="passwordForm.get('nuevaContrasenna')?.errors?.['required']">Debes introducir una nueva contraseña.</span>
+                <span *ngIf="passwordForm.get('nuevaContrasenna')?.errors?.['pattern']">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</span>
+              </div>
+              <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
+            </div>
+
+            <div class="mb-4">
+              <label for="confirmarContrasenna" class="form-label">Confirmar nueva contraseña <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">check_circle</span>
+                </span>
+                <input type="password" id="confirmarContrasenna" formControlName="confirmarContrasenna" class="form-control"
+                  [ngClass]="{'is-invalid': passwordForm.get('confirmarContrasenna')?.invalid && passwordForm.get('confirmarContrasenna')?.touched}">
+              </div>
+              <div *ngIf="passwordForm.get('confirmarContrasenna')?.invalid && passwordForm.get('confirmarContrasenna')?.touched" class="invalid-feedback">
+                <span *ngIf="passwordForm.get('confirmarContrasenna')?.errors?.['required']">Debes confirmar la nueva contraseña.</span>
+                <span *ngIf="passwordForm.get('confirmarContrasenna')?.errors?.['notMatch']">Las contraseñas no coinciden.</span>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelarCambioContrasenna()">
+                <span class="material-icons">cancel</span>
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
+                <span class="material-icons">update</span>
+                Actualizar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Tarjeta de información adicional -->
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-icons card-icon">info</span>
+            Información de cuenta
+          </h2>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <span class="material-icons text-success me-3">verified_user</span>
+            <div>
+              <h3 class="h6 fw-bold mb-1">Estado de cuenta</h3>
+              <p class="mb-0 text-success">Activa</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="material-icons text-primary me-3">date_range</span>
+            <div>
+              <h3 class="h6 fw-bold mb-1">Fecha de registro</h3>
+              <p class="mb-0 text-muted">{{ usuario?.fechaCreacion | date:'medium':'':'es' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
