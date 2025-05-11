@@ -49,11 +49,8 @@ export class AutenticacionComponent {
         },
       }); 
       return;
-    }
-
-    this.autenticacionService.authenticateUsuario(this.authRequest.usuario, this.authRequest.contrasenna).subscribe({
+    }    this.autenticacionService.authenticateUsuario(this.authRequest.usuario, this.authRequest.contrasenna).subscribe({
       next: (response) => {
-        console.log('Usuario autenticado exitosamente', response);
         toast.success('¡Autenticado!', { 
           description: 'Usuario autenticado con éxito',
           action: {

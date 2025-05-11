@@ -115,7 +115,7 @@ export class AutorService {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
       }
     }
-    console.error(errorMessage);
+    console.error('[AutorService] Error HTTP:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

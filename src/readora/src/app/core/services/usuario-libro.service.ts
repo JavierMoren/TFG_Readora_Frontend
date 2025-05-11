@@ -83,7 +83,7 @@ export class UsuarioLibroService {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
       }
     }
-    console.error(errorMessage);
+    console.error('[UsuarioLibroService] Error HTTP:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

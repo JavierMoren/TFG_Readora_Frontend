@@ -20,7 +20,7 @@
               </div>
               <div>
                 <h5 class="card-title">{{ item.titulo }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ item.autor?.nombre || 'Autor desconocido' }}</h6>
+                <h6 class="card-subtitle mb-2 text-muted">{{ getAutores(item.id) }}</h6>
                 <div class="book-details">
                   <p class="text-muted">{{ item.anioPublicacion || 'Año desconocido' }} · {{ item.genero || 'Género no especificado' }}</p>
                 </div>

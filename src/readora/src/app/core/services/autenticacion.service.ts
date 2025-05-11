@@ -24,8 +24,9 @@ export class AutenticacionService {
     // Consultar al backend sobre el estado de autenticación utilizando las cookies
     this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
       .pipe(
-        catchError(() => {
+        catchError((error) => {
           // Si hay un error, asumimos que no está autenticado
+          console.error('[AutenticacionService] Error al verificar autenticación', error);
           this.isAuthenticated.next(false);
           this.token = null;
           return of(false);
@@ -35,7 +36,6 @@ export class AutenticacionService {
         // Verificar explícitamente si la respuesta indica que el usuario está autenticado
         const isAuth = response && response.isAuthenticated === true;
         this.isAuthenticated.next(isAuth);
-        console.log('Estado de autenticación actualizado:', isAuth);
         
         // Si el backend nos proporciona un token en la respuesta, lo almacenamos
         // para compatibilidad con los componentes que lo utilizan
@@ -55,7 +55,6 @@ export class AutenticacionService {
       tap((response) => {
         // Cuando la autenticación es exitosa, actualizamos el estado
         if (response && response.mensage === "Authentication successful") {
-          console.log('Autenticación exitosa, actualizando estado');
           this.isAuthenticated.next(true);
           
           // Verificar el estado actual llamando a checkAuthentication
@@ -66,6 +65,10 @@ export class AutenticacionService {
             this.token = response.token;
           }
         }
+      }),
+      catchError((error) => {
+        console.error('[AutenticacionService] Error en autenticación', error);
+        return throwError(() => error);
       })
     );
   }  isLoggedIn(): Observable<boolean> {
@@ -81,7 +84,8 @@ export class AutenticacionService {
           this.token = null;
           this.router.navigate(['/']);
         },
-        error: () => {
+        error: (error) => {
+          console.error('[Autenticacion] Error al cerrar sesión', error);
           // Incluso si hay un error, limpiamos el estado local
           this.isAuthenticated.next(false);
           this.token = null;
@@ -89,13 +93,24 @@ export class AutenticacionService {
         }
       });
   }  getUserInfo(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/v1/user-info`, { withCredentials: true });
+    return this.http.get<any>(`${environment.apiUrl}/v1/user-info`, { withCredentials: true }).pipe(
+      catchError((error) => {
+        console.error('[AutenticacionService] Error al obtener información del usuario', error);
+        return throwError(() => error);
+      })
+    );
   }  setToken(token: string): void {
     this.token = token;
     this.isAuthenticated.next(!!token);
   }  getToken(): string | null {
     if (!this.token && this.isAuthenticated.getValue()) {
       this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
+        .pipe(
+          catchError((error) => {
+            console.error('[AutenticacionService] Error al obtener token', error);
+            return of(null);
+          })
+        )
         .subscribe(response => {
           if (response && response.token) {
             this.token = response.token;

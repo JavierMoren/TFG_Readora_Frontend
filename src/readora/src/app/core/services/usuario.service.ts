@@ -87,7 +87,7 @@ export class UsuarioService {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
       }
     }
-    console.error(errorMessage);
+    console.error('[UsuarioService] Error HTTP:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

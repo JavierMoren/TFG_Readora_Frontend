@@ -67,7 +67,7 @@ export class RoleService {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
       }
     }
-    console.error(errorMessage);
+    console.error('[RoleService] Error HTTP:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

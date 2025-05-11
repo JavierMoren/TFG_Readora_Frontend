@@ -76,7 +76,6 @@ export class RegisterComponent {
       next: (response: HttpResponse<any>) => {
         // Verifica si el código de estado es 201 (Created)
         if (response.status === 201) {
-          console.log('Usuario registrado exitosamente', response.body);
           toast.success('¡Registrado!', { 
             description: 'Usuario registrado con éxito',
             action: {
@@ -88,7 +87,6 @@ export class RegisterComponent {
             this.router.navigate(['/']);
           }, 1500);
         } else {
-          console.error('Respuesta inesperada del servidor:', response);
           toast.error('Error', { 
             description: 'Respuesta inesperada del servidor',
             action: {
@@ -99,8 +97,7 @@ export class RegisterComponent {
         }
       },
       error: (error) => {
-        console.error('Error al registrar usuario', error);
-
+        console.error('[Register] Error al registrar usuario', error);
         // Maneja errores específicos
         if (error.status === 500) {
           toast.error('Error', { 

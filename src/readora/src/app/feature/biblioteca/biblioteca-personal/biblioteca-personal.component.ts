@@ -2,20 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
-import { LibroService } from '../../../core/services/libro.service';
+import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model';
 import { Libro } from '../../../models/libro/libro.model';
 import { Autor } from '../../../models/autor/autor.model';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { forkJoin, map, switchMap, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-biblioteca-personal',
-  standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './biblioteca-personal.component.html',
   styleUrls: ['./biblioteca-personal.component.css']
 })
@@ -53,32 +52,28 @@ export class BibliotecaPersonalComponent implements OnInit {
 
   constructor(
     private usuarioLibroService: UsuarioLibroService,
-    private libroService: LibroService,
+    private libroService: LibrosService,
     public storageService: StorageService,
     private authService: AutenticacionService,
     private notificationService: NotificationService
   ) {
-    console.log('[BibliotecaPersonal] Componente creado');
-  }
+      }
 
   ngOnInit(): void {
-    console.log('[BibliotecaPersonal] Inicializando componente');
     // Obtener el ID del usuario autenticado
     this.authService.getUserInfo().subscribe({
       next: (userData) => {
         if (userData && userData.id) {
           this.usuarioId = userData.id;
-          console.log('[BibliotecaPersonal] ID de usuario obtenido:', userData.id);
           this.cargarLibrosUsuario();
         } else {
-          console.error('[BibliotecaPersonal] No se pudo obtener el ID del usuario autenticado');
           this.notificationService.error('Error', {
             description: 'No se pudo obtener tu información de usuario'
           });
         }
       },
       error: (error) => {
-        console.error('[BibliotecaPersonal] Error al obtener información del usuario', error);
+        console.error('[BibliotecaPersonal] Error de autenticación', error);
         this.notificationService.error('Error de autenticación', {
           description: 'No se pudo verificar tu sesión. Por favor, intenta iniciar sesión nuevamente.'
         });
@@ -90,18 +85,18 @@ export class BibliotecaPersonalComponent implements OnInit {
    * Carga todos los libros del usuario y los organiza por estado de lectura
    */
   cargarLibrosUsuario(): void {
-    console.log('[BibliotecaPersonal] Cargando libros del usuario');
     if (!this.usuarioId) {
       console.error('[BibliotecaPersonal] No hay ID de usuario disponible');
       return;
     }
     
+    // Establecer estado de carga
+    this.cargando = true;
+    
     // Obtener todas las relaciones usuario-libro
     this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
       next: (usuarioLibros) => {
-        console.log('[BibliotecaPersonal] Relaciones usuario-libro obtenidas:', usuarioLibros ? usuarioLibros.length : 0);
         if (!usuarioLibros || usuarioLibros.length === 0) {
-          console.log('[BibliotecaPersonal] El usuario no tiene libros en su biblioteca');
           return;
         }
         
@@ -117,12 +112,10 @@ export class BibliotecaPersonalComponent implements OnInit {
           return this.libroService.getLibroById(usuarioLibro.libroId).pipe(
             // Luego obtenemos los autores para el libro
             switchMap((libro: Libro) => {
-              console.log(`[BibliotecaPersonal] Detalle del libro ${libro.id} obtenido, obteniendo autores...`);
               
               // Obtenemos los autores del libro
               return this.libroService.getAutoresByLibroId(libro.id).pipe(
                 map(autores => {
-                  console.log(`[BibliotecaPersonal] Autores obtenidos para libro ${libro.id}: ${autores.length}`);
                   
                   // Combinamos toda la información
                   return {
@@ -152,17 +145,25 @@ export class BibliotecaPersonalComponent implements OnInit {
           );
         });
         
-        console.log(`[BibliotecaPersonal] Realizando ${observables.length} peticiones para obtener detalles de libros`);
-        
         // Ejecutar todas las peticiones en paralelo
         forkJoin(observables).subscribe({
           next: (librosConEstado) => {
-            console.log('[BibliotecaPersonal] Detalles de todos los libros recibidos, clasificando...');
             // Clasificar los libros según su estado
             librosConEstado.forEach(libro => {
-              switch(libro.estadoLectura) {
+              
+              // Validación específica para el estado LEYENDO con comprobación de case-sensitivity
+              if (libro.estadoLectura && (libro.estadoLectura.toUpperCase() === 'LEYENDO')) {
+                
+                // Normaliza el estado para garantizar que sea 'LEYENDO' en mayúsculas
+                libro.estadoLectura = 'LEYENDO';
+                
+                // Verifica si el libro ya existe en el array (para evitar duplicados)
+                const yaExiste = this.librosLeyendo.some(l => l.id === libro.id);
+              }
+              
+              switch(libro.estadoLectura ? libro.estadoLectura.toUpperCase() : '') {
                 case 'LEYENDO':
-                  this.librosLeyendo.push(libro);
+                  this.librosLeyendo.push({...libro, estadoLectura: 'LEYENDO'});
                   break;
                 case 'PENDIENTE':
                   this.librosPendientes.push(libro);
@@ -174,21 +175,34 @@ export class BibliotecaPersonalComponent implements OnInit {
                   this.librosAbandonados.push(libro);
                   break;
                 default:
-                  console.warn('[BibliotecaPersonal] Estado de lectura desconocido:', libro.estadoLectura);
+                  // Estado de lectura desconocido
               }
             });
             
-            console.log('[BibliotecaPersonal] Clasificación completada:');
-            console.log(`- Leyendo: ${this.librosLeyendo.length}`);
-            console.log(`- Pendientes: ${this.librosPendientes.length}`);
-            console.log(`- Terminados: ${this.librosTerminados.length}`);
-            console.log(`- Abandonados: ${this.librosAbandonados.length}`);
+            // Clasificación completada
+            
+            // Depuración detallada para los arrays de libros
+            if (this.librosLeyendo.length > 0) {
+              
+              // Verificar si necesitamos mostrar la sección "Leyendo"
+              if (this.filtroActual === 'todos' || this.filtroActual === 'leyendo') {
+                
+                // Forzar actualización de la vista cuando hay libros en estado "Leyendo"
+                setTimeout(() => {
+                  // Actualizar vista
+                }, 100);
+              }
+            }
+            
+            // Finalizar estado de carga
+            this.cargando = false;
           },
           error: (error) => {
             console.error('[BibliotecaPersonal] Error al obtener detalles de los libros', error);
             this.notificationService.error('Error', {
               description: 'No se pudieron cargar todos los detalles de tus libros'
             });
+            this.cargando = false;
           }
         });
       },
@@ -197,6 +211,7 @@ export class BibliotecaPersonalComponent implements OnInit {
         this.notificationService.error('Error', {
           description: 'No se pudo cargar tu biblioteca personal'
         });
+        this.cargando = false;
       }
     });
   }
@@ -205,9 +220,7 @@ export class BibliotecaPersonalComponent implements OnInit {
    * Actualiza el estado de lectura de un libro
    */
   actualizarEstadoLectura(): void {
-    console.log('[BibliotecaPersonal] Actualizando estado de lectura');
     if (!this.libroSeleccionado || !this.usuarioId) {
-      console.error('[BibliotecaPersonal] Datos incompletos para actualizar');
       return;
     }
     
@@ -225,17 +238,13 @@ export class BibliotecaPersonalComponent implements OnInit {
     // Si cambia a TERMINADO y no tiene fecha de fin, establecerla a hoy
     if (usuarioLibroActualizado.estadoLectura === 'TERMINADO' && !usuarioLibroActualizado.fechaFinLectura) {
       usuarioLibroActualizado.fechaFinLectura = new Date().toISOString().split('T')[0];
-      console.log('[BibliotecaPersonal] Estableciendo fecha de finalización automática:', usuarioLibroActualizado.fechaFinLectura);
     }
-    
-    console.log('[BibliotecaPersonal] Enviando actualización:', usuarioLibroActualizado);
     
     this.usuarioLibroService.updateUsuarioLibro(
       this.libroSeleccionado.usuarioLibroId, 
       usuarioLibroActualizado
     ).subscribe({
       next: () => {
-        console.log('[BibliotecaPersonal] Estado actualizado correctamente');
         this.notificationService.success('Estado actualizado', {
           description: 'El estado del libro se ha actualizado correctamente'
         });
@@ -243,7 +252,7 @@ export class BibliotecaPersonalComponent implements OnInit {
         this.cargarLibrosUsuario();
       },
       error: (error) => {
-        console.error('[BibliotecaPersonal] Error al actualizar estado de lectura', error);
+        console.error('[BibliotecaPersonal] Error al actualizar estado del libro', error);
         this.notificationService.error('Error', {
           description: 'No se pudo actualizar el estado del libro'
         });
@@ -255,7 +264,6 @@ export class BibliotecaPersonalComponent implements OnInit {
    * Prepara la edición de un libro
    */
   editarLibro(libro: any): void {
-    console.log('[BibliotecaPersonal] Preparando edición del libro:', libro.titulo);
     this.libroSeleccionado = { ...libro };
     this.mostrarEdicion = true;
   }
@@ -264,7 +272,6 @@ export class BibliotecaPersonalComponent implements OnInit {
    * Cierra el panel de edición
    */
   cerrarEdicion(): void {
-    console.log('[BibliotecaPersonal] Cerrando panel de edición');
     this.libroSeleccionado = null;
     this.mostrarEdicion = false;
   }
@@ -273,7 +280,6 @@ export class BibliotecaPersonalComponent implements OnInit {
    * Elimina un libro de la biblioteca personal
    */
   eliminarDeColeccion(libro: any): void {
-    console.log('[BibliotecaPersonal] Solicitando confirmación para eliminar libro:', libro.titulo);
     this.notificationService.confirm({
       title: '¿Eliminar libro?',
       text: '¿Estás seguro de eliminar este libro de tu biblioteca?',
@@ -282,14 +288,12 @@ export class BibliotecaPersonalComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then(resultado => {
       if (resultado) {
-        console.log('[BibliotecaPersonal] Confirmación recibida, eliminando libro de la biblioteca');
         
         // Eliminar inmediatamente de la lista local para actualizar la UI
         this.eliminarLibroDeListas(libro);
         
         this.usuarioLibroService.deleteUsuarioLibro(libro.usuarioLibroId).subscribe({
           next: () => {
-            console.log('[BibliotecaPersonal] Libro eliminado correctamente');
             this.notificationService.success('Libro eliminado', {
               description: 'El libro ha sido eliminado de tu biblioteca'
             });
@@ -305,8 +309,6 @@ export class BibliotecaPersonalComponent implements OnInit {
             this.cargarLibrosUsuario();
           }
         });
-      } else {
-        console.log('[BibliotecaPersonal] Eliminación cancelada por el usuario');
       }
     });
   }
@@ -336,7 +338,6 @@ export class BibliotecaPersonalComponent implements OnInit {
    * Cambia el filtro de visualización de libros y maneja la accesibilidad
    */
   cambiarFiltro(filtro: string, event?: KeyboardEvent): void {
-    console.log('[BibliotecaPersonal] Cambiando filtro a:', filtro);
     this.filtroActual = filtro;
     
     // Si el evento existe y es un evento de teclado, mover el foco al panel correspondiente

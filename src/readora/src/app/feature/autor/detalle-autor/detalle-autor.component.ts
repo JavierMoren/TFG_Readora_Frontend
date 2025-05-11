@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AutorService } from '../../../core/services/autor.service';
-import { LibroService } from '../../../core/services/libro.service';
+import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Autor } from '../../../models/autor/autor.model';
 import { Libro } from '../../../models/libro/libro.model';
 
 @Component({
   selector: 'app-detalle-autor',
-  standalone: true,
+  
   imports: [CommonModule, RouterModule],
   templateUrl: './detalle-autor.component.html',
   styleUrls: ['./detalle-autor.component.css']
@@ -28,7 +28,7 @@ export class DetalleAutorComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private autorService: AutorService,
-    private libroService: LibroService,
+    private libroService: LibrosService,
     public storageService: StorageService
   ) { }
 

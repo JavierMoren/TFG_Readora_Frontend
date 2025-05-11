@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Libro } from '../../../models/libro/libro.model';
 import { Autor } from '../../../models/autor/autor.model';
-import { LibroService } from '../../../core/services/libro.service';
+import { LibrosService } from '../../../core/services/libros.service';
 import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -44,7 +44,7 @@ export class AdminLibrosComponent implements OnInit {
   Math = Math;
 
   constructor(
-    private librosService: LibroService,
+    private librosService: LibrosService,
     private autorService: AutorService,
     private storageService: StorageService,
     private notificationService: NotificationService
@@ -64,7 +64,7 @@ export class AdminLibrosComponent implements OnInit {
         this.allAutores = data;
       },
       error: (error) => {
-        console.error('Error al cargar autores', error);
+        console.error('[AdminLibros] Error al cargar autores', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los autores'
         });
@@ -96,14 +96,14 @@ export class AdminLibrosComponent implements OnInit {
                 libro.autores = autores;
               },
               error: (error) => {
-                console.error(`Error al cargar autores del libro ${libro.id}`, error);
+                console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
               }
             });
           }
         });
       },
       error: (error) => {
-        console.error('Error al cargar libros', error);
+        console.error('[AdminLibros] Error al cargar libros', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los libros'
         });
@@ -179,12 +179,11 @@ export class AdminLibrosComponent implements OnInit {
         });
       }
       
-      // Recargar la lista de libros y limpiar el formulario
       this.getLibrosPaginados();
       this.cancelEdit();
       this.isUploading = false;
     } catch (error: any) {
-      console.error('Error al guardar libro', error);
+      console.error('[AdminLibros] Error al guardar/actualizar libro', error);
       this.notificationService.error('Error', { 
         description: 'No se pudo guardar el libro'
       });
@@ -228,7 +227,7 @@ export class AdminLibrosComponent implements OnInit {
           this.libroIdToDelete = null;
         },
         error: (error) => {
-          console.error('Error al eliminar libro', error);
+          console.error('[AdminLibros] Error al eliminar libro', error);
           this.notificationService.error('Error', { 
             description: 'No se pudo eliminar el libro'
           });

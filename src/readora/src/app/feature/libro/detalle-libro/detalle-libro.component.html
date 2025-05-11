@@ -92,8 +92,11 @@
             </div>
             
             <!-- Mensaje si no hay autores -->
-            <div class="libro-autores" *ngIf="!autores || autores.length === 0">
-              <span class="autor-desconocido">Autor desconocido</span>
+            <div class="libro-autores sin-autores-mensaje" *ngIf="!autores || autores.length === 0">
+              <span class="autor-desconocido">
+                <span class="material-icons small me-1">person_off</span>
+                No Tiene Autor
+              </span>
             </div>
             
             <div class="libro-badges">

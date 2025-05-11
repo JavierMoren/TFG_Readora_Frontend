@@ -40,7 +40,6 @@ export class AdminUsuariosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('AdminUsuariosComponent inicializado');
     // Inicializar formularios
     this.initForms();
     // Carga los usuarios paginados al inicializar el componente
@@ -58,7 +57,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.totalPages = data.totalPages;
       },
       error: (error) => {
-        console.error('Error al cargar usuarios paginados', error);
+        console.error('[AdminUsuarios] Error al cargar usuarios', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los usuarios'
         });
@@ -151,13 +150,12 @@ export class AdminUsuariosComponent implements OnInit {
    * Método de respaldo que mantiene la compatibilidad con el código existente
    */
   getAllUsuarios(): void {
-    console.log('Solicitando usuarios al servicio...');
     this.usuarioService.getAllUsuarios().subscribe({
       next: (data) => {
         this.usuarios = data;
       },
       error: (error) => {
-        console.error('Error al cargar usuarios', error);
+        console.error('[AdminUsuarios] Error al cargar todos los usuarios', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los usuarios'
         });
@@ -175,7 +173,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.usuarioDetalle = data;
       },
       error: (error) => {
-        console.error('Error al cargar usuario', error);
+        console.error(`[AdminUsuarios] Error al cargar usuario ID=${id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo cargar el usuario'
         });
@@ -187,7 +185,6 @@ export class AdminUsuariosComponent implements OnInit {
    * Prepara el formulario para crear un nuevo usuario
    */
   prepareCreateUsuario(): void {
-    console.log('Preparando formulario para crear usuario');
     this.isEditing = false;
     this.resetForms();
     this.showForm = true;
@@ -198,7 +195,6 @@ export class AdminUsuariosComponent implements OnInit {
    * @param usuario - Usuario a editar
    */
   prepareUpdateUsuario(usuario: Usuario): void {
-    console.log('Preparando formulario para actualizar usuario:', usuario);
     this.isEditing = true;
     // Establecer valores en el formulario
     this.usuarioForm.patchValue({
@@ -278,10 +274,8 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la petición para crear un nuevo usuario
    */
   createUsuario(): void {
-    console.log('Creando nuevo usuario...');
-    this.usuarioService.createUsuario(this.currentUsuario).subscribe({
+        this.usuarioService.createUsuario(this.currentUsuario).subscribe({
       next: (response) => {
-        console.log('Usuario creado:', response);
         this.notificationService.success('Éxito', { 
           description: 'Usuario creado correctamente'
         });
@@ -289,7 +283,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al crear usuario', error);
+        console.error('[AdminUsuarios] Error al crear usuario', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo crear el usuario'
         });
@@ -301,10 +295,8 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la petición para actualizar un usuario existente
    */
   updateUsuario(): void {
-    console.log('Actualizando usuario...');
     this.usuarioService.updateUsuario(this.currentUsuario).subscribe({
       next: (response) => {
-        console.log('Usuario actualizado:', response);
         this.notificationService.success('Éxito', { 
           description: 'Usuario actualizado correctamente'
         });
@@ -312,7 +304,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al actualizar usuario', error);
+        console.error(`[AdminUsuarios] Error al actualizar usuario ID=${this.currentUsuario.id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo actualizar el usuario'
         });
@@ -324,7 +316,6 @@ export class AdminUsuariosComponent implements OnInit {
    * Verifica la contraseña actual antes de permitir el cambio
    */
   verificarContrasenna(): void {
-    console.log('Verificando contraseña actual...');
     
     const verificacionData = {
       usuario: this.usuarioForm.value.usuario, // Usar el nombre de usuario en lugar del ID
@@ -334,7 +325,6 @@ export class AdminUsuariosComponent implements OnInit {
     this.usuarioService.verificarContrasenna(verificacionData).subscribe({
       next: (response) => {
         if (response.valida) { // Cambiar de response.valid a response.valida según la interfaz del servicio
-          console.log('Contraseña verificada correctamente');
           // Mostrar notificación de éxito en la verificación
           this.notificationService.success('Verificación exitosa', {
             description: 'La contraseña actual es correcta'
@@ -349,7 +339,7 @@ export class AdminUsuariosComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error al verificar contraseña', error);
+        console.error('[AdminUsuarios] Error al verificar contraseña', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo verificar la contraseña'
         });
@@ -361,10 +351,8 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la solicitud de actualización al servidor
    */
   enviarActualizacion(): void {
-    console.log('Enviando actualización con nueva contraseña...');
     this.usuarioService.updateUsuarioConPassword(this.currentUsuario).subscribe({
       next: (response) => {
-        console.log('Usuario con contraseña actualizado:', response);
         this.notificationService.success('Éxito', { 
           description: 'Usuario y contraseña actualizados correctamente'
         });
@@ -372,7 +360,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al actualizar usuario con contraseña', error);
+        console.error(`[AdminUsuarios] Error al actualizar contraseña de usuario ID=${this.currentUsuario.id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo actualizar la contraseña'
         });
@@ -407,17 +395,15 @@ export class AdminUsuariosComponent implements OnInit {
    */
   confirmDelete(): void {
     if (this.userIdToDelete !== null) {
-      console.log('Confirmación recibida, eliminando usuario...');
       this.usuarioService.deleteUsuario(this.userIdToDelete).subscribe({
         next: () => {
-          console.log('Usuario eliminado con éxito');
           this.notificationService.success('Eliminado', { 
             description: 'El usuario ha sido eliminado'
           });
           this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
         },
         error: (error) => {
-          console.error('Error al eliminar usuario', error);
+          console.error(`[AdminUsuarios] Error al eliminar usuario ID=${this.userIdToDelete}`, error);
           this.notificationService.error('Error', { 
             description: 'No se pudo eliminar el usuario'
           });
@@ -432,7 +418,6 @@ export class AdminUsuariosComponent implements OnInit {
    * Cancela la edición/creación de un usuario
    */
   cancelEdit(): void {
-    console.log('Cancelando edición de usuario');
     this.showForm = false;
     this.resetForms();
   }
@@ -441,7 +426,6 @@ export class AdminUsuariosComponent implements OnInit {
    * Cierra el panel de detalles del usuario
    */
   closeDetails(): void {
-    console.log('Cerrando detalles del usuario');
     this.usuarioDetalle = null;
   }
 

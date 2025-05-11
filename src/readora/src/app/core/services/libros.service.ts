@@ -169,7 +169,7 @@ export class LibrosService {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
       }
     }
-    console.error(errorMessage);
+    console.error('[LibrosService] Error HTTP:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

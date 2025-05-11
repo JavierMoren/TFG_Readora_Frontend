@@ -4,7 +4,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-theme-toggle',
-  standalone: true,
+  
   imports: [CommonModule],
   templateUrl: './theme-toggle.component.html',
   styleUrls: ['./theme-toggle.component.css']

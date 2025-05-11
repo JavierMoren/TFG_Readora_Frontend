@@ -57,7 +57,7 @@ export class AdminRolesComponent implements OnInit {
         this.totalPages = data.totalPages;
       },
       error: (error) => {
-        console.error('Error al cargar roles paginados', error);
+        console.error('[AdminRoles] Error al cargar roles', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los roles'
         });
@@ -112,7 +112,7 @@ export class AdminRolesComponent implements OnInit {
         this.roles = data;
       },
       error: (error) => {
-        console.error('Error al cargar roles', error);
+        console.error('[AdminRoles] Error al cargar todos los roles', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los roles'
         });
@@ -130,7 +130,7 @@ export class AdminRolesComponent implements OnInit {
         this.roleDetalle = data;
       },
       error: (error) => {
-        console.error('Error al cargar rol', error);
+        console.error(`[AdminRoles] Error al cargar rol ID=${id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo cargar el rol'
         });
@@ -181,7 +181,7 @@ export class AdminRolesComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al crear rol', error);
+        console.error('[AdminRoles] Error al crear rol', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo crear el rol'
         });
@@ -202,7 +202,7 @@ export class AdminRolesComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al actualizar rol', error);
+        console.error('[AdminRoles] Error al actualizar rol', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo actualizar el rol'
         });
@@ -246,7 +246,7 @@ export class AdminRolesComponent implements OnInit {
           this.roleIdToDelete = null;
         },
         error: (error) => {
-          console.error('Error al eliminar role', error);
+          console.error(`[AdminRoles] Error al eliminar rol ID=${this.roleIdToDelete}`, error);
           this.notificationService.error('Error', { 
             description: 'No se pudo eliminar el rol'
           });

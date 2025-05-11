@@ -5,7 +5,7 @@ import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model'
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { UsuarioService } from '../../../core/services/usuario.service';
-import { LibroService } from '../../../core/services/libro.service';
+import { LibrosService } from '../../../core/services/libros.service';
 import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Libro } from '../../../models/libro/libro.model';
@@ -48,7 +48,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   constructor(
     private usuarioLibroService: UsuarioLibroService,
     private usuarioService: UsuarioService,
-    private libroService: LibroService,
+    private libroService: LibrosService,
     private notificationService: NotificationService
   ) { }
 
@@ -117,7 +117,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
             });
           },
           error: (error) => {
-            console.error('Error al enriquecer datos de usuario-libro', error);
+            console.error('[AdminUsuarioLibros] Error al cargar detalles de las relaciones', error);
             this.notificationService.error('Error', { 
               description: 'No se pudieron cargar todos los detalles de las relaciones'
             });
@@ -127,7 +127,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
         });
       },
       error: (error) => {
-        console.error('Error al cargar relaciones usuario-libro paginadas', error);
+        console.error('[AdminUsuarioLibros] Error al cargar relaciones usuario-libro', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar las relaciones usuario-libro'
         });
@@ -182,7 +182,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
         this.usuarioLibros = data;
       },
       error: (error) => {
-        console.error('Error al cargar relaciones usuario-libro', error);
+        console.error('[AdminUsuarioLibros] Error al obtener todas las relaciones usuario-libro', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar las relaciones usuario-libro'
         });
@@ -200,7 +200,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
         this.usuarioLibroDetalle = usuarioLibro;
       },
       error: (error) => {
-        console.error('Error al obtener detalles de la relación usuario-libro', error);
+        console.error(`[AdminUsuarioLibros] Error al obtener detalles de relación usuario-libro ID=${id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los detalles de la relación'
         });
@@ -251,7 +251,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al crear relación usuario-libro', error);
+        console.error('[AdminUsuarioLibros] Error al crear relación usuario-libro', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo crear la relación usuario-libro'
         });
@@ -272,7 +272,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('Error al actualizar relación usuario-libro', error);
+        console.error(`[AdminUsuarioLibros] Error al actualizar relación usuario-libro ID=${this.currentUsuarioLibro.id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo actualizar la relación usuario-libro'
         });
@@ -303,7 +303,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
           this.usuarioLibroIdToDelete = null;
         },
         error: (error) => {
-          console.error('Error al eliminar relación usuario-libro', error);
+          console.error(`[AdminUsuarioLibros] Error al eliminar relación usuario-libro ID=${this.usuarioLibroIdToDelete}`, error);
           this.notificationService.error('Error', { 
             description: 'No se pudo eliminar la relación usuario-libro'
           });
@@ -318,7 +318,6 @@ export class AdminUsuarioLibrosComponent implements OnInit {
    */
   cancelDeleteUsuarioLibro(): void {
     this.usuarioLibroIdToDelete = null;
-    console.log('Eliminación cancelada');
   }
 
   /**

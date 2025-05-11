@@ -9,7 +9,7 @@ import { Usuario } from '../../../models/usuario/usuario.model';
 
 @Component({
   selector: 'app-detalle-usuario',
-  standalone: true,
+  
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './detalle-usuario.component.html',
   styleUrl: './detalle-usuario.component.css'
@@ -189,8 +189,6 @@ export class DetalleUsuarioComponent implements OnInit {
       usuario: this.usuario.usuario,
       contrasenna: this.passwordForm.value.contrasennaActual
     };
-    
-    console.log('Verificando contraseña para usuario:', this.usuario.usuario);
     
     // Deshabilitamos temporalmente los controles para evitar múltiples envíos
     this.passwordForm.disable();

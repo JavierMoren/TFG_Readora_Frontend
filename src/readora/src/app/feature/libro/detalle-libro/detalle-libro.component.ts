@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LibroService } from '../../../core/services/libro.service';
+import { LibrosService } from '../../../core/services/libros.service';
 import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
@@ -13,7 +13,7 @@ import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model'
 
 @Component({
   selector: 'app-detalle-libro',
-  standalone: true,
+  
   imports: [CommonModule, RouterModule],
   templateUrl: './detalle-libro.component.html',
   styleUrls: ['./detalle-libro.component.css']
@@ -38,7 +38,7 @@ export class DetalleLibroComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private libroService: LibroService,
+    private libroService: LibrosService,
     private autorService: AutorService,
     public storageService: StorageService,
     private authService: AutenticacionService,
@@ -73,7 +73,7 @@ export class DetalleLibroComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error al obtener información del usuario', error);
+        console.error('[DetalleLibro] Error al cargar datos del usuario', error);
       }
     });
   }
@@ -88,14 +88,13 @@ export class DetalleLibroComponent implements OnInit {
         if (relacion) {
           this.enBiblioteca = true;
           this.usuarioLibroId = relacion.id ?? null;
-          console.log(`Libro encontrado en la biblioteca, ID relación: ${this.usuarioLibroId}`);
         } else {
           this.enBiblioteca = false;
           this.usuarioLibroId = null;
         }
       },
       error: (error) => {
-        console.error('Error al verificar si el libro está en la biblioteca', error);
+        console.error('[DetalleLibro] Error al verificar libro en biblioteca', error);
       }
     });
   }
@@ -115,7 +114,7 @@ export class DetalleLibroComponent implements OnInit {
         }
       },
       error: (error: any) => {
-        console.error('Error al cargar el libro', error);
+        console.error('[DetalleLibro] Error al cargar detalles del libro', error);
         this.error = 'No se pudo cargar el libro. Por favor, inténtelo de nuevo más tarde.';
         this.loading = false;
       }
@@ -130,7 +129,7 @@ export class DetalleLibroComponent implements OnInit {
           this.loading = false;
         },
         error: (error: any) => {
-          console.error('Error al cargar autores del libro', error);
+          console.error('[DetalleLibro] Error al cargar autores del libro', error);
           this.loading = false;
         }
       });
@@ -239,7 +238,6 @@ export class DetalleLibroComponent implements OnInit {
         
         this.usuarioLibroService.deleteUsuarioLibro(this.usuarioLibroId!).subscribe({
           next: () => {
-            console.log('Libro eliminado correctamente de la biblioteca');
             this.notificationService.success('Libro eliminado', {
               description: 'El libro ha sido eliminado de tu biblioteca'
             });
@@ -250,7 +248,6 @@ export class DetalleLibroComponent implements OnInit {
             this.eliminando = false;
           },
           error: (error) => {
-            console.error('Error al eliminar libro de la biblioteca', error);
             this.eliminando = false;
             this.notificationService.error('Error', {
               description: 'No se pudo eliminar el libro de tu biblioteca'

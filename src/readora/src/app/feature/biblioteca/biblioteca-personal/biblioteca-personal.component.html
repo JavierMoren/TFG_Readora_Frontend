@@ -103,8 +103,14 @@
        class="biblioteca-section" 
        role="tabpanel" 
        id="seccion-leyendo" 
-       aria-labelledby="tab-leyendo"
-       [attr.hidden]="!(filtroActual === 'todos' || filtroActual === 'leyendo')">
+       aria-labelledby="tab-leyendo">
+      <!-- Indicador de depuración -->
+      <div style="display: none;">
+        Condición de visualización: {{(filtroActual === 'todos' || filtroActual === 'leyendo') && librosLeyendo.length > 0}}
+        Filtro actual: {{filtroActual}}
+        Libros leyendo: {{librosLeyendo.length}}
+      </div>
+      
       <div class="section-header">
           <h2 class="section-title">
             <span class="material-icons section-icon" aria-hidden="true">auto_stories</span>

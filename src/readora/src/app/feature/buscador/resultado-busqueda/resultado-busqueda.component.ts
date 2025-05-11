@@ -6,6 +6,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { LibrosService } from '../../../core/services/libros.service';
 
 // Interfaz para el evento de cambio de página
 export interface PageChangeEvent {
@@ -17,7 +18,7 @@ export interface PageChangeEvent {
   selector: 'app-resultado-busqueda',
   templateUrl: './resultado-busqueda.component.html',
   styleUrls: ['./resultado-busqueda.component.css'],
-  standalone: true,
+  
   imports: [CommonModule, RouterModule, FormsModule],
   providers: [StorageService]
 })
@@ -33,9 +34,10 @@ export class ResultadoBusquedaComponent implements OnChanges {
   pages: number[] = [];
   usuarioId: number | null = null;
   isLoggedIn = false;
-  librosAgregando: Set<number> = new Set(); // Para controlar los botones de "Añadiendo..."
-  librosEliminando: Set<number> = new Set(); // Para controlar los botones de "Eliminando..."
-  librosEnBiblioteca: Map<number, number> = new Map(); // Mapa de ID libro -> ID relación usuario-libro
+  librosAgregando: Set<number> = new Set(); 
+  librosEliminando: Set<number> = new Set(); 
+  librosEnBiblioteca: Map<number, number> = new Map(); 
+  libroAutores: Map<number, string[]> = new Map(); 
 
   // Rutas para imágenes predeterminadas
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
@@ -49,7 +51,8 @@ export class ResultadoBusquedaComponent implements OnChanges {
     private storageService: StorageService,
     private usuarioLibroService: UsuarioLibroService,
     private autenticacionService: AutenticacionService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private librosService: LibrosService
   ) {
     // Comprobar si el usuario está autenticado
     this.autenticacionService.isLoggedIn().subscribe(isLoggedIn => {
@@ -86,12 +89,67 @@ export class ResultadoBusquedaComponent implements OnChanges {
     }
     
     // Si hay cambios en los resultados, hacer scroll hacia arriba y verificar libros en biblioteca
-    if (changes['results'] && !changes['results'].firstChange) {
+    if (changes['results'] && this.results.length > 0) {
       window.scrollTo(0, 0);
-      if (this.isLoggedIn && this.usuarioId && this.isBooks && this.results.length > 0) {
+      
+      // Cargar los autores para cada libro
+      if (this.isBooks) {
+        this.cargarAutoresDeTodosLosLibros();
+      }
+      
+      // Verificar libros en biblioteca si el usuario está logueado
+      if (this.isLoggedIn && this.usuarioId && this.isBooks) {
         this.verificarLibrosEnBiblioteca();
       }
     }
+  }
+  
+  /**
+   * Carga los autores para todos los libros en los resultados
+   */
+  cargarAutoresDeTodosLosLibros(): void {
+    // Limpiar el mapa de autores
+    this.libroAutores.clear();
+    
+    // Para cada libro, cargar sus autores
+    this.results.forEach(libro => {
+      if (libro.id) {
+        this.librosService.getAutoresByLibroId(libro.id).subscribe({
+          next: (autores) => {
+            if (autores && autores.length > 0) {
+              // Guardar los nombres de los autores para este libro
+              this.libroAutores.set(
+                libro.id, 
+                autores.map(autor => autor.nombre + (autor.apellido ? ' ' + autor.apellido : ''))
+              );
+            }
+          },
+          error: (err) => {
+            console.error(`Error al cargar autores para el libro ${libro.id}:`, err);
+          }
+        });
+      }
+    });
+  }
+  
+  /**
+   * Obtiene los autores de un libro específico para mostrar
+   */
+  getAutores(libroId: number): string {
+    const autores = this.libroAutores.get(libroId);
+    if (!autores || autores.length === 0) {
+      return 'Autor desconocido';
+    }
+    
+    if (autores.length === 1) {
+      return autores[0];
+    }
+    
+    if (autores.length === 2) {
+      return `${autores[0]} y ${autores[1]}`;
+    }
+    
+    return `${autores[0]} y ${autores.length - 1} más`;
   }
   
   /**
@@ -99,8 +157,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
    */
   verificarLibrosEnBiblioteca(): void {
     if (!this.usuarioId) return;
-    
-    console.log('[ResultadoBusqueda] Verificando libros en biblioteca del usuario');
     
     this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
       next: (usuarioLibros) => {
@@ -114,8 +170,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
               this.librosEnBiblioteca.set(usuarioLibro.libroId, usuarioLibro.id);
             }
           });
-          
-          console.log(`[ResultadoBusqueda] Usuario tiene ${this.librosEnBiblioteca.size} libros en su biblioteca`);
         }
       },
       error: (error) => {
@@ -142,8 +196,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
    * Calcula la paginación basándose en el total de items y el tamaño de página
    */
   calcularPaginacion(): void {
-    console.log(`[ResultadoBusqueda] Calculando paginación: ${this.totalItems} items, página ${this.currentPage + 1}, tamaño ${this.pageSize}`);
-    
     // Calcular el número total de páginas
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
     
@@ -183,12 +235,9 @@ export class ResultadoBusquedaComponent implements OnChanges {
     
     // Eliminar duplicados
     this.pages = this.pages.filter((value, index, self) => self.indexOf(value) === index);
-    
-    console.log('[ResultadoBusqueda] Páginas generadas:', this.pages);
   }
 
   changePage(page: number): void {
-    console.log(`[ResultadoBusqueda] Usuario seleccionó página: ${page + 1}`);
     if (page !== this.currentPage && page >= 0 && page < this.totalPages) {
       this.pageChange.emit({ page });
     }
@@ -198,7 +247,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
    * Cambia el tamaño de página y reinicia a la primera página
    */
   changePageSize(): void {
-    console.log(`[ResultadoBusqueda] Usuario cambió tamaño de página a: ${this.pageSize}`);
     // Al cambiar el tamaño de página, enviamos un objeto con la información
     this.pageChange.emit({
       page: 0,
@@ -229,7 +277,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
    */
   agregarABiblioteca(libro: any, event: Event): void {
     event.stopPropagation(); // Evitar que se abra la página de detalles
-    console.log('[ResultadoBusqueda] Intentando añadir libro a biblioteca:', libro.id);
     
     if (!this.isLoggedIn || !this.usuarioId) {
       this.notificationService.warning('Inicio de sesión requerido', { 
@@ -253,14 +300,17 @@ export class ResultadoBusquedaComponent implements OnChanges {
     
     this.usuarioLibroService.createUsuarioLibro(nuevoUsuarioLibro).subscribe({
       next: (response) => {
-        console.log('[ResultadoBusqueda] Libro añadido correctamente a la biblioteca');
         this.notificationService.success('Libro añadido', {
           description: 'El libro ha sido añadido a tu biblioteca con éxito'
         });
         this.librosAgregando.delete(libro.id);
+        
+        // Actualizar el estado local para mostrar el botón de Eliminar
+        if (response && response.id) {
+          this.librosEnBiblioteca.set(libro.id, response.id);
+        }
       },
       error: (error) => {
-        console.error('[ResultadoBusqueda] Error al añadir libro a la biblioteca', error);
         this.librosAgregando.delete(libro.id);
         
         // Comprobar si es un error de libro ya existente
@@ -268,6 +318,9 @@ export class ResultadoBusquedaComponent implements OnChanges {
           this.notificationService.warning('Libro ya en biblioteca', { 
             description: 'Este libro ya está en tu biblioteca'
           });
+          
+          // Actualizar el estado local para mostrar el botón de Eliminar aunque ya existiera
+          this.verificarLibrosEnBiblioteca();
         } else {
           this.notificationService.error('Error', {
             description: 'No se pudo añadir el libro a la biblioteca'
@@ -294,8 +347,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
       return;
     }
     
-    console.log(`[ResultadoBusqueda] Eliminando libro ${libro.id} de la biblioteca, relación: ${usuarioLibroId}`);
-    
     this.notificationService.confirm({
       title: '¿Eliminar libro?',
       text: '¿Estás seguro de eliminar este libro de tu biblioteca?',
@@ -308,7 +359,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
         
         this.usuarioLibroService.deleteUsuarioLibro(usuarioLibroId as number).subscribe({
           next: () => {
-            console.log('[ResultadoBusqueda] Libro eliminado correctamente de la biblioteca');
             this.notificationService.success('Libro eliminado', {
               description: 'El libro ha sido eliminado de tu biblioteca'
             });

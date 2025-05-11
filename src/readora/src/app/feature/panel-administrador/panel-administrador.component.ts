@@ -14,10 +14,8 @@ export class PanelAdministradorComponent implements OnInit {
   constructor(private router: Router, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    console.log('PanelAdministradorComponent inicializado');
     // Determinar la pestaña activa según la ruta actual
     const url = this.router.url;
-    console.log('URL actual:', url);
     
     if (url.includes('libros')) {
       this.activeTab = 'libros';
@@ -31,7 +29,6 @@ export class PanelAdministradorComponent implements OnInit {
       this.activeTab = 'usuarios';
       // Redirigir a usuarios por defecto si estamos en la raíz del panel
       if (url === '/panel-administrador') {
-        console.log('Redirigiendo a usuarios');
         this.router.navigate(['usuarios'], { relativeTo: this.route });
       }
     }
@@ -42,7 +39,6 @@ export class PanelAdministradorComponent implements OnInit {
    * @param tab - Nombre de la pestaña a la que navegar
    */
   navigateTo(tab: string): void {
-    console.log('Navegando a:', tab);
     this.activeTab = tab;
     this.router.navigate([tab], { relativeTo: this.route });
   }
