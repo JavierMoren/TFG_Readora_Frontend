@@ -3,13 +3,13 @@
 #### Curso Escolar 2024-2025
 #### Autor: [Javier Moreno Salas](https://github.com/JavierMoren)
 #### Tutor: [Antonio Gabriel González Casado](https://github.com/antonio-gabriel-gonzalez-casado)
-#### Fecha de Inicio: 11-03-2025
-#### Fecha de Finalización: DD-MM-YYYY
+#### Fecha de Inicio: 11-03-2024
+#### Fecha de Finalización: XX-XX-XXXX
 
 ## Breve descripción del proyecto
 
-Tras haber navegado mucho en la búsqueda de libros por internet, y no estar nada cómodo con ella, esta web nace para ayudar a resolver ese problema, como objetivo de unificar los libros leídos de una persona y que su búsqueda de libros sea mas cómoda.
-La Idea principal del proyecto es una web la cual unifique tu universo de lectura, en el cual puedas almacenar tus libros leídos, llevar un control de la lectura y valorar esos libros.
+Tras haber navegado mucho en la búsqueda de libros por internet y no estar nada cómodo con ella, esta web nace para ayudar a resolver ese problema, con el objetivo de unificar los libros leídos de una persona y hacer que su búsqueda de libros sea más cómoda.
+La idea principal del proyecto es una web que unifique tu universo de lectura, en la cual puedas almacenar tus libros leídos, llevar un control de la lectura y valorar esos libros.
 
 ## Objetivo de la aplicación
 
@@ -18,29 +18,83 @@ La Idea principal del proyecto es una web la cual unifique tu universo de lectur
 La aplicación va a permitir almacenar tus libros leídos, llevar un control de la lectura y valorar esos libros.
 - **¿Cuál es su atractivo principal?**
 
-Su atractio principal y el porque ha sido creada, es para poder permitir a la personas que le gustan llevar mas control en su vida, unificar los libros leídos de una persona y que su búsqueda de libros sea mas cómoda.
+Su atractivo principal y el porqué ha sido creada, es para permitir a las personas que les gusta llevar más control en su vida, unificar los libros leídos y hacer que su búsqueda de libros sea más cómoda.
 - **¿Qué problema concreto va a resolver?**
   
-Unificar los libros leídos de una persona y que su búsqueda de libros sea mas cómoda.
+Unificar los libros leídos de una persona y hacer que su búsqueda de libros sea más cómoda.
 - **¿Qué necesidad va a cubrir?**
   
-Ayuda a las personas a organizarse y encontrar libros de una forma mas comoda.
+Ayuda a las personas a organizarse y encontrar libros de una forma más cómoda.
 
 ## Estructura del Proyecto
 
-En este apartado el alumno explicará el contenido del repositorio y de todas las carpetas relevantes del mismo. Para facilitar la gestión de la entrega, todo el código y documentación debe estar en este repositorio.
+El proyecto Readora está estructurado como una aplicación cliente-servidor, con un frontend desarrollado en Angular y un backend desarrollado en Spring Boot. La estructura del repositorio está organizada de la siguiente manera:
 
-Por lo anterior, un proyecto que contenga un Frontend en una tecnología o framework (por ejemplo Angular) y una API REST en otra tecnología o framework (Springboot, Express) deberá tener la siguiente estructura de directorios en el repositorio de entrega:
+```
+Proyecto_TFG/
+├── TFG_Readora_Backend/          # Proyecto de API REST (Spring Boot)
+│   ├── docs/                     # Documentación del backend
+│   └── src/
+│       └── readora/              # Código fuente del backend
+│           ├── Dockerfile        # Configuración para contenedorización
+│           ├── pom.xml           # Dependencias y configuración de Maven
+│           └── src/
+│               └── main/
+│                   ├── java/     # Código Java
+│                   └── resources/ # Recursos y configuraciones
+│
+├── TFG_Readora_Frontend/         # Proyecto de interfaz de usuario (Angular)
+│   ├── docs/                     # Documentación del frontend
+│   └── src/
+│       └── readora/              # Código fuente del frontend
+│           ├── Dockerfile        # Configuración para contenedorización
+│           ├── angular.json      # Configuración de Angular
+│           ├── package.json      # Dependencias y scripts de npm
+│           └── src/
+│               ├── app/          # Componentes y servicios de la aplicación
+│               ├── assets/       # Recursos estáticos (imágenes, logos)
+│               └── enviroments/  # Configuraciones de entorno
+│
+├── certs/                        # Certificados SSL y claves
+│   ├── jwt-keystore.jks
+│   ├── server.crt/
+│   └── server.key/
+│
+├── uploads/                      # Almacenamiento de archivos subidos por usuarios
+│   ├── autor/                    # Imágenes de autores
+│   └── libro/                    # Portadas de libros
+│
+├── docker-compose.yml            # Configuración para desplegar con Docker Compose
+└── README.md                     # Documentación principal del proyecto
+```
 
-- src-api
-- src-frontend
-- docs
-- README.md
+### Frontend (Angular)
+El frontend está estructurado siguiendo las buenas prácticas de Angular, con una organización por módulos y características:
 
-En el caso anterior, si se quiere desplegar de forma automatizada a partir del control de versiones, lo habitual es que estén los dos proyectos en repositorios separados. Por lo que se deberá configurar el despliegue automático para indicarle la raíz del código fuente de cada proyecto (si es posible) o hacer dos folks del repositorio principal uno para la API y otro para el frontend y adaptar los directorios para poder realizar el despliegue automático.
+- **core/**: Contiene servicios, guardias e interceptores fundamentales
+- **feature/**: Módulos de características de la aplicación como autenticación, búsqueda de libros, etc.
+- **layout/**: Componentes de estructura como cabecera y pie de página
+- **models/**: Interfaces y clases para los modelos de datos
+- **shared/**: Componentes reutilizables en toda la aplicación
 
-En un proyecto monolítico (tecnología servidor: Springboot, Django, Express, PHP,... con un sistema de templates propio para el frontend: Thymeleaf, jinja, ejs,...) deberá tener la siguiente estructura en el repositorio de entrega:
+### Backend (Spring Boot)
+El backend implementa una API REST con la siguiente organización:
 
-- src
-- docs
-- README.md
+- **config/**: Configuración de la aplicación, seguridad y componentes
+- **controllers/**: Controladores REST que manejan las peticiones HTTP
+- **dtos/**: Objetos de transferencia de datos para comunicación cliente-servidor
+- **entities/**: Entidades JPA que representan las tablas de la base de datos
+- **mappers/**: Clases para mapeo entre entidades y DTOs
+- **repositories/**: Interfaces para acceso a datos mediante Spring Data JPA
+- **services/**: Implementación de la lógica de negocio
+- **utils/**: Clases de utilidad y componentes auxiliares
+
+### Despliegue
+La aplicación está preparada para desplegarse mediante Docker y Docker Compose, facilitando la configuración de entornos de desarrollo y producción.
+
+## Enlaces a Otros README
+
+- [README Principal del Proyecto](../../README.md)
+- [README del Frontend](../../TFG_Readora_Frontend/README.md)
+- [README del código fuente del Backend](../src/README.md)
+- [README del código fuente del Frontend](../../TFG_Readora_Frontend/src/README.md)
