@@ -44,12 +44,27 @@ export class AutorService {
     );
   }
 
-  getAllAutoresPaginados(page: number = 0, size: number = 10, sort: string = 'nombre', direction: string = 'asc'): Observable<any> {
+  getAllAutoresPaginados(
+    page: number = 0, 
+    size: number = 10, 
+    sort: string = 'nombre', 
+    direction: string = 'asc', 
+    searchTerm: string = ''
+  ): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
       .set('sort', sort)
       .set('direction', direction);
+    
+    if (searchTerm && searchTerm.trim() !== '') {
+      params = params.set('query', searchTerm.trim());
+      return this.http.get(`${this.apiUrl}/search`, {
+        params: params
+      }).pipe(
+        catchError(this.handleError)
+      );
+    }
 
     return this.http.get(`${this.apiUrl}/paginados`, {
       params: params
@@ -86,8 +101,20 @@ export class AutorService {
     );
   }
 
-  getImageUrl(relativePath: string | null): string | null {
-    if (!relativePath) return null;
+  /**
+   * Construye una URL completa para una ruta de imagen relativa o devuelve una imagen predeterminada
+   * @param relativePath Ruta relativa de la imagen
+   * @returns URL completa de la imagen o ruta a la imagen predeterminada
+   */
+  getImageUrl(relativePath: string | null): string {
+    if (!relativePath) {
+      return 'assets/placeholders/author-placeholder.svg'; // Imagen predeterminada para autores
+    }
+    
+    if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+      return relativePath;
+    }
+    
     return `${environment.apiUrl}/files/${relativePath}`;
   }
 

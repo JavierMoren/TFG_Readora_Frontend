@@ -88,6 +88,6 @@ export class UsuarioService {
       }
     }
     console.error('[UsuarioService] Error HTTP:', errorMessage);
-    return throwError(() => new Error(errorMessage));
+    return throwError(() => error);
   }
 }

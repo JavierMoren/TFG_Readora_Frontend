@@ -404,9 +404,17 @@ export class AdminUsuariosComponent implements OnInit {
         },
         error: (error) => {
           console.error(`[AdminUsuarios] Error al eliminar usuario ID=${this.userIdToDelete}`, error);
-          this.notificationService.error('Error', { 
-            description: 'No se pudo eliminar el usuario'
-          });
+          
+          // Verificar si el error es debido a que el usuario tiene libros asociados (código 409)
+          if (error.status === 409) {
+            this.notificationService.warning('No se puede eliminar', { 
+              description: 'Este usuario tiene libros asociados en su biblioteca personal. Debe eliminar primero los libros de la biblioteca del usuario.'
+            });
+          } else {
+            this.notificationService.error('Error', { 
+              description: 'No se pudo eliminar el usuario'
+            });
+          }
         }
       });
       // Resetear el ID del usuario a eliminar

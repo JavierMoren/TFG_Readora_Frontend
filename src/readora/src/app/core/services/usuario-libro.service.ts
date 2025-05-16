@@ -61,6 +61,12 @@ export class UsuarioLibroService {
     );
   }
 
+  getUsuariosByLibroId(libroId: number): Observable<UsuarioLibro[]> {
+    return this.http.get<UsuarioLibro[]>(`${this.apiUrl}/libro/${libroId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getUsuarioLibrosDetalladosPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())

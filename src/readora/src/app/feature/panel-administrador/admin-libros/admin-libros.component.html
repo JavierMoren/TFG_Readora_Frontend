@@ -12,6 +12,80 @@
     </div>
   </div>
 
+  <!-- Campo de búsqueda -->
+  <div *ngIf="!showForm" class="mb-4">
+    <div class="form-group mb-3">
+      <label class="form-label">Buscar por:</label>
+      <div class="btn-group w-100" role="group">
+        <input type="radio" class="btn-check" name="tipoBusqueda" id="buscarTexto" 
+               [(ngModel)]="tipoBusqueda" [value]="'texto'" autocomplete="off">
+        <label class="btn btn-outline-primary" for="buscarTexto">
+          <span class="material-icons small me-1">search</span>
+          Título/ISBN/Autor
+        </label>
+        
+        <input type="radio" class="btn-check" name="tipoBusqueda" id="buscarId" 
+               [(ngModel)]="tipoBusqueda" [value]="'id'" autocomplete="off">
+        <label class="btn btn-outline-primary" for="buscarId">
+          <span class="material-icons small me-1">tag</span>
+          ID
+        </label>
+      </div>
+    </div>
+
+    <!-- Búsqueda por texto (título, ISBN, autor) -->
+    <div *ngIf="tipoBusqueda === 'texto'" class="input-group">
+      <span class="input-group-text">
+        <span class="material-icons small">search</span>
+      </span>
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Buscar por título, ISBN o nombre/apellido de autor..." 
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="buscarLibros()">
+      <button 
+        class="btn btn-primary" 
+        type="button" 
+        (click)="buscarLibros()">
+        Buscar
+      </button>
+      <button 
+        *ngIf="searchTerm" 
+        class="btn btn-outline-secondary" 
+        type="button" 
+        (click)="limpiarBusqueda()">
+        Limpiar
+      </button>
+    </div>
+
+    <!-- Búsqueda por ID -->
+    <div *ngIf="tipoBusqueda === 'id'" class="input-group">
+      <span class="input-group-text">
+        <span class="material-icons small">tag</span>
+      </span>
+      <input 
+        type="number" 
+        class="form-control" 
+        placeholder="Buscar por ID del libro..." 
+        [(ngModel)]="searchId"
+        (keyup.enter)="buscarLibroPorId()">
+      <button 
+        class="btn btn-primary" 
+        type="button" 
+        (click)="buscarLibroPorId()">
+        Buscar
+      </button>
+      <button 
+        *ngIf="searchId" 
+        class="btn btn-outline-secondary" 
+        type="button" 
+        (click)="limpiarBusquedaId()">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
   <!-- Formulario para añadir/editar libro -->
   <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
     <div class="card-header d-flex justify-content-between align-items-center border-bottom">
@@ -20,7 +94,7 @@
     </div>
     
     <div class="card-body">
-      <form (submit)="saveLibro()" #libroForm="ngForm" class="mb-3">
+      <form (submit)="formularioValido() && saveLibro()" #libroForm="ngForm" class="mb-3">
         <div class="row mb-3">
           <div class="col-12 col-md-8 mb-3 mb-md-0">
             <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
@@ -46,8 +120,27 @@
                 <span class="material-icons small">qr_code</span>
               </span>
               <input type="text" id="isbn" [(ngModel)]="currentLibro.isbn" name="isbn" 
-                class="form-control">
+                class="form-control"
+                placeholder="Ej: 9788437604367"
+                #isbnInput="ngModel"
+                (ngModelChange)="limpiarErrorIsbn()"
+                [ngClass]="{'is-invalid': (isbnInput.invalid && (isbnInput.dirty || isbnInput.touched)) || isbnDuplicado}">
             </div>
+            <div *ngIf="isbnInput.invalid && (isbnInput.dirty || isbnInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="isbnInput.errors?.['pattern']">El formato del ISBN no es válido</span>
+            </div>
+            <div *ngIf="isbnDuplicado" class="text-danger small mt-1">
+              <span>{{mensajeErrorIsbn}}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <button type="button" class="btn btn-link btn-sm p-0" 
+                      (click)="currentLibro.isbn = isbnInput.valid ? formatISBN(currentLibro.isbn) : currentLibro.isbn">
+                Formatear
+              </button>
+            </div>
+            <small class="d-block text-muted">
+              <strong>Ejemplos:</strong> 8437604362 (ISBN-10), 9788437604367 (ISBN-13)
+            </small>
           </div>
         </div>
         
@@ -71,7 +164,12 @@
                 <span class="material-icons small">auto_stories</span>
               </span>
               <input type="number" id="numeroPaginas" [(ngModel)]="currentLibro.numeroPaginas" name="numeroPaginas" 
-                class="form-control" min="1">
+                class="form-control" min="1"
+                #numeroPaginasInput="ngModel"
+                [ngClass]="{'is-invalid': numeroPaginasInput.invalid && (numeroPaginasInput.dirty || numeroPaginasInput.touched)}">
+            </div>
+            <div *ngIf="numeroPaginasInput.invalid && (numeroPaginasInput.dirty || numeroPaginasInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="numeroPaginasInput.errors?.['min']">El número de páginas debe ser al menos 1</span>
             </div>
           </div>
         </div>
@@ -91,15 +189,25 @@
         </div>
 
         <div class="row mb-3">
-          <div class="col-12 col-md-6">
+          <div class="col-12">
             <label for="portada" class="form-label">Portada del libro</label>
-            <div class="preview-container">
+            <div class="d-flex gap-3 align-items-start">
               <!-- Vista previa de la imagen actual si existe -->
-              <div *ngIf="previewPortadaUrl" class="mb-2">
-                <img [src]="previewPortadaUrl" alt="Vista previa de portada" class="img-fluid">
+              <div *ngIf="previewPortadaUrl" class="mb-2" style="max-width: 150px;">
+                <img [src]="previewPortadaUrl" alt="Vista previa de portada" class="img-fluid rounded">
+                <!-- Botón para eliminar la portada -->
+                <div class="d-flex mt-2 gap-2">
+                  <button *ngIf="currentLibro.portadaUrl" type="button" 
+                    class="btn btn-danger btn-sm d-inline-flex align-items-center" 
+                    (click)="eliminarPortada()">
+                    <span class="material-icons small me-1">delete</span>
+                    Eliminar portada
+                  </button>
+                </div>
               </div>
               <div class="flex-grow-1">
-                <input type="file" class="form-control" id="portada" (change)="onFileSelected($event)" accept="image/*">
+                <input type="file" class="form-control" id="portada" 
+                  (change)="onFileSelected($event)" accept="image/*">
                 <small class="text-muted">Formatos aceptados: JPG, PNG (Máx. 2 MB)</small>
               </div>
             </div>
@@ -108,20 +216,24 @@
         
         <!-- Autores asociados al libro -->
         <div class="mb-3">
-          <label class="form-label">Autores</label>
+          <label class="form-label">Autores <span class="text-danger">*</span></label>
           
           <div class="d-flex flex-column gap-2">
             <!-- Lista de autores actuales -->
-            <div *ngIf="currentLibro.autores?.length > 0" class="mb-2">
-              <div *ngFor="let autor of currentLibro.autores" class="badge bg-primary bg-opacity-10 text-primary me-2 mb-2 p-2 d-inline-flex align-items-center">
-                {{autor.nombre}} {{autor.apellido}}
-                <button type="button" class="btn-close btn-close-sm ms-2" (click)="removeAutor(autor)"></button>
+            <div *ngIf="hasAutores()" class="mb-2">
+              <div class="alert alert-info p-2">
+                <p class="mb-1"><strong>Autores seleccionados:</strong> ({{currentLibro.autores.length}})</p>
+                <div *ngFor="let autor of currentLibro.autores" class="badge bg-primary bg-opacity-10 text-primary me-2 mb-2 p-2 d-inline-flex align-items-center">
+                  <span class="material-icons small me-1">person</span>
+                  <span>{{autor.nombre}} {{autor.apellido}}</span>
+                  <button type="button" class="btn-close btn-close-sm ms-2" (click)="removeAutor(autor)" title="Eliminar autor"></button>
+                </div>
               </div>
             </div>
             
             <!-- Mensaje si no hay autores -->
-            <div *ngIf="!currentLibro.autores?.length" class="text-muted small mb-2">
-              No hay autores asociados a este libro
+            <div *ngIf="!hasAutores()" class="alert alert-warning p-2">
+              <p class="mb-0"><strong>Atención:</strong> Este libro no tiene autores asociados. Es recomendable añadir al menos un autor.</p>
             </div>
             
             <!-- Botón para añadir autor -->
@@ -133,7 +245,7 @@
         </div>
         
         <div class="d-flex gap-2 mt-4">
-          <button type="submit" [disabled]="libroForm.invalid || isUploading"
+          <button type="submit" [disabled]="libroForm.invalid || isUploading || !formularioValido()"
             class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
             <span class="material-icons small me-1">save</span>
             <span *ngIf="!isUploading">Guardar</span>
@@ -150,18 +262,18 @@
   </div>
 
   <!-- Tabla de libros -->
-  <div class="table-responsive">
-    <table class="table table-hover table-striped">
+  <div class="table-responsive" style="min-height: 300px; overflow-x: auto;">
+    <table class="table table-hover table-striped table-fixed">
       <thead class="table-light">
         <tr>
-          <th scope="col" class="text-primary small">ID</th>
-          <th scope="col" class="text-primary small">Portada</th>
-          <th scope="col" class="text-primary small">Título</th>
-          <th scope="col" class="text-primary small">ISBN</th>
-          <th scope="col" class="text-primary small">Autores</th>
-          <th scope="col" class="text-primary small">Páginas</th>
-          <th scope="col" class="text-primary small">Publicación</th>
-          <th scope="col" class="text-primary small text-center">Acciones</th>
+          <th scope="col" class="text-primary small" style="width: 50px;">ID</th>
+          <th scope="col" class="text-primary small" style="width: 80px;">Portada</th>
+          <th scope="col" class="text-primary small" style="min-width: 150px; max-width: 200px;">Título</th>
+          <th scope="col" class="text-primary small" style="width: 120px;">ISBN</th>
+          <th scope="col" class="text-primary small" style="min-width: 150px; max-width: 200px;">Autores</th>
+          <th scope="col" class="text-primary small" style="width: 80px;">Páginas</th>
+          <th scope="col" class="text-primary small" style="width: 100px;">Publicación</th>
+          <th scope="col" class="text-primary small text-center" style="width: 120px;">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -170,18 +282,18 @@
             {{libro.id}}
           </td>
           <!-- Portada -->
-          <td>
+          <td style="width: 60px;">
             <img [src]="libro.portadaUrl ? getImageUrl(libro.portadaUrl) : libroPlaceholder" 
               alt="Portada de {{libro.titulo}}" 
-              class="img-thumbnail">
+              class="img-thumbnail" style="max-width: 60px;">
           </td>
-          <td>
-            {{libro.titulo}}
+          <td style="min-width: 150px; max-width: 200px;">
+            <div class="text-truncate" title="{{libro.titulo}}">{{libro.titulo}}</div>
           </td>
-          <td>
+          <td style="width: 120px;">
             {{libro.isbn || 'N/A'}}
           </td>
-          <td class="small">
+          <td class="small" style="min-width: 150px; max-width: 200px;">
             <!-- Mostrar hasta 2 autores -->
             <span *ngFor="let autor of libro.autores?.slice(0, 2); let i = index">
               {{autor.nombre}} {{autor.apellido}}{{i < ((libro.autores && libro.autores.length > 2) ? 2 : (libro.autores ? libro.autores.length : 0)) - 1 ? ', ' : ''}}
@@ -191,13 +303,13 @@
             <!-- Si no hay autores -->
             <span *ngIf="!libro.autores?.length" class="text-muted">Sin autores</span>
           </td>
-          <td class="text-center">
+          <td class="text-center" style="width: 80px;">
             {{libro.numeroPaginas || 'N/A'}}
           </td>
-          <td>
+          <td style="width: 100px;">
             {{libro.anioPublicacion ? (libro.anioPublicacion | date:'yyyy') : 'N/A'}}
           </td>
-          <td class="text-center">
+          <td class="text-center actions-column" style="width: 120px;">
             <div class="d-flex justify-content-center gap-2">
               <button (click)="prepareUpdateLibro(libro)" 
                 class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">

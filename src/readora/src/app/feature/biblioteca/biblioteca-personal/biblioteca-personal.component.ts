@@ -33,7 +33,7 @@ export class BibliotecaPersonalComponent implements OnInit {
   usuarioId: number | null = null;
   
   // Filtro de visualización
-  filtroActual: string = 'todos';
+  filtroActual: string = 'leyendo';
   
   // Estados de lectura disponibles
   estadosLectura = [
@@ -46,6 +46,9 @@ export class BibliotecaPersonalComponent implements OnInit {
   // Rutas para imágenes predeterminadas
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
   readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
+
+  // Fecha actual para validaciones
+  fechaActual: string = new Date().toISOString().split('T')[0];
 
   // Indicador de carga
   cargando: boolean = false;
@@ -137,7 +140,8 @@ export class BibliotecaPersonalComponent implements OnInit {
                     valoracion: usuarioLibro.valoracion,
                     comentario: usuarioLibro.comentario,
                     fechaInicioLectura: usuarioLibro.fechaInicioLectura,
-                    fechaFinLectura: usuarioLibro.fechaFinLectura
+                    fechaFinLectura: usuarioLibro.fechaFinLectura,
+                    paginasLeidas: usuarioLibro.paginasLeidas
                   };
                 })
               );
@@ -185,7 +189,7 @@ export class BibliotecaPersonalComponent implements OnInit {
             if (this.librosLeyendo.length > 0) {
               
               // Verificar si necesitamos mostrar la sección "Leyendo"
-              if (this.filtroActual === 'todos' || this.filtroActual === 'leyendo') {
+              if (this.filtroActual === 'leyendo') {
                 
                 // Forzar actualización de la vista cuando hay libros en estado "Leyendo"
                 setTimeout(() => {
@@ -232,19 +236,69 @@ export class BibliotecaPersonalComponent implements OnInit {
       valoracion: this.libroSeleccionado.valoracion,
       comentario: this.libroSeleccionado.comentario,
       fechaInicioLectura: this.libroSeleccionado.fechaInicioLectura,
-      fechaFinLectura: this.libroSeleccionado.fechaFinLectura
+      fechaFinLectura: this.libroSeleccionado.fechaFinLectura,
+      paginasLeidas: this.libroSeleccionado.paginasLeidas
     };
     
-    // Si cambia a TERMINADO y no tiene fecha de fin, establecerla a hoy
-    if (usuarioLibroActualizado.estadoLectura === 'TERMINADO' && !usuarioLibroActualizado.fechaFinLectura) {
-      usuarioLibroActualizado.fechaFinLectura = new Date().toISOString().split('T')[0];
+    // Si cambia a TERMINADO
+    if (usuarioLibroActualizado.estadoLectura === 'TERMINADO') {
+      // Establecer la fecha de fin a hoy si no existe
+      if (!usuarioLibroActualizado.fechaFinLectura) {
+        usuarioLibroActualizado.fechaFinLectura = new Date().toISOString().split('T')[0];
+      }
+      
+      // Si no ha leído todas las páginas, mostrar confirmación
+      if (this.libroSeleccionado.paginasLeidas !== this.libroSeleccionado.numeroPaginas && 
+          this.libroSeleccionado.numeroPaginas > 0) {
+        this.notificationService.confirm({
+          title: '¿Marcar como leído todo el libro?',
+          text: '¿Quieres establecer el progreso de lectura al 100%?',
+          icon: 'warning',
+          confirmButtonText: 'Sí, completar',
+          cancelButtonText: 'No, mantener progreso actual'
+        }).then(result => {
+          if (result) {
+            // Si confirma, establecer páginas leídas al total
+
+            usuarioLibroActualizado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+          }
+          this.ejecutarActualizacionLibro(usuarioLibroActualizado);
+        });
+        return;
+      }
+      
+      // Si está marcando como TERMINADO y no entró en la confirmación (porque ya tenía todas las páginas leídas),
+      // mantenemos el valor actual de páginas leídas y solo actualizamos si realmente hay una diferencia
+      if (this.libroSeleccionado.numeroPaginas > 0 && 
+          this.libroSeleccionado.paginasLeidas !== this.libroSeleccionado.numeroPaginas) {
+        usuarioLibroActualizado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+      }
     }
+    
+    // Para otros estados, actualizar directamente
+    this.ejecutarActualizacionLibro(usuarioLibroActualizado);
+  }
+
+  /**
+   * Ejecuta la actualización del libro con el servicio
+   */
+  private ejecutarActualizacionLibro(usuarioLibroActualizado: any): void {
+    // Aseguramos que paginasLeidas sea un número válido
+    if (usuarioLibroActualizado.paginasLeidas === undefined || usuarioLibroActualizado.paginasLeidas === null) {
+      usuarioLibroActualizado.paginasLeidas = 0;
+    }
+    
+    // Eliminamos la lógica que sobreescribía la elección del usuario
+    // para respetar si decidió NO completar las páginas al marcar como terminado
+    
+
     
     this.usuarioLibroService.updateUsuarioLibro(
       this.libroSeleccionado.usuarioLibroId, 
       usuarioLibroActualizado
     ).subscribe({
-      next: () => {
+      next: (response) => {
+
         this.notificationService.success('Estado actualizado', {
           description: 'El estado del libro se ha actualizado correctamente'
         });
@@ -423,10 +477,95 @@ export class BibliotecaPersonalComponent implements OnInit {
   }
   
   /**
+   * Calcula el porcentaje de progreso de lectura basado en páginas leídas y total
+   */
+  calcularProgreso(paginasLeidas: number | null | undefined, totalPaginas: number | null | undefined): number {
+    if (!paginasLeidas || !totalPaginas || paginasLeidas <= 0 || totalPaginas <= 0) {
+      return 0;
+    }
+    
+    // Asegurar que el porcentaje no exceda el 100%
+    return Math.min(Math.round((paginasLeidas / totalPaginas) * 100), 100);
+  }
+  
+  /**
    * Trunca un texto largo para mostrar una versión corta
    */
   truncarTexto(texto: string | null, longitud: number = 100): string {
     if (!texto) return '';
     return texto.length > longitud ? texto.substring(0, longitud) + '...' : texto;
+  }
+
+  /**
+   * Actualiza el progreso cuando se mueve la barra interactiva
+   */
+  actualizarProgresoBarra(): void {
+    // Asegurar que no se exceda el máximo de páginas
+    if (this.libroSeleccionado && this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas) {
+      this.libroSeleccionado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+    }
+  }
+
+  /**
+   * Valida si el formulario está listo para enviarse
+   */
+  formularioValido(): boolean {
+    if (!this.libroSeleccionado) return false;
+
+    // Validar fecha de inicio
+    if (!this.libroSeleccionado.fechaInicioLectura) return false;
+    
+    const fechaInicio = new Date(this.libroSeleccionado.fechaInicioLectura);
+    const hoy = new Date();
+    if (fechaInicio > hoy) return false;
+    
+    // Validar fecha de fin para estados que la requieren
+    if ((this.libroSeleccionado.estadoLectura === 'TERMINADO' || 
+         this.libroSeleccionado.estadoLectura === 'ABANDONADO') &&
+        (!this.libroSeleccionado.fechaFinLectura)) {
+      return false;
+    }
+    
+    // Si hay fecha de fin, verificar que es posterior a la de inicio
+    if (this.libroSeleccionado.fechaFinLectura) {
+      const fechaFin = new Date(this.libroSeleccionado.fechaFinLectura);
+      if (fechaFin < fechaInicio || fechaFin > hoy) return false;
+    }
+    
+    // Validar páginas leídas
+    if (this.libroSeleccionado.numeroPaginas && 
+        (this.libroSeleccionado.estadoLectura === 'LEYENDO' || 
+         this.libroSeleccionado.estadoLectura === 'PENDIENTE' || 
+         this.libroSeleccionado.estadoLectura === 'TERMINADO')) {
+      
+      if (this.libroSeleccionado.paginasLeidas === undefined || 
+          this.libroSeleccionado.paginasLeidas === null) {
+        return false;
+      }
+      
+      if (this.libroSeleccionado.paginasLeidas < 0 || 
+          this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Muestra confirmación antes de actualizar
+   */
+  confirmarActualizacion(): void {
+    this.notificationService.confirm({
+      title: '¿Guardar cambios?',
+      text: '¿Estás seguro de guardar los cambios realizados a este libro?',
+      icon: 'question',
+      confirmButtonText: 'Sí, guardar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result) {
+        this.actualizarEstadoLectura();
+      }
+    });
   }
 }

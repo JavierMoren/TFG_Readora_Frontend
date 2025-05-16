@@ -182,7 +182,7 @@ export class DetalleLibroComponent implements OnInit {
 
           this.usuarioLibroService.createUsuarioLibro(usuarioLibro).subscribe({
             next: (response) => {
-              this.notificationService.success('Libro añadido', {
+              this.notificationService.success('Biblioteca actualizada', {
                 description: 'El libro se ha añadido a tu biblioteca personal'
               });
               // Actualizar el estado local
@@ -192,19 +192,9 @@ export class DetalleLibroComponent implements OnInit {
             },
             error: (err) => {
               this.agregando = false;
-              // Verificar si es un error de duplicación
-              if (err.status === 409) {
-                this.notificationService.info('Libro duplicado', {
-                  description: 'Este libro ya está en tu biblioteca personal'
-                });
-                // Actualizar estado local
-                this.enBiblioteca = true;
-                this.verificarLibroEnBiblioteca(); // Obtener el ID de la relación
-              } else {
-                this.notificationService.error('Error', {
-                  description: 'No se pudo añadir el libro a tu biblioteca'
-                });
-              }
+              this.notificationService.error('Error', {
+                description: 'No se pudo añadir el libro a tu biblioteca'
+              });
             }
           });
         } else {

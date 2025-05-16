@@ -59,4 +59,16 @@ export class StorageService {
   deleteFile(path: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${path}`);
   }
+
+  /**
+   * Sube una imagen al servidor
+   * @param file - Archivo de imagen a subir
+   * @param tipo - Tipo de imagen (libro, autor, etc.)
+   * @returns Observable con la URL de la imagen subida
+   */
+  uploadImage(file: File, tipo: string): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.uploadFile(formData, tipo);
+  }
 }

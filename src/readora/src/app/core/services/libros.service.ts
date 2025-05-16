@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, of } from 'rxjs';
+import { catchError, switchMap, map } from 'rxjs/operators';
 import { Libro } from '../../models/libro/libro.model';
 import { Autor } from '../../models/autor/autor.model';
 import { environment } from '../../../enviroments/enviroments';
@@ -115,14 +115,41 @@ export class LibrosService {
     );
   }
   
-  createLibro(libro: Libro): Observable<Libro> {
-    return this.http.post<Libro>(this.apiUrl, libro).pipe(
+  createLibro(libro: any): Observable<Libro> {
+    // Verificar si el libro tiene autoresIds
+    if (libro.autoresIds) {
+
+    } else {
+      libro.autoresIds = [];
+    }
+    
+    // Asegurar que el Content-Type sea application/json para que se procesen correctamente los arrays
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    
+    return this.http.post<Libro>(this.apiUrl, libro, httpOptions).pipe(
       catchError(this.handleError)
     );
   }
   
-  updateLibro(libro: Libro): Observable<Libro> {
-    return this.http.put<Libro>(`${this.apiUrl}/${libro.id}`, libro).pipe(
+  updateLibro(libro: any): Observable<Libro> {
+    // Verificar si el libro tiene autoresIds
+    if (libro.autoresIds) {
+    } else {
+      libro.autoresIds = [];
+    }
+    
+    // Asegurar que el Content-Type sea application/json para que se procesen correctamente los arrays
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    };
+    
+    return this.http.put<Libro>(`${this.apiUrl}/${libro.id}`, libro, httpOptions).pipe(
       catchError(this.handleError)
     );
   }
@@ -143,11 +170,13 @@ export class LibrosService {
   }
   
   /**
-   * Construye una URL completa para una ruta de imagen relativa
+   * Construye una URL completa para una ruta de imagen relativa o devuelve una imagen predeterminada
+   * @param path Ruta relativa de la imagen
+   * @returns URL completa de la imagen o ruta a la imagen predeterminada
    */
   getImageUrl(path: string | null): string {
     if (!path) {
-      return '/assets/placeholder-book.jpg';
+      return 'assets/placeholders/book-placeholder.svg'; // Imagen predeterminada para libros
     }
     
     if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -155,6 +184,77 @@ export class LibrosService {
     }
     
     return `${environment.apiUrl}/files/${path}`;
+  }
+
+  /**
+   * Desasocia todos los autores de un libro específico
+   * Esto es útil cuando queremos eliminar todas las relaciones libro-autor
+   * @param libroId - ID del libro
+   * @returns Observable que emite cuando la operación se completa
+   */
+  removeAllAutoresFromLibro(libroId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${libroId}/autores`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Asigna autores específicos a un libro
+   * Esta operación reemplaza cualquier asociación existente
+   * @param libroId - ID del libro
+   * @param autoresIds - Array con los IDs de los autores a asignar
+   * @returns Observable que emite cuando la operación se completa
+   */
+  assignAutoresToLibro(libroId: number, autoresIds: number[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${libroId}/autores`, { autoresIds }).pipe(
+      catchError(this.handleError)
+    );
+  }
+  
+  /**
+   * Actualiza un libro y sus relaciones con autores en una sola operación
+   * Este método se encarga de:
+   * 1. Eliminar las relaciones existentes con autores
+   * 2. Actualizar la información del libro
+   * 3. Asignar los nuevos autores
+   * @param libro - Datos del libro a actualizar (debe incluir id y autoresIds)
+   * @returns Observable que emite el libro actualizado
+   */
+  updateLibroConAutores(libro: any): Observable<any> {
+    // Primero nos aseguramos de que el libro tenga un ID válido
+    if (!libro.id) {
+      return throwError(() => new Error('El libro debe tener un ID para ser actualizado'));
+    }
+    
+    
+    // Hacemos una copia para no modificar el objeto original
+    const libroCopy = { ...libro };
+    
+    // Extraemos los IDs de autores
+    const autoresIds = Array.isArray(libroCopy.autoresIds) ? libroCopy.autoresIds : [];
+    
+    // 1. Primero eliminamos todas las relaciones existentes
+    return this.removeAllAutoresFromLibro(libroCopy.id).pipe(
+      switchMap(() => {
+        // 2. Luego actualizamos la información del libro
+        return this.updateLibro(libroCopy);
+      }),
+      switchMap((updatedLibro) => {
+        // 3. Finalmente asignamos los nuevos autores
+        if (autoresIds.length > 0) {
+          return this.assignAutoresToLibro(updatedLibro.id, autoresIds).pipe(
+            map(() => updatedLibro)
+          );
+        } else {
+          // Si no hay autores, simplemente devolvemos el libro actualizado
+          return of(updatedLibro);
+        }
+      }),
+      catchError((error) => {
+        console.error('[LibrosService] Error al actualizar libro con autores:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   private handleError(error: HttpErrorResponse) {
