@@ -92,9 +92,3 @@ El backend implementa una API REST con la siguiente organización:
 ### Despliegue
 La aplicación está preparada para desplegarse mediante Docker y Docker Compose, facilitando la configuración de entornos de desarrollo y producción.
 
-## Enlaces a Otros README
-
-- [README Principal del Proyecto](../../README.md)
-- [README del Frontend](../../TFG_Readora_Frontend/README.md)
-- [README del código fuente del Backend](../src/README.md)
-- [README del código fuente del Frontend](../../TFG_Readora_Frontend/src/README.md)

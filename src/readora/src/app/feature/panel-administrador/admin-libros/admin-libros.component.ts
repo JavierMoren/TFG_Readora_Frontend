@@ -72,18 +72,19 @@ export class AdminLibrosComponent implements OnInit {
    */
   loadAutores(): void {
     this.autorService.getAllAutores().subscribe({
-      next: (data) => {
-        this.allAutores = data;
-      },
+      next: (data) => this.allAutores = data,
       error: (error) => {
         console.error('[AdminLibros] Error al cargar autores', error);
-        this.notificationService.error('Error', { 
-          description: 'No se pudieron cargar los autores'
-        });
+        this.notificationService.error('Error', { description: 'No se pudieron cargar los autores' });
       }
     });
   }
-
+  
+  /**
+   * Alias para mantener compatibilidad con código existente
+   */
+  getAllAutores = (): void => this.loadAutores();
+  
   /**
    * Recupera los libros aplicando filtros y paginación para optimizar la carga
    */
@@ -232,22 +233,21 @@ export class AdminLibrosComponent implements OnInit {
   }
 
   /**
-   * Limpiar la búsqueda por ID
+   * Limpia la búsqueda y recarga los libros
+   * @param tipo - Tipo de búsqueda a limpiar ('id' o 'texto')
    */
-  limpiarBusquedaId(): void {
-    this.searchId = null;
+  limpiarBusqueda(tipo: 'id' | 'texto' = 'texto'): void {
+    if (tipo === 'id') {
+      this.searchId = null;
+    } else {
+      this.searchTerm = '';
+    }
     this.currentPage = 0;
     this.getLibrosPaginados();
   }
-
-  /**
-   * Limpiar la búsqueda y mostrar todos los libros
-   */
-  limpiarBusqueda(): void {
-    this.searchTerm = '';
-    this.currentPage = 0;
-    this.getLibrosPaginados();
-  }
+  
+  // Alias para mantener compatibilidad con código existente
+  limpiarBusquedaId = (): void => this.limpiarBusqueda('id');
 
   /**
    * Prepara el formulario para crear un nuevo libro
@@ -255,21 +255,10 @@ export class AdminLibrosComponent implements OnInit {
   prepareCreateLibro(): void {
     this.isEditing = false;
     this.currentLibro = this.initializeLibro();
-    
-    // Asegurarse que la propiedad autores esté inicializada
-    if (!this.currentLibro.autores) {
-      this.currentLibro.autores = [];
-    }
-    
-    // Limpiar estado de validación de ISBN duplicado
-    this.isbnDuplicado = false;
-    this.mensajeErrorIsbn = '';
-    
+    this.limpiarErrorIsbn();
     this.selectedFile = null;
     this.previewPortadaUrl = this.libroPlaceholder;
     this.showForm = true;
-    
-
   }
 
   /**
@@ -325,7 +314,7 @@ export class AdminLibrosComponent implements OnInit {
    * Determina si debe crear o actualizar un libro
    */
   saveLibro(): void {
-    // Validar el formulario antes de guardar
+    // Validaciones básicas antes de proceder
     if (!this.formularioValido()) {
       this.notificationService.warning('Datos incorrectos', { 
         description: 'Por favor, corrija los datos del formulario antes de guardar'
@@ -333,7 +322,7 @@ export class AdminLibrosComponent implements OnInit {
       return;
     }
     
-    // Validar que el ISBN tenga un formato válido, si se ha especificado
+    // Segunda validación específica de ISBN si es necesario
     if (this.currentLibro.isbn && !this.isValidISBN(this.currentLibro.isbn)) {
       this.notificationService.warning('ISBN inválido', { 
         description: 'El formato del ISBN no es válido. Debe ser ISBN-10 o ISBN-13'
@@ -341,6 +330,7 @@ export class AdminLibrosComponent implements OnInit {
       return;
     }
     
+    // Si todas las validaciones pasan, procedemos con la subida de imagen y guardado
     this.uploadImageAndSaveLibro();
   }
 
@@ -351,28 +341,15 @@ export class AdminLibrosComponent implements OnInit {
   uploadImageAndSaveLibro(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.isUploading = true;
-      
-      // Preparar el libro antes de enviarlo al backend
-      // Extraer los IDs de los autores para evitar enviar objetos completos
       const libroParaGuardar = this.prepararLibroParaEnviar(this.currentLibro);
       
-
-      
-      // Si hay una nueva imagen para subir
+      // Manejar el caso con nueva imagen
       if (this.selectedFile) {
-        // Subir la imagen primero y luego guardar el libro con la URL obtenida
         this.storageService.uploadImage(this.selectedFile, 'libro').subscribe({
           next: (response: any) => {
-
-            // Actualizar la URL de la portada con solo el string de la URL
+            // Extraer URL del objeto o usar directamente si es string
             libroParaGuardar.portadaUrl = typeof response === 'object' && response.url ? response.url : response;
-            
-            // Guardar el libro actualizado
-            if (this.isEditing) {
-              this.updateLibro(libroParaGuardar, resolve, reject);
-            } else {
-              this.createLibro(libroParaGuardar, resolve, reject);
-            }
+            this.guardarLibro(libroParaGuardar, resolve, reject);
           },
           error: (error) => {
             console.error('[AdminLibros] Error al subir imagen:', error);
@@ -384,14 +361,21 @@ export class AdminLibrosComponent implements OnInit {
           }
         });
       } else {
-        // Si no hay imagen nueva, sólo guardar el libro
-        if (this.isEditing) {
-          this.updateLibro(libroParaGuardar, resolve, reject);
-        } else {
-          this.createLibro(libroParaGuardar, resolve, reject);
-        }
+        // Sin nueva imagen, guardar directamente
+        this.guardarLibro(libroParaGuardar, resolve, reject);
       }
     });
+  }
+  
+  /**
+   * Función auxiliar para guardar el libro según sea creación o actualización
+   */
+  private guardarLibro(libro: any, resolve: Function, reject: Function): void {
+    if (this.isEditing) {
+      this.updateLibro(libro, resolve, reject);
+    } else {
+      this.createLibro(libro, resolve, reject);
+    }
   }
 
   /**
@@ -399,10 +383,8 @@ export class AdminLibrosComponent implements OnInit {
    * @param id - ID del libro a eliminar
    */
   async deleteLibro(id: number): Promise<void> {
-    // Primero verificamos si el libro tiene registros de lectura asociados
     const libroInfo = this.libros.find(libro => libro.id === id);
-    const nombreLibro = libroInfo ? libroInfo.titulo : 'el libro';
-    
+    const nombreLibro = libroInfo?.titulo || 'el libro';
     this.libroIdToDelete = id;
     
     const confirmed = await this.notificationService.confirm({
@@ -413,60 +395,47 @@ export class AdminLibrosComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     });
     
-    if (confirmed) {
-      this.confirmDeleteLibro();
-    } else {
-      this.libroIdToDelete = null;
-    }
+    confirmed ? this.procesarEliminacionLibro() : this.libroIdToDelete = null;
   }
   
   /**
-   * Confirma la eliminación del libro
+   * Procesa la eliminación del libro
    */
-  confirmDeleteLibro(): void {
-    if (this.libroIdToDelete !== null) {
-      this.librosService.deleteLibro(this.libroIdToDelete).subscribe({
-        next: () => {
-          this.notificationService.success('Eliminado', { 
-            description: 'El libro ha sido eliminado correctamente'
-          });
-          this.getLibrosPaginados();
-          this.libroIdToDelete = null;
-        },
-        error: (error) => {
-          console.error('[AdminLibros] Error al eliminar libro', error);
+  private procesarEliminacionLibro(): void {
+    if (this.libroIdToDelete === null) return;
+    
+    this.librosService.deleteLibro(this.libroIdToDelete).subscribe({
+      next: () => {
+        this.notificationService.success('Eliminado', { description: 'El libro ha sido eliminado correctamente' });
+        this.getLibrosPaginados();
+        this.libroIdToDelete = null;
+      },
+      error: (error) => {
+        console.error('[AdminLibros] Error al eliminar libro', error);
+        
+        // Verificar si es un error de restricción relacional
+        const palabrasErrorRelacional = ['constraint', 'relacionado', 'registros de lectura', 'foreign key', 'references'];
+        const esErrorRelacional = palabrasErrorRelacional.some(term => 
+          error?.error?.message?.includes(term) || error?.error?.includes(term)
+        );
+        
+        const mensaje = esErrorRelacional 
+          ? 'Este libro no puede ser eliminado porque tiene registros de lectura asociados. Primero debe eliminar estas relaciones desde el panel "Gestión de Lecturas".'
+          : 'No se pudo eliminar el libro. Verifique si existen registros dependientes.';
           
-          // Mejorar manejo de errores para restricciones relacionales
-          let mensaje = 'No se pudo eliminar el libro.';
-          
-          // Comprobar si el error está relacionado con restricciones de clave foránea
-          if (error?.error?.message?.includes('constraint') || 
-              error?.error?.includes('constraint') || 
-              error?.error?.includes('relacionado') ||
-              error?.error?.includes('registros de lectura') ||
-              error?.error?.includes('foreign key') ||
-              error?.error?.includes('references')) {
-            
-            mensaje = 'Este libro no puede ser eliminado porque tiene registros de lectura asociados. ' +
-                      'Primero debe eliminar estas relaciones desde el panel "Gestión de Lecturas".';
-            
-            this.notificationService.error('Error de integridad referencial', { 
-              description: mensaje
-            });
-          } else {
-            this.notificationService.error('Error', { 
-              description: mensaje + ' Verifique si existen registros dependientes.'
-            });
-          }
-          this.libroIdToDelete = null;
-        }
-      });
-    }
+        this.notificationService.error(
+          esErrorRelacional ? 'Error de integridad referencial' : 'Error', 
+          { description: mensaje }
+        );
+        
+        this.libroIdToDelete = null;
+      }
+    });
   }
 
-  /**
-   * Cancela la eliminación del libro
-   */
+  // Alias para mantener compatibilidad con código existente
+  confirmDeleteLibro = (): void => this.procesarEliminacionLibro();
+  
   cancelDeleteLibro(): void {
     this.libroIdToDelete = null;
   }
@@ -738,29 +707,12 @@ export class AdminLibrosComponent implements OnInit {
   formularioValido(): boolean {
     if (!this.currentLibro) return false;
 
-    // Validar ISBN si se proporciona
-    if (this.currentLibro.isbn) {
-      // Expresión regular para validación de ISBN
-      const isbnRegex = new RegExp('^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$');
-      
-      if (!isbnRegex.test(this.currentLibro.isbn)) {
-        return false;
-      }
-    }
+    // Validar ISBN, páginas y sinopsis
+    const isbnValido = !this.currentLibro.isbn || this.isValidISBN(this.currentLibro.isbn);
+    const paginasValidas = !this.currentLibro.numeroPaginas || this.currentLibro.numeroPaginas > 0;
+    const sinopsisValida = !this.currentLibro.sinopsis || this.currentLibro.sinopsis.length <= 1000;
 
-    // Validar que el número de páginas sea positivo si está definido
-    if (this.currentLibro.numeroPaginas !== null && this.currentLibro.numeroPaginas !== undefined) {
-      if (this.currentLibro.numeroPaginas <= 0) {
-        return false;
-      }
-    }
-
-    // Validar que la sinopsis no exceda la longitud máxima si está definida
-    if (this.currentLibro.sinopsis && this.currentLibro.sinopsis.length > 1000) {
-      return false;
-    }
-
-    return true;
+    return isbnValido && paginasValidas && sinopsisValida;
   }
 
   /**
@@ -772,33 +724,25 @@ export class AdminLibrosComponent implements OnInit {
     // Eliminar guiones y espacios
     isbn = isbn.replace(/[-\s]/g, '');
     
-    // Comprobar si es un ISBN-10 (10 dígitos)
+    // ISBN-10 (10 dígitos)
     if (/^(\d{9}[\dX])$/.test(isbn)) {
-      // Validar ISBN-10 con dígito de control
+      // Calcular suma ponderada para ISBN-10
       let sum = 0;
       for (let i = 0; i < 9; i++) {
         sum += parseInt(isbn.charAt(i)) * (10 - i);
       }
-      
-      // Calcular dígito de control
       const checksum = isbn.charAt(9).toUpperCase() === 'X' ? 10 : parseInt(isbn.charAt(9));
-      sum += checksum;
-      
-      return sum % 11 === 0;
+      return (sum + checksum) % 11 === 0;
     }
     
-    // Comprobar si es un ISBN-13 (13 dígitos)
-    else if (/^\d{13}$/.test(isbn)) {
-      // Validar ISBN-13 con dígito de control
+    // ISBN-13 (13 dígitos)
+    if (/^\d{13}$/.test(isbn)) {
+      // Calcular suma con factores alternantes 1 y 3
       let sum = 0;
       for (let i = 0; i < 12; i++) {
         sum += parseInt(isbn.charAt(i)) * (i % 2 === 0 ? 1 : 3);
       }
-      
-      // Calcular dígito de control
-      const checksum = (10 - (sum % 10)) % 10;
-      
-      return checksum === parseInt(isbn.charAt(12));
+      return (10 - (sum % 10)) % 10 === parseInt(isbn.charAt(12));
     }
     
     return false;
@@ -810,100 +754,41 @@ export class AdminLibrosComponent implements OnInit {
    * @returns ISBN formateado con guiones
    */
   formatISBN(isbn: string): string {
-    // Eliminar todos los guiones y espacios existentes
     isbn = isbn.replace(/[-\s]/g, '');
-    
-    // Si es ISBN-10
-    if (isbn.length === 10) {
-      return `${isbn.substring(0, 1)}-${isbn.substring(1, 3)}-${isbn.substring(3, 9)}-${isbn.substring(9)}`;
-    }
-    // Si es ISBN-13
-    else if (isbn.length === 13) {
-      return `${isbn.substring(0, 3)}-${isbn.substring(3, 4)}-${isbn.substring(4, 6)}-${isbn.substring(6, 12)}-${isbn.substring(12)}`;
-    }
-    
-    // Si no tiene el formato correcto, devolver sin formatear
+    if (isbn.length === 10) return `${isbn.substring(0, 1)}-${isbn.substring(1, 3)}-${isbn.substring(3, 9)}-${isbn.substring(9)}`;
+    if (isbn.length === 13) return `${isbn.substring(0, 3)}-${isbn.substring(3, 4)}-${isbn.substring(4, 6)}-${isbn.substring(6, 12)}-${isbn.substring(12)}`;
     return isbn;
   }
 
   /**
-   * Comprueba si el libro actual tiene autores asociados
-   * @returns true si hay autores, false en caso contrario
+   * Comprueba si el libro tiene autores asociados
    */
-  hasAutores(): boolean {
-    return this.currentLibro && 
-           Array.isArray(this.currentLibro.autores) && 
-           this.currentLibro.autores.length > 0;
-  }
+  hasAutores = (): boolean => 
+    this.currentLibro && Array.isArray(this.currentLibro.autores) && this.currentLibro.autores.length > 0;
   
   /**
    * Comprueba si los autores están correctamente cargados y los inicializa si es necesario
    */
   verificarAutores(): void {
-    if (!this.currentLibro) {
-      console.warn('[AdminLibros] currentLibro no está definido, inicializando...');
-      this.currentLibro = this.initializeLibro();
-    }
+    // Inicializar libro y array de autores si es necesario
+    if (!this.currentLibro) this.currentLibro = this.initializeLibro();
+    if (!Array.isArray(this.currentLibro.autores)) this.currentLibro.autores = [];
     
-    if (!Array.isArray(this.currentLibro.autores)) {
-      console.warn('[AdminLibros] currentLibro.autores no es un array, inicializando...');
-      this.currentLibro.autores = [];
-    }
-    
-    // Asegurarse de que cada autor tenga todas sus propiedades
+    // Si hay autores, normalizar
     if (this.currentLibro.autores.length > 0) {
-
-      
-      // Verificar e inicializar propiedades de cada autor si es necesario
       this.currentLibro.autores = this.currentLibro.autores
-        .filter((autor: null | undefined) => autor !== null && autor !== undefined)
-        .map((autor: any) => {
-          if (typeof autor !== 'object') {
-            console.warn('[AdminLibros] Autor no es un objeto:', autor);
-            return null;
-          }
-          
-          // Asegurarse de que el ID es numérico
-          const authorId = parseInt(autor.id);
-          if (isNaN(authorId)) {
-            console.warn('[AdminLibros] ID de autor no válido:', autor.id);
-          }
-          
-          // Asegurarse de que el autor tiene todas las propiedades necesarias
-          return {
-            id: isNaN(authorId) ? null : authorId, // Asegurar que el ID sea numérico
-            nombre: autor.nombre || '',
-            apellido: autor.apellido || '',
-            fechaNacimiento: autor.fechaNacimiento || null,
-            fechaFallecimiento: autor.fechaFallecimiento || null,
-            biografia: autor.biografia || '',
-            fotoUrl: autor.fotoUrl || null
-          };
-        })
-        .filter((autor: any) => autor !== null); // Eliminar elementos nulos
-        
-
+        .filter((autor: any) => autor && typeof autor === 'object')
+        .map((autor: any) => ({
+          id: parseInt(autor.id) || null,
+          nombre: autor.nombre || '',
+          apellido: autor.apellido || '',
+          fechaNacimiento: autor.fechaNacimiento || null,
+          fechaFallecimiento: autor.fechaFallecimiento || null,
+          biografia: autor.biografia || '',
+          fotoUrl: autor.fotoUrl || null
+        }))
+        .filter((autor: any) => autor.id !== null);
     }
-    
-
-  }
-
-  /**
-   * Carga todos los autores disponibles
-   */
-  getAllAutores(): void {
-    this.autorService.getAllAutores().subscribe({
-      next: (autores) => {
-        this.allAutores = autores;
-
-      },
-      error: (error) => {
-        console.error('[AdminLibros] Error al cargar autores:', error);
-        this.notificationService.error('Error', {
-          description: 'No se pudieron cargar los autores disponibles'
-        });
-      }
-    });
   }
 
   /**
@@ -1025,77 +910,36 @@ export class AdminLibrosComponent implements OnInit {
   }
 
   /**
-   * Verifica si los autores se guardaron correctamente después de crear o actualizar un libro
-   * @param libroId - ID del libro
-   * @param autoresIdsEnviados - IDs de los autores que se enviaron al guardar
-   */
-  /**
-   * Verifica si los autores se guardaron correctamente comparando los IDs enviados con los guardados
+   * Verifica si los autores se guardaron correctamente
    * @param libroId - ID del libro a verificar
-   * @param autoresIdsEnviados - Array de IDs de autores que deberían estar asociados al libro
+   * @param autoresIdsEnviados - Array de IDs de autores que deberían estar asociados
    */
   verificarAutoresGuardados(libroId: number, autoresIdsEnviados: number[]): void {
-    // Primero ordenamos los IDs enviados para facilitar la comparación visual en logs
+    if (!libroId || !autoresIdsEnviados?.length) return;
+    
     const autoresIdsOrdenados = [...autoresIdsEnviados].sort((a, b) => a - b);
     
-
-    
-    // Consultamos los autores actuales del libro
     this.librosService.getAutoresByLibroId(libroId).subscribe({
       next: (autores) => {
-        // Extraemos solo los IDs y los ordenamos para facilitar comparación
         const autoresGuardadosIds = autores.map((autor: Autor) => autor.id).sort((a, b) => a - b);
         
-
+        // Verificar concordancia entre lo enviado y lo guardado
+        const todosGuardados = autoresIdsOrdenados.every(id => autoresGuardadosIds.includes(id));
+        const mismaLongitud = autoresGuardadosIds.length === autoresIdsOrdenados.length;
         
-        // Verificamos si todos los autores enviados están correctamente guardados
-        const todosGuardados = autoresIdsOrdenados.every(id => 
-          autoresGuardadosIds.includes(id)
-        );
-        
-        // Verificamos que no haya autores adicionales no solicitados
-        const noHayAdicionales = autoresGuardadosIds.length === autoresIdsOrdenados.length;
-        
-        // Si hay alguna discrepancia, mostramos advertencia
-        if (!todosGuardados || !noHayAdicionales) {
-          console.error('[AdminLibros] ALERTA: Los autores guardados no coinciden con los enviados');
-          
-          // Encontrar autores que deberían estar pero no están
-          const autoresFaltantes = autoresIdsOrdenados.filter(id => !autoresGuardadosIds.includes(id));
-          if (autoresFaltantes.length > 0) {
-            console.error(`[AdminLibros] Autores que deberían estar pero no se guardaron: ${autoresFaltantes.join(', ')}`);
-          }
-          
-          // Encontrar autores adicionales que no deberían estar
-          const autoresAdicionales = autoresGuardadosIds.filter(id => !autoresIdsOrdenados.includes(id));
-          if (autoresAdicionales.length > 0) {
-            console.error(`[AdminLibros] Autores adicionales que no deberían estar: ${autoresAdicionales.join(', ')}`);
-          }
-          
-          // Notificar al usuario
+        if (!todosGuardados || !mismaLongitud) {
+          // En caso de discrepancias, mostrar advertencia
           this.notificationService.warning('Advertencia', { 
-            description: 'Es posible que algunos autores no se hayan guardado correctamente. Por favor, verifique la lista.'
+            description: 'Es posible que algunos autores no se hayan guardado correctamente'
           });
-        } else {
-          // Todo correcto
-
         }
       },
       error: (err) => {
-        console.error(`[AdminLibros] Error al verificar autores después de actualizar para libro ${libroId}:`, err);
-        this.notificationService.error('Error', { 
-          description: 'No se pudo verificar si los autores fueron guardados correctamente.'
-        });
+        console.error(`[AdminLibros] Error al verificar autores: ${err}`);
       }
     });
   }
 
-  /**
-   * Prepara correctamente los datos del libro para enviar al backend,
-   * asegurándose de que los IDs de autores se envíen en el formato esperado
-   * @param libroOriginal - El libro con todos los datos
-   * @returns Un objeto libro preparado para el backend
-   */
   /**
    * Prepara correctamente los datos del libro para enviar al backend,
    * asegurando que los autores se conviertan en un array de IDs
@@ -1104,56 +948,22 @@ export class AdminLibrosComponent implements OnInit {
    */
   prepararLibroParaEnviar(libroOriginal: any): any {
     try {
-      // Hacer una copia profunda para evitar modificar el original
       const libroParaEnviar = JSON.parse(JSON.stringify(libroOriginal));
       
-
-      
-      // Extraer los IDs de los autores y asignarlos a autoresIds
-      if (Array.isArray(libroParaEnviar.autores) && libroParaEnviar.autores.length > 0) {
-        // Filtrar para asegurar que solo se incluyen IDs válidos numéricos
-        const autoresIds = libroParaEnviar.autores
-          .filter((autor: any) => autor && typeof autor.id === 'number')
-          .map((autor: any) => autor.id);
-        
-        // Asignar el array de IDs a la propiedad esperada por el backend
-        libroParaEnviar.autoresIds = autoresIds;
-        
-
-      } else {
-        // Si no hay autores, asignar un array vacío explícitamente
-        // Esto es importante para eliminar autores existentes
-        libroParaEnviar.autoresIds = [];
-
-      }
-      
-      // Eliminar la propiedad autores para evitar duplicidad y posibles problemas
-      // en el backend al recibir tanto objetos completos como IDs
+      // Extraer IDs de autores y eliminar datos completos
+      libroParaEnviar.autoresIds = Array.isArray(libroParaEnviar.autores) 
+        ? libroParaEnviar.autores.filter((a: any) => a?.id).map((a: any) => a.id) 
+        : [];
       delete libroParaEnviar.autores;
       
-      // Asegurarse de que otros campos específicos estén correctamente formateados
-      
-      // El número de páginas debe ser numérico
-      if (libroParaEnviar.numeroPaginas) {
-        libroParaEnviar.numeroPaginas = Number(libroParaEnviar.numeroPaginas);
-      }
-      
-      // Debugging: Ver el objeto final
-
+      // Convertir número de páginas a numérico
+      if (libroParaEnviar.numeroPaginas) libroParaEnviar.numeroPaginas = Number(libroParaEnviar.numeroPaginas);
       
       return libroParaEnviar;
     } catch (error) {
       console.error('[AdminLibros] Error al preparar libro para enviar:', error);
-      // En caso de error, devolver un objeto básico con los datos mínimos necesarios
-      const fallbackLibro = { 
-        ...libroOriginal,
-        autoresIds: [] // Garantizar que siempre haya un array de autoresIds incluso en caso de error
-      };
-      
-      // Eliminar la propiedad autores para evitar problemas
+      const fallbackLibro = { ...libroOriginal, autoresIds: [] };
       delete fallbackLibro.autores;
-      
-      console.warn('[AdminLibros] Se está enviando una versión reducida del libro debido a un error');
       return fallbackLibro;
     }
   }
