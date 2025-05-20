@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AutenticacionService } from '../../core/services/autenticacion.service';
+import { OAuth2Service } from '../../core/services/oauth2.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -18,11 +19,14 @@ export class AutenticacionComponent {
     usuario: '',
     contrasenna: ''
   };
-
   constructor(
     private autenticacionService: AutenticacionService, 
     private router: Router,
+    private oauth2Service: OAuth2Service
   ) {}
+  loginWithGoogle() {
+    this.oauth2Service.loginWithGoogle();
+  }
 
   onSubmit(form: NgForm) {
     if (form.invalid) {

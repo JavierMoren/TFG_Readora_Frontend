@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpResponse } from '@angular/common/http';
 import { toast } from 'ngx-sonner';
+import { OAuth2Service } from '../../core/services/oauth2.service';
 
 @Component({
   selector: 'app-register',
@@ -25,7 +26,8 @@ export class RegisterComponent {
   
   constructor(
     private registerService: RegisterService, 
-    private router: Router
+    private router: Router,
+    private oauth2Service: OAuth2Service
   ) {}
 
   onSubmit(form: NgForm) {
@@ -83,7 +85,9 @@ export class RegisterComponent {
               onClick: () => toast.dismiss(),
             },
           });
+          // Forzar comprobación de autenticación tras registro
           setTimeout(() => {
+            this.oauth2Service.checkAuthAfterRegister();
             this.router.navigate(['/']);
           }, 1500);
         } else {
@@ -134,5 +138,9 @@ export class RegisterComponent {
         }
       },
     });
+  }
+
+  loginWithGoogle() {
+    this.oauth2Service.loginWithGoogle();
   }
 }
