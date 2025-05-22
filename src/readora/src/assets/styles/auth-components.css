@@ -100,14 +100,14 @@
   border-radius: 0.5rem;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   border: none;
-  box-shadow: 0 4px 12px rgba(77, 107, 254, 0.25);
+  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 77, 107, 254), 0.25);
   transition: all 0.3s ease;
 }
 
 .auth-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #3A58D6, var(--primary-color));
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(77, 107, 254, 0.35);
+  box-shadow: 0 6px 15px rgba(var(--primary-color-rgb, 77, 107, 254), 0.35);
 }
 
 .auth-btn:active:not(:disabled) {

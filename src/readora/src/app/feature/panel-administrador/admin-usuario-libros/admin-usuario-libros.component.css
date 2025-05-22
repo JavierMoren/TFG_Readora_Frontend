@@ -27,7 +27,7 @@
 .progress {
   height: 8px;
   border-radius: 4px;
-  background-color: #e9ecef;
+  background-color: var(--background-subtle);
 }
 
 .progress-bar {

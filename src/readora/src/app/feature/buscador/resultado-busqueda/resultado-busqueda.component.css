@@ -16,7 +16,7 @@
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
 }
 
 .book-cover img {
@@ -50,6 +50,7 @@
   color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.6;
@@ -64,15 +65,15 @@
 }
 
 .pagination .page-item.active .page-link {
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: #fff;
   box-shadow: 0 0.25rem 0.5rem rgba(77, 107, 254, 0.25);
 }
 
 .pagination .page-link:hover {
   background-color: var(--background-subtle);
-  color: #4D6BFE;
+  color: var(--primary-color);
   z-index: 2;
 }
 
@@ -103,14 +104,14 @@
 
 /* Estilos para botones de acción en las tarjetas */
 .btn-primary, .btn-outline-primary:hover {
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   box-shadow: 0 0.25rem 0.5rem rgba(77, 107, 254, 0.25);
 }
 
 .btn-outline-primary {
-  color: #4D6BFE;
-  border-color: #4D6BFE;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
   font-weight: 500;
 }
 

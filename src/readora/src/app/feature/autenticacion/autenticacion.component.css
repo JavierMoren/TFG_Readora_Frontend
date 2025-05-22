@@ -307,18 +307,3 @@ input:-webkit-autofill:active {
   color: var(--text-secondary);
 }
 
-[data-theme="dark"] .form-control {
-  background-color: var(--input-bg);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .form-control:focus {
-  background-color: var(--input-bg);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(77, 107, 254, 0.2);
-}
-
-[data-theme="dark"] .form-control::placeholder {
-  color: var(--text-muted);
-}
