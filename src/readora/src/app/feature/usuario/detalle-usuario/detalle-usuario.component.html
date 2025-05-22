@@ -28,23 +28,79 @@
     <!-- Columna de información del perfil -->
     <div class="col-12 col-lg-7 mb-4">
       <div class="card shadow-sm">
-        <div class="card-header">
-          <h2 class="card-title">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="card-title mb-0">
             <span class="material-icons card-icon">person</span>
             Información personal
           </h2>
+          <button *ngIf="!modoEdicion" type="button" class="btn btn-sm btn-outline-primary" (click)="activarEdicion()">
+            <span class="material-icons small">edit</span> Modificar
+          </button>
         </div>
         <div class="card-body p-4">
           <form [formGroup]="usuarioForm" (submit)="guardarCambios()">
-            <div class="mb-3">
-              <label for="usuario" class="form-label">Nombre de usuario</label>
-              <div class="input-group">
+            <div class="mb-3"> <!-- Contenedor principal del campo Nombre de Usuario -->
+              <label for="usuario" class="form-label">Nombre de usuario <span class="text-danger">*</span></label>
+              
+              <!-- CASO 1: Usuario NO es de Google -->
+              <!-- Muestra un input. Su estado editable/readonly depende de modoEdicion. -->
+              <div class="input-group" *ngIf="!esUsuarioGoogle">
                 <span class="input-group-text bg-light">
                   <span class="material-icons small">alternate_email</span>
                 </span>
-                <input type="text" id="usuario" formControlName="usuario" class="form-control" readonly>
+                <input type="text" id="usuario" formControlName="usuario" 
+                  class="form-control" 
+                  [readonly]="!modoEdicion"
+                  [ngClass]="{'is-invalid': (nombreUsuarioInvalido || (usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched))}">
+                <!-- Icono de check para usuarios normales en modo edición y campo válido -->
+                <span *ngIf="modoEdicion && !nombreUsuarioInvalido && usuarioForm.get('usuario')?.valid" 
+                      class="input-group-text bg-success text-white">
+                  <span class="material-icons small">check_circle</span>
+                </span>
               </div>
-              <small class="form-text text-muted">El nombre de usuario no se puede cambiar.</small>
+              
+              <!-- CASO 2: Usuario ES de Google -->
+              <ng-container *ngIf="esUsuarioGoogle">
+                <!-- SUB-CASO 2a: Usuario de Google Y EN MODO EDICIÓN -->
+                <div class="input-group" *ngIf="modoEdicion">
+                  <span class="input-group-text bg-light">
+                    <span class="material-icons small">alternate_email</span>
+                  </span>
+                  <input type="text" id="usuarioGoogle" formControlName="usuario" 
+                    class="form-control" 
+                    [readonly]="false"
+                    [ngClass]="{'is-invalid': (nombreUsuarioInvalido || (usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched))}">
+                  <span class="input-group-text bg-light" title="Cuenta vinculada con Google">
+                    <span class="material-icons small">google</span>
+                  </span>
+                  <span *ngIf="!nombreUsuarioInvalido && usuarioForm.get('usuario')?.valid" 
+                        class="input-group-text bg-success text-white">
+                    <span class="material-icons small">check_circle</span>
+                  </span>
+                </div>
+
+                <!-- SUB-CASO 2b: Usuario de Google Y NO EN MODO EDICIÓN -->
+                <div class="input-group" *ngIf="!modoEdicion">
+                  <span class="input-group-text bg-light">
+                    <span class="material-icons small">alternate_email</span>
+                  </span>
+                  <div class="form-control bg-light-subtle">{{ usuario?.usuario }}</div>
+                  <span class="input-group-text bg-light" title="Cuenta vinculada con Google">
+                    <span class="material-icons small">google</span>
+                  </span>
+                </div>
+              </ng-container>
+              
+              <!-- Mensajes de error -->
+              <div class="invalid-feedback d-block" *ngIf="nombreUsuarioInvalido">
+                {{ mensajeErrorUsuario }}
+              </div>
+              <div class="invalid-feedback d-block" *ngIf="!nombreUsuarioInvalido && usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched">
+                <span *ngIf="usuarioForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio.</span>
+                <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">El nombre de usuario sólo puede contener letras, números, puntos, guiones y guiones bajos.</span>
+                <span *ngIf="usuarioForm.get('usuario')?.errors?.['minlength']">El nombre de usuario debe tener al menos 4 caracteres.</span>
+                <span *ngIf="usuarioForm.get('usuario')?.errors?.['maxlength']">El nombre de usuario no puede exceder los 100 caracteres.</span>
+              </div>
             </div>
 
             <div class="mb-3">
@@ -54,9 +110,10 @@
                   <span class="material-icons small">badge</span>
                 </span>
                 <input type="text" id="nombre" formControlName="nombre" class="form-control" 
+                  [readonly]="!modoEdicion"
                   [ngClass]="{'is-invalid': usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched}">
               </div>
-              <div *ngIf="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched" class="invalid-feedback">
+              <div *ngIf="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched" class="invalid-feedback d-block">
                 <span *ngIf="usuarioForm.get('nombre')?.errors?.['required']">El nombre es obligatorio.</span>
                 <span *ngIf="usuarioForm.get('nombre')?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</span>
               </div>
@@ -69,9 +126,10 @@
                   <span class="material-icons small">badge</span>
                 </span>
                 <input type="text" id="apellido" formControlName="apellido" class="form-control"
+                  [readonly]="!modoEdicion"
                   [ngClass]="{'is-invalid': usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched}">
               </div>
-              <div *ngIf="usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched" class="invalid-feedback">
+              <div *ngIf="usuarioForm.get('apellido')?.invalid && usuarioForm.get('apellido')?.touched" class="invalid-feedback d-block">
                 <span *ngIf="usuarioForm.get('apellido')?.errors?.['required']">El apellido es obligatorio.</span>
                 <span *ngIf="usuarioForm.get('apellido')?.errors?.['pattern']">El apellido solo puede contener letras y espacios.</span>
               </div>
@@ -79,20 +137,42 @@
 
             <div class="mb-4">
               <label for="gmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
-              <div class="input-group">
+              
+              <!-- Campo para usuarios normales -->
+              <div class="input-group" *ngIf="!esUsuarioGoogle">
                 <span class="input-group-text bg-light">
                   <span class="material-icons small">email</span>
                 </span>
                 <input type="email" id="gmail" formControlName="gmail" class="form-control"
+                  [readonly]="!modoEdicion"
                   [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched}">
               </div>
-              <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback">
+              
+              <!-- Campo de solo lectura para usuarios de Google -->
+              <div class="input-group" *ngIf="esUsuarioGoogle">
+                <span class="input-group-text bg-light">
+                  <span class="material-icons small">email</span>
+                </span>
+                <div class="form-control bg-light-subtle">{{ usuario?.gmail }}</div>
+                <span class="input-group-text bg-light" title="Cuenta vinculada con Google">
+                  <span class="material-icons small">google</span>
+                </span>
+              </div>
+              
+              <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback d-block">
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El correo electrónico es obligatorio.</span>
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Formato de correo electrónico inválido.</span>
               </div>
+              <div *ngIf="esUsuarioGoogle" class="form-text text-info mt-1">
+                <small><span class="material-icons small align-middle">info</span> El correo electrónico no puede modificarse en cuentas vinculadas con Google.</small>
+              </div>
             </div>
 
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <div *ngIf="modoEdicion" class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-outline-secondary me-md-2" (click)="cancelarEdicion()">
+                <span class="material-icons">cancel</span>
+                Cancelar
+              </button>
               <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid">
                 <span class="material-icons">save</span>
                 Guardar cambios
@@ -113,8 +193,8 @@
           </h2>
         </div>
         <div class="card-body p-4">
-          <!-- Formulario para cambio de contraseña -->
-          <div *ngIf="!cambiarContrasenna">
+          <!-- Formulario para cambio de contraseña (solo para usuarios que no son de Google) -->
+          <div *ngIf="!cambiarContrasenna && !esUsuarioGoogle">
             <div class="d-flex align-items-center mb-3">
               <span class="material-icons text-primary me-3" style="font-size: 2.5rem;">password</span>
               <div>
@@ -122,13 +202,24 @@
                 <p class="mb-0 text-muted">Mantén tu cuenta segura cambiando tu contraseña regularmente</p>
               </div>
             </div>
-            <button class="btn btn-outline-primary w-100" (click)="cambiarContrasenna = true">
+            <button class="btn btn-outline-primary w-100" (click)="puedeModificarContrasenna() ? cambiarContrasenna = true : null">
               <span class="material-icons">key</span>
               Cambiar contraseña
             </button>
           </div>
+          
+          <!-- Mensaje para usuarios de Google -->
+          <div *ngIf="esUsuarioGoogle">
+            <div class="d-flex align-items-center mb-3">
+              <span class="material-icons text-primary me-3" style="font-size: 2.5rem;">google</span>
+              <div>
+                <h3 class="h6 fw-bold mb-1">Cuenta vinculada con Google</h3>
+                <p class="mb-0 text-muted">Tu cuenta está autenticada a través de Google. La gestión de contraseñas se realiza a través de tu cuenta de Google.</p>
+              </div>
+            </div>
+          </div>
 
-          <form *ngIf="cambiarContrasenna" [formGroup]="passwordForm" (submit)="verificarContrasenna()">
+          <form *ngIf="cambiarContrasenna && !esUsuarioGoogle" [formGroup]="passwordForm" (submit)="verificarContrasenna()">
             <div class="mb-3">
               <label for="contrasennaActual" class="form-label">Contraseña actual <span class="text-danger">*</span></label>
               <div class="input-group">
@@ -208,7 +299,7 @@
             <span class="material-icons text-primary me-3">date_range</span>
             <div>
               <h3 class="h6 fw-bold mb-1">Fecha de registro</h3>
-              <p class="mb-0 text-muted">{{ usuario?.fechaCreacion | date:'medium':'':'es' }}</p>
+              <p class="mb-0 text-muted">{{ getFechaCreacionLocal() }}</p>
             </div>
           </div>
         </div>

@@ -75,6 +75,18 @@ export class UsuarioService {
     );
   }
 
+  /**
+   * Obtiene un usuario por su nombre de usuario
+   */
+  getUsuarioByUsername(username: string): Observable<Usuario | null> {
+    return this.http.get<Usuario | null>(`${this.apiUrl}/buscar-por-usuario/${username}`).pipe(
+      catchError(err => {
+        if (err.status === 404) return new Observable<Usuario | null>(observer => { observer.next(null); observer.complete(); });
+        return this.handleError(err);
+      })
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
     if (error.error instanceof ErrorEvent) {
@@ -87,7 +99,6 @@ export class UsuarioService {
         errorMessage += `\nDetalle: ${JSON.stringify(error.error)}`;
       }
     }
-    console.error('[UsuarioService] Error HTTP:', errorMessage);
     return throwError(() => error);
   }
 }

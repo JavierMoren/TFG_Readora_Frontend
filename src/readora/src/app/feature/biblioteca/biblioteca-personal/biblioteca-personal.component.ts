@@ -11,10 +11,11 @@ import { Libro } from '../../../models/libro/libro.model';
 import { Autor } from '../../../models/autor/autor.model';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, map, switchMap, Observable } from 'rxjs';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-biblioteca-personal',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './biblioteca-personal.component.html',
   styleUrls: ['./biblioteca-personal.component.css']
 })
@@ -100,6 +101,7 @@ export class BibliotecaPersonalComponent implements OnInit {
     this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
       next: (usuarioLibros) => {
         if (!usuarioLibros || usuarioLibros.length === 0) {
+            this.cargando = false; // Soluciona el loading infinito si no hay libros
           return;
         }
         

@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { RegisterComponent } from './feature/register/register.component';
 import { HomeComponent } from './layout/home/home.component';
 import { AutenticacionComponent } from './feature/autenticacion/autenticacion.component';
-import { OauthSuccessComponent } from './feature/autenticacion/oauth-success/oauth-success.component';
 import { autenticacionGuard } from './core/guard/autenticacion.guard';
 import { adminGuard } from './core/guard/admin.guard';
 import { ForbiddenComponent } from './feature/forbidden/forbidden.component';
@@ -28,10 +27,6 @@ export const routes: Routes = [
   },  {
     path: 'api/v1/authenticate',
     component: AutenticacionComponent,
-  },
-  {
-    path: 'oauth-success',
-    component: OauthSuccessComponent,
   },
   {
     path: 'perfil',

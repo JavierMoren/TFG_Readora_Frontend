@@ -40,12 +40,32 @@
   color: var(--primary-color);
 }
 
-/* Estilo para input deshabilitado más claro que el estándar */
-input[readonly], input[disabled] {
-  background-color: var(--background-subtle);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-  border-color: var(--border-color);
+/* Estilos para campos deshabilitados y de solo lectura con mejor contraste */
+input[readonly], input[disabled],
+.form-control[readonly], .form-control:disabled,
+.form-control.bg-light-subtle {
+  background-color: var(--background-subtle) !important;
+  color: var(--text-secondary) !important;
+  cursor: not-allowed !important;
+  border-color: var(--border-color) !important;
+  opacity: 0.8 !important;
+  pointer-events: none !important; /* Evita que reciba foco o eventos de mouse */
+  user-select: none !important;    /* Evita que se pueda seleccionar el texto */
+}
+
+/* Evitar el resaltado azul en campos deshabilitados */
+.form-control:focus:not(:focus-visible) {
+  box-shadow: none !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Estilo para campos de solo lectura en modo oscuro */
+:host-context(.dark-theme) .form-control[readonly],
+:host-context(.dark-theme) .form-control:disabled,
+:host-context(.dark-theme) .bg-light-subtle {
+  background-color: rgba(30, 30, 30, 0.6) !important;
+  color: #adb5bd !important;
+  border-color: #495057 !important;
 }
 
 .form-label {

@@ -74,7 +74,7 @@ export class AdminLibrosComponent implements OnInit {
     this.autorService.getAllAutores().subscribe({
       next: (data) => this.allAutores = data,
       error: (error) => {
-        console.error('[AdminLibros] Error al cargar autores', error);
+        // console.error('[AdminLibros] Error al cargar autores', error);
         this.notificationService.error('Error', { description: 'No se pudieron cargar los autores' });
       }
     });
@@ -109,14 +109,14 @@ export class AdminLibrosComponent implements OnInit {
                 libro.autores = autores;
               },
               error: (error) => {
-                console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
+                // console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
               }
             });
           }
         });
       },
       error: (error: any) => {
-        console.error('[AdminLibros] Error al cargar libros', error);
+        // console.error('[AdminLibros] Error al cargar libros', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los libros'
         });
@@ -158,7 +158,7 @@ export class AdminLibrosComponent implements OnInit {
                 libro.autores = autores;
               },
               error: (error) => {
-                console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
+                // console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
               }
             });
           }
@@ -176,7 +176,7 @@ export class AdminLibrosComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('[AdminLibros] Error al buscar libros por texto', error);
+        // console.error('[AdminLibros] Error al buscar libros por texto', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron buscar los libros'
         });
@@ -211,7 +211,7 @@ export class AdminLibrosComponent implements OnInit {
               libro.autores = autores;
             },
             error: (error) => {
-              console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
+              // console.error(`[AdminLibros] Error al cargar autores del libro ${libro.id}`, error);
             }
           });
         }

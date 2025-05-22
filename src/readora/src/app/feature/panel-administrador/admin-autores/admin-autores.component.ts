@@ -72,7 +72,6 @@ export class AdminAutoresComponent implements OnInit {
         this.totalPages = data.totalPages;
       },
       error: (error) => {
-        console.error('[AdminAutores] Error al cargar autores', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los autores'
         });
@@ -116,7 +115,6 @@ export class AdminAutoresComponent implements OnInit {
         });
       },
       error: (error) => {
-        console.error('[AdminAutores] Error al buscar autor por ID', error);
         this.notificationService.error('Error', { 
           description: `No se encontró el autor con ID ${this.searchId}`
         });
@@ -181,7 +179,6 @@ export class AdminAutoresComponent implements OnInit {
         this.autores = autores;
       },
       error: (error) => {
-        console.error('[AdminAutores] Error al cargar la lista completa de autores', error);
         this.notificationService.error('Error', { description: 'No se pudo cargar la lista de autores' });
       }
     });
@@ -256,7 +253,6 @@ export class AdminAutoresComponent implements OnInit {
             this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
-            console.error(`[AdminAutores] Error al actualizar autor ID=${this.currentAutor.id}`, error);
             this.notificationService.error('Error', { description: 'No se pudo actualizar el autor' });
             this.isUploading = false;
           }
@@ -270,7 +266,6 @@ export class AdminAutoresComponent implements OnInit {
             this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
-            console.error('[AdminAutores] Error al crear autor', error);
             this.notificationService.error('Error', { description: 'No se pudo crear el autor' });
             this.isUploading = false;
           }
@@ -290,7 +285,6 @@ export class AdminAutoresComponent implements OnInit {
           saveAutorFn();
         },
         error: (error: any) => {
-          console.error('[AdminAutores] Error al subir foto del autor', error);
           this.notificationService.error('Error', { description: 'No se pudo subir la foto del autor' });
           this.isUploading = false;
         }
@@ -315,7 +309,6 @@ export class AdminAutoresComponent implements OnInit {
             this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
-            console.error(`[AdminAutores] Error al eliminar autor ID=${id}`, error);
             this.notificationService.error('Error', { description: 'No se pudo eliminar el autor' });
           }
         });

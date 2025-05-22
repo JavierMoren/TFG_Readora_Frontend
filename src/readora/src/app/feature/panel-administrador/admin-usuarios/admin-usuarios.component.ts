@@ -21,6 +21,7 @@ export class AdminUsuariosComponent implements OnInit {
   usuarioForm!: FormGroup;
   cambiarContrasenna: boolean = false;
   passwordForm!: FormGroup;
+  esUsuarioGoogle: boolean = false;
   
   userIdToDelete: number | null = null;
   
@@ -57,7 +58,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.totalPages = data.totalPages;
       },
       error: (error) => {
-        console.error('[AdminUsuarios] Error al cargar usuarios', error);
+        // console.error('[AdminUsuarios] Error al cargar usuarios', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los usuarios'
         });
@@ -155,7 +156,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.usuarios = data;
       },
       error: (error) => {
-        console.error('[AdminUsuarios] Error al cargar todos los usuarios', error);
+        // console.error('[AdminUsuarios] Error al cargar todos los usuarios', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los usuarios'
         });
@@ -173,7 +174,7 @@ export class AdminUsuariosComponent implements OnInit {
         this.usuarioDetalle = data;
       },
       error: (error) => {
-        console.error(`[AdminUsuarios] Error al cargar usuario ID=${id}`, error);
+        // console.error(`[AdminUsuarios] Error al cargar usuario ID=${id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo cargar el usuario'
         });
@@ -195,7 +196,7 @@ export class AdminUsuariosComponent implements OnInit {
    * @param usuario - Usuario a editar
    */
   prepareUpdateUsuario(usuario: Usuario): void {
-    this.isEditing = true;
+    this.isEditing = true; 
     // Establecer valores en el formulario
     this.usuarioForm.patchValue({
       id: usuario.id,
@@ -295,6 +296,35 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la petición para actualizar un usuario existente
    */
   updateUsuario(): void {
+    // Si es una cuenta de Google y los valores han cambiado, restauramos los originales
+    if (this.esUsuarioGoogle) {
+      // Obtener el usuario original para restaurar usuario y email
+      this.usuarioService.getUsuarioById(this.currentUsuario.id).subscribe({
+        next: (usuarioOriginal) => {
+          // Restaurar valores que no se deberían cambiar en cuentas de Google
+          this.currentUsuario.usuario = usuarioOriginal.usuario;
+          this.currentUsuario.gmail = usuarioOriginal.gmail;
+          
+          // Continuar con la actualización usando los valores restaurados
+          this.enviarActualizacionUsuario();
+        },
+        error: (error) => {
+          console.error(`[AdminUsuarios] Error al obtener usuario original ID=${this.currentUsuario.id}`, error);
+          this.notificationService.error('Error', { 
+            description: 'No se pudo verificar la información original del usuario de Google'
+          });
+        }
+      });
+    } else {
+      // Usuario normal, proceder con la actualización directamente
+      this.enviarActualizacionUsuario();
+    }
+  }
+  
+  /**
+   * Método auxiliar que envía la petición de actualización al servidor
+   */
+  private enviarActualizacionUsuario(): void {
     this.usuarioService.updateUsuario(this.currentUsuario).subscribe({
       next: (response) => {
         this.notificationService.success('Éxito', { 
@@ -351,6 +381,14 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la solicitud de actualización al servidor
    */
   enviarActualizacion(): void {
+    // No permitir cambiar la contraseña si es un usuario de Google
+    if (this.esUsuarioGoogle) {
+      this.notificationService.error('Error', {
+        description: 'No se puede cambiar la contraseña de un usuario autenticado con Google'
+      });
+      return;
+    }
+    
     this.usuarioService.updateUsuarioConPassword(this.currentUsuario).subscribe({
       next: (response) => {
         this.notificationService.success('Éxito', { 
@@ -366,6 +404,14 @@ export class AdminUsuariosComponent implements OnInit {
         });
       }
     });
+  }
+  
+  /**
+   * Verifica si el usuario puede cambiar su contraseña
+   * @returns boolean indicando si se permite cambiar la contraseña
+   */
+  puedeModificarContrasenna(): boolean {
+    return !this.esUsuarioGoogle;
   }
 
   /**
