@@ -10,22 +10,34 @@
               <input 
                 type="text" 
                 class="form-control" 
-                placeholder="Buscar por título, palabra clave..." 
+                placeholder="Buscar por título, palabra clave... (mín. 3 caracteres)" 
                 formControlName="searchTerm"
                 aria-label="Término de búsqueda">
-              <button class="btn btn-primary" type="submit">
+              <button class="btn btn-primary" type="submit" [disabled]="!isValidSearch">
                 <i class="bi bi-search"></i> Buscar
               </button>
+            </div>
+            <!-- Indicador visual para validación -->
+            <div class="mt-1" *ngIf="searchForm.get('searchTerm')?.value">
+              <small class="text-muted" *ngIf="!isValidSearch">
+                <i class="bi bi-info-circle me-1"></i>
+                {{3 - (searchForm.get('searchTerm')?.value?.trim()?.length || 0)}} caracteres más para buscar
+              </small>
             </div>
           </div>
           
           <div class="col-md-4">
-            <div class="btn-group w-100" role="group">
-              <input type="radio" class="btn-check" name="searchType" id="searchBooks" value="libros" formControlName="searchType">
-              <label class="btn btn-outline-primary" for="searchBooks">Libros</label>
-              
-              <input type="radio" class="btn-check" name="searchType" id="searchAuthors" value="autores" formControlName="searchType">
-              <label class="btn btn-outline-primary" for="searchAuthors">Autores</label>
+            <div class="row g-2">
+              <!-- Selector de tipo de búsqueda (libros o autores) -->
+              <div class="col-12">
+                <fieldset class="btn-group w-100">
+                  <input type="radio" class="btn-check" name="searchType" id="searchBooks" value="libros" formControlName="searchType">
+                  <label class="btn btn-outline-primary" for="searchBooks">Libros</label>
+                  
+                  <input type="radio" class="btn-check" name="searchType" id="searchAuthors" value="autores" formControlName="searchType">
+                  <label class="btn btn-outline-primary" for="searchAuthors">Autores</label>
+                </fieldset>
+              </div>
             </div>
           </div>
         </div>
@@ -35,25 +47,135 @@
   
   <!-- Indicador de carga -->
   <div class="text-center my-4" *ngIf="loading">
-    <div class="spinner-border text-primary" role="status">
+    <div class="spinner-border text-primary" aria-hidden="true">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
   
+  <!-- Mensaje de error -->
+  <div class="alert alert-danger mt-4" *ngIf="hasError">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ errorMessage }}
+    <button class="btn btn-sm btn-outline-danger ms-3" (click)="search()">
+      <i class="bi bi-arrow-clockwise"></i> Reintentar
+    </button>
+  </div>
+  
   <!-- Resultados de la búsqueda -->
   <div class="mt-4" *ngIf="results.length > 0 && !loading">
-    <app-resultado-busqueda 
-      [results]="results"
-      [isBooks]="isSearchingBooks"
-      [totalItems]="totalItems"
-      [currentPage]="currentPage"
-      [pageSize]="pageSize"
-      (pageChange)="pageChanged($event)">
-    </app-resultado-busqueda>
+    <!-- Indicador de fuente para búsqueda de Google Books -->
+    <div class="alert alert-info mb-3" *ngIf="isGoogleSearch">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <i class="bi bi-info-circle me-2"></i>
+          <span>
+            <strong>Resultados de Google Books</strong>
+            <span *ngIf="totalItems > 0">
+              (página {{currentPage + 1}} de {{Math.min(Math.ceil(totalItems / pageSize), Math.ceil(100 / pageSize))}})
+            </span>
+          </span>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" 
+                (click)="isGoogleSearch = false; search()" 
+                *ngIf="lastSearchTerm">
+          <i class="bi bi-arrow-left"></i> Volver a búsqueda local
+        </button>
+      </div>
+      <div class="mt-2 small text-muted">
+        <span *ngIf="totalItems > 0">
+          Mostrando resultados {{currentPage * pageSize + 1}}-{{Math.min((currentPage + 1) * pageSize, totalItems)}} 
+          de aproximadamente {{totalItems}} libros encontrados.
+        </span>
+        <span *ngIf="totalItems === 0">
+          No se encontraron libros que coincidan con tu búsqueda.
+        </span>
+        <span *ngIf="totalItems >= 100" class="text-info ms-2">
+          <i class="bi bi-info-circle-fill"></i> Los resultados están limitados a las 100 mejores coincidencias para un mejor rendimiento.
+        </span>
+      </div>
+    </div>
+    
+    <!-- Indicador de fuente para búsqueda local con opción de Google Books -->
+    <div class="alert alert-success mb-3" *ngIf="!isGoogleSearch && isSearchingBooks">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <i class="bi bi-check-circle me-2"></i>
+          <span>
+            <strong>Resultados de la biblioteca local</strong>
+            <span *ngIf="totalItems > 0">
+              ({{totalItems}} libro{{totalItems !== 1 ? 's' : ''}} encontrado{{totalItems !== 1 ? 's' : ''}})
+            </span>
+          </span>
+        </div>
+        <button class="btn btn-outline-primary btn-sm" 
+                (click)="searchDeep()"
+                [disabled]="!isValidSearch"
+                [attr.aria-label]="isValidSearch ? 'Buscar también en Google Books' : 'Necesita al menos 3 caracteres'">
+          <i class="bi bi-cloud-download"></i> 
+          <span *ngIf="isValidSearch">Buscar también en Google Books</span>
+          <span *ngIf="!isValidSearch">Mín. 3 caracteres</span>
+        </button>
+      </div>
+      <div class="mt-2 small text-muted" *ngIf="isValidSearch">
+        <i class="bi bi-info-circle me-1"></i>
+        ¿No encuentras lo que buscas? Prueba buscar en Google Books para descubrir más títulos
+      </div>
+      <div class="mt-2 small text-warning" *ngIf="!isValidSearch">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+        Ingresa al menos 3 caracteres para poder buscar en Google Books
+      </div>
+    </div>
+    
+    <!-- Advertencia cuando se intenta acceder a resultados más allá del límite de 100 -->
+    <div class="alert alert-warning mt-4 d-flex align-items-center" 
+         *ngIf="isGoogleSearch && googleBooksStartIndex >= 100 && !loading">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <div>
+        <strong>Límite de resultados:</strong> 
+        Has alcanzado el máximo de resultados disponibles (100). 
+        <small class="d-block mt-1">Para encontrar más títulos, intenta refinar tu búsqueda con términos más específicos.</small>
+      </div>
+    </div>
+
+    <!-- Contenedor de resultados -->
+    <div *ngIf="results && results.length > 0">
+      <app-resultado-busqueda 
+        [results]="results"
+        [isBooks]="isSearchingBooks"
+        [totalItems]="totalItems"
+        [currentPage]="currentPage"
+        [pageSize]="pageSize"
+        (pageChange)="pageChanged($event)">
+      </app-resultado-busqueda>
+    </div>
   </div>
   
   <!-- Mensaje cuando no hay resultados -->
-  <div class="alert alert-info mt-4" *ngIf="results.length === 0 && !loading && searchForm.get('searchTerm')?.value">
-    No se encontraron resultados para tu búsqueda.
+  <div class="alert alert-info mt-4" *ngIf="results.length === 0 && !loading && searchForm.get('searchTerm')?.value && isSearchingBooks">
+    <div *ngIf="!isGoogleSearch">
+      No se encontraron libros en la biblioteca local. 
+      <button 
+        class="btn btn-primary btn-sm ms-2" 
+        (click)="searchDeep()"
+        [disabled]="!isValidSearch"
+        [attr.aria-label]="isValidSearch ? 'Realizar búsqueda más profunda' : 'Necesita al menos 3 caracteres'">
+        <i class="bi bi-search"></i> Realizar búsqueda más profunda
+      </button>
+      <div class="mt-2">
+        <small class="d-block text-muted">La búsqueda profunda consulta en Google Books y permite añadir nuevos títulos a tu biblioteca</small>
+        <small class="d-block text-warning" *ngIf="!isValidSearch">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+          Ingresa al menos 3 caracteres para realizar la búsqueda en Google Books
+        </small>
+      </div>
+    </div>
+    <div *ngIf="isGoogleSearch">
+      No se encontraron resultados en Google Books para tu búsqueda.
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay resultados en autores -->
+  <div class="alert alert-info mt-4" *ngIf="results.length === 0 && !loading && searchForm.get('searchTerm')?.value && !isSearchingBooks">
+    No se encontraron autores para tu búsqueda.
   </div>
 </div>

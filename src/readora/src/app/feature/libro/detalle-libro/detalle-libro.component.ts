@@ -56,7 +56,17 @@ export class DetalleLibroComponent implements OnInit {
 
     // Obtener el ID del libro de la URL
     this.route.params.subscribe(params => {
-      this.libroId = +params['id'];
+      const idParam = params['id'];
+      this.libroId = +idParam;
+      
+      // Validar que el ID sea un número válido
+      if (isNaN(this.libroId) || this.libroId <= 0) {
+        console.error('[DetalleLibro] ID de libro inválido:', idParam);
+        this.error = 'El ID del libro no es válido.';
+        this.loading = false;
+        return;
+      }
+      
       this.loadLibro();
     });
   }

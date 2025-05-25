@@ -35,7 +35,17 @@ export class DetalleAutorComponent implements OnInit {
   ngOnInit(): void {
     // Obtener el ID del autor de la URL
     this.route.params.subscribe(params => {
-      this.autorId = +params['id'];
+      const idParam = params['id'];
+      this.autorId = +idParam;
+      
+      // Validar que el ID sea un número válido
+      if (isNaN(this.autorId) || this.autorId <= 0) {
+        console.error('[DetalleAutor] ID de autor inválido:', idParam);
+        this.error = 'El ID del autor no es válido.';
+        this.loading = false;
+        return;
+      }
+      
       this.loadAutor();
     });
   }

@@ -11,6 +11,32 @@
   border: 1px solid var(--border-color);
   background-color: var(--card-bg);
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Estilos para las imágenes de autores */
+.author-image .img-author {
+  border: 2px solid var(--card-bg);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+}
+
+/* Estilos para la biografía del autor */
+.author-bio {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Iconos para información del autor */
+.bi {
+  font-size: 0.875rem;
 }
 
 .card:hover {
@@ -95,13 +121,6 @@
   text-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
-/* Estilo para las imágenes de autores */
-.author-image .img-author {
-  border: 2px solid var(--card-bg);
-  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
-  border-radius: 50%;
-}
-
 /* Estilos para botones de acción en las tarjetas */
 .btn-primary, .btn-outline-primary:hover {
   background-color: var(--primary-color);
@@ -167,4 +186,92 @@
 [data-theme="dark"] .btn-outline-primary:hover {
   background-color: #4D6BFE;
   color: white;
+}
+
+/* Estilos para la animación de importación */
+.card.importing {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.import-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(2px);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.import-overlay .spinner-border {
+  color: #fff;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.import-overlay p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Animación pulsante para el overlay */
+@keyframes pulse {
+  0% {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  50% {
+    background-color: rgba(77, 107, 254, 0.8);
+  }
+  100% {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Estilos para paginación responsiva */
+.pagination-container {
+  margin-top: 2rem;
+}
+
+/* Cuando hay pocos resultados (menos de 3 por fila), centrar la paginación */
+@media (max-width: 767.98px) {
+  .pagination-container .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  
+  .pagination-container .text-secondary {
+    text-align: center;
+  }
+}
+
+/* Para tablets y pantallas medianas */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .pagination-container .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  
+  .pagination-container .text-secondary {
+    text-align: center;
+  }
+}
+
+/* Para pantallas grandes, mantener diseño horizontal solo cuando hay suficientes resultados */
+@media (min-width: 992px) {
+  .pagination-container.few-results .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  
+  .pagination-container.few-results .text-secondary {
+    text-align: center;
+  }
 }
