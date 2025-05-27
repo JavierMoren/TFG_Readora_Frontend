@@ -1,25 +1,13 @@
-<div class="results-container">
+<div class="container">
   <h3 class="mb-3" id="search-results-heading">Resultados ({{ totalItems }})</h3>
   
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" aria-labelledby="search-results-heading" role="list">
-    <div class="col" *ngFor="let item of results; let i = index" role="listitem">
-      <div class="card h-100" (click)="navigateToDetails(item)" 
+    <div class="col" *ngFor="let item of results; let i = index" role="listitem">      <div class="card h-100" (click)="navigateToDetails(item)" 
            (keydown.enter)="navigateToDetails(item)"
            (keydown.space)="$event.preventDefault(); navigateToDetails(item)"
            tabindex="0" 
            role="button"
-           [class.importing]="item.isGoogleBook && librosImportando.has(item.id)"
            [attr.aria-label]="'Ver detalles de ' + (isBooks ? item.titulo : item.nombre)">
-        
-        <!-- Indicador de importación para libros de Google Books -->
-        <div *ngIf="item.isGoogleBook && librosImportando.has(item.id)" 
-             class="import-overlay d-flex justify-content-center align-items-center">
-          <div class="text-center text-white">
-            <div class="spinner-border mb-2" aria-hidden="true"></div>
-            <output class="visually-hidden">Importando...</output>
-            <p class="mb-0">Importando libro...</p>
-          </div>
-        </div>
         
         <div class="card-body">
           <!-- Contenido para Libros -->
@@ -205,8 +193,12 @@
               <span class="material-icons small" aria-hidden="true">navigate_next</span>
             </button>
           </li>
-        </ul>
-      </nav>
+        </ul>      </nav>
     </div>
   </div>
+  <!-- Animación de importación no bloqueante -->
+  <app-import-animation 
+    [isVisible]="showImportAnimation"
+    [bookTitle]="importingBookTitle">
+  </app-import-animation>
 </div>

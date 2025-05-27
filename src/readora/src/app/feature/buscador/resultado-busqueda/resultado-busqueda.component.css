@@ -194,29 +194,127 @@
   pointer-events: none;
 }
 
+@keyframes pulse-glow {
+  0% {
+    background-color: rgba(32, 74, 135, 0.8);
+    box-shadow: 0 0 10px rgba(32, 74, 135, 0.5);
+  }
+  50% {
+    background-color: rgba(32, 74, 135, 0.85);
+    box-shadow: 0 0 25px rgba(32, 74, 135, 0.8);
+  }
+  100% {
+    background-color: rgba(32, 74, 135, 0.8);
+    box-shadow: 0 0 10px rgba(32, 74, 135, 0.5);
+  }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dots-loading {
+  0%, 20% { opacity: 0; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0; }
+}
+
 .import-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, rgba(32, 74, 135, 0.85) 0%, rgba(45, 85, 155, 0.9) 100%);
   z-index: 10;
   border-radius: 0.75rem;
-  backdrop-filter: blur(2px);
-  animation: pulse 2s ease-in-out infinite;
+  backdrop-filter: blur(3px);
+  animation: pulse-glow 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
-.import-overlay .spinner-border {
-  color: #fff;
-  width: 2.5rem;
-  height: 2.5rem;
+.import-content {
+  animation: floating 3s ease infinite;
 }
 
-.import-overlay p {
-  font-size: 0.9rem;
-  font-weight: 500;
+.import-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.import-icon {
+  font-size: 2.5rem;
   color: #fff;
+  display: block;
+}
+
+.import-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  width: 1.5rem;
+  height: 1.5rem;
+  animation: rotate 1s linear infinite;
+}
+
+.import-text h6 {
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.import-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
+}
+
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.progress-dots .dot {
+  width: 6px;
+  height: 6px;
+  background-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: dots-loading 1.5s ease-in-out infinite;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.progress-dots .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.progress-dots .dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.progress-dots .dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+/* Efecto adicional para el card durante la importación */
+.card.importing {
+  transform: scale(0.98);
+  transition: transform 0.3s ease;
 }
 
 /* Animación pulsante para el overlay */

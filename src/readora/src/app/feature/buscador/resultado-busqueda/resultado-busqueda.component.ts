@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -8,6 +8,7 @@ import { AutenticacionService } from '../../../core/services/autenticacion.servi
 import { NotificationService } from '../../../core/services/notification.service';
 import { LibrosService } from '../../../core/services/libros.service';
 import { GoogleBooksService } from '../../../core/services/google-books.service';
+import { ImportAnimationComponent } from '../../../shared/components/import-animation/import-animation.component';
 
 // Interfaz para el evento de cambio de página
 export interface PageChangeEvent {
@@ -19,9 +20,8 @@ export interface PageChangeEvent {
   selector: 'app-resultado-busqueda',
   templateUrl: './resultado-busqueda.component.html',
   styleUrls: ['./resultado-busqueda.component.css'],
-  
-  imports: [CommonModule, RouterModule, FormsModule],
-  providers: [StorageService]
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule, ImportAnimationComponent]
 })
 export class ResultadoBusquedaComponent implements OnChanges {
   @Input() results: any[] = [];
@@ -38,8 +38,11 @@ export class ResultadoBusquedaComponent implements OnChanges {
   librosAgregando: Set<string | number> = new Set(); 
   librosEliminando: Set<string | number> = new Set(); 
   librosEnBiblioteca: Map<string, number> = new Map(); 
-  libroAutores: Map<string, string[]> = new Map(); 
-  librosImportando: Set<string> = new Set(); // Para trackear libros de Google Books que se están importando
+  libroAutores: Map<string, string[]> = new Map();   librosImportando: Set<string> = new Set(); // Para trackear libros de Google Books que se están importando
+
+  // Propiedades para controlar la animación de importación
+  showImportAnimation = false;
+  importingBookTitle = '';
 
   // Rutas para imágenes predeterminadas
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
@@ -47,18 +50,19 @@ export class ResultadoBusquedaComponent implements OnChanges {
 
   // Exponiendo Math para su uso en el template
   Math = Math;
+
+  // Inyección de dependencias usando inject()
+  private router = inject(Router);
+  private storageService = inject(StorageService);
+  private usuarioLibroService = inject(UsuarioLibroService);
+  private autenticacionService = inject(AutenticacionService);
+  private notificationService = inject(NotificationService);
+  private librosService = inject(LibrosService);
+  private googleBooksService = inject(GoogleBooksService);
   
-  constructor(
-    private router: Router,
-    private storageService: StorageService,
-    private usuarioLibroService: UsuarioLibroService,
-    private autenticacionService: AutenticacionService,
-    private notificationService: NotificationService,
-    private librosService: LibrosService,
-    private googleBooksService: GoogleBooksService
-  ) {
+  constructor() {
     // Comprobar si el usuario está autenticado
-    this.autenticacionService.isLoggedIn().subscribe(isLoggedIn => {
+    this.autenticacionService.isLoggedIn().subscribe((isLoggedIn: boolean) => {
       this.isLoggedIn = isLoggedIn;
       if (isLoggedIn) {
         this.cargarDatosUsuario();
@@ -333,7 +337,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
       this.router.navigate(['/autores', item.id]);
     }
   }
-
   /**
    * Importa un libro de Google Books y luego navega a sus detalles
    */
@@ -344,17 +347,28 @@ export class ResultadoBusquedaComponent implements OnChanges {
 
     this.librosImportando.add(googleBook.id);
     
+    // Mostrar la animación de importación
+    this.importingBookTitle = googleBook.volumeInfo?.title || 'Libro';
+    this.showImportAnimation = true;
+    
     this.googleBooksService.importBook(googleBook.id).subscribe({
       next: (importedBook) => {
         console.log('[ResultadoBusqueda] Libro importado exitosamente para navegación', importedBook);
         this.librosImportando.delete(googleBook.id);
         
-        // Navegar a la página de detalles del libro importado
-        this.router.navigate(['/libros', importedBook.id]);
+        // Ocultar la animación después de un breve delay
+        setTimeout(() => {
+          this.showImportAnimation = false;
+          // Navegar a la página de detalles del libro importado
+          this.router.navigate(['/libros', importedBook.id]);
+        }, 1500);
       },
       error: (error) => {
         console.error('[ResultadoBusqueda] Error al importar libro para navegación', error);
         this.librosImportando.delete(googleBook.id);
+        
+        // Ocultar la animación en caso de error
+        this.showImportAnimation = false;
         
         if (error.status === 409) {
           // El libro ya existe, intentar encontrarlo por ISBN para navegar
@@ -482,17 +496,25 @@ export class ResultadoBusquedaComponent implements OnChanges {
       this.performBookImport(googleBook);
     }
   }
-
   /**
    * Realiza la importación real del libro con animación
    */
   private performBookImport(googleBook: any): void {
     this.librosImportando.add(googleBook.id);
     
+    // Mostrar la animación de importación
+    this.importingBookTitle = googleBook.volumeInfo?.title || 'Libro';
+    this.showImportAnimation = true;
+    
     this.googleBooksService.importBook(googleBook.id).subscribe({
       next: (importedBook) => {
         console.log('[ResultadoBusqueda] Libro importado exitosamente para biblioteca', importedBook);
         this.librosImportando.delete(googleBook.id);
+        
+        // Ocultar la animación después de un breve delay para que el usuario pueda ver la completación
+        setTimeout(() => {
+          this.showImportAnimation = false;
+        }, 1500);
         
         // Actualizar el objeto Google Book con el ID local para sincronizar el estado
         googleBook.localId = importedBook.id;
@@ -510,6 +532,9 @@ export class ResultadoBusquedaComponent implements OnChanges {
       error: (error) => {
         console.error('[ResultadoBusqueda] Error al importar libro para biblioteca', error);
         this.librosImportando.delete(googleBook.id);
+        
+        // Ocultar la animación en caso de error
+        this.showImportAnimation = false;
         
         if (error.status === 409) {
           // El libro ya existe, intentar encontrarlo y agregarlo a la biblioteca

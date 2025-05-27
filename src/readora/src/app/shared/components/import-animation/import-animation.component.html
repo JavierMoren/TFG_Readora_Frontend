@@ -1,0 +1,76 @@
+<div 
+  class="import-overlay" 
+  [class.visible]="isVisible"
+  [attr.aria-hidden]="!isVisible">
+  
+  <div class="import-modal" [class.show]="isVisible">
+    <!-- Icono de libro animado -->
+    <div class="book-icon-container">
+      <div class="book-icon">
+        <div class="book-cover"></div>
+        <div class="book-pages">
+          <div class="page page-1"></div>
+          <div class="page page-2"></div>
+          <div class="page page-3"></div>
+        </div>
+      </div>
+      
+      <!-- Partículas mágicas -->
+      <div class="magic-particles">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+        <div class="particle particle-5"></div>
+        <div class="particle particle-6"></div>
+      </div>
+      
+      <!-- Anillo de progreso -->
+      <div class="progress-ring">
+        <svg width="120" height="120" class="progress-svg">
+          <circle 
+            cx="60" 
+            cy="60" 
+            r="54"
+            class="progress-circle-bg">
+          </circle>
+          <circle 
+            cx="60" 
+            cy="60" 
+            r="54"
+            class="progress-circle">
+          </circle>
+        </svg>
+      </div>
+    </div>
+    
+    <!-- Texto principal -->
+    <div class="import-text">
+      <h3 class="import-title">Importando libro</h3>
+      <p class="import-subtitle" *ngIf="bookTitle">
+        "{{ bookTitle }}"
+      </p>
+      <div class="loading-dots">
+        <span class="loading-text">Procesando</span>
+        <span class="dots">{{ dotsLoading }}</span>
+      </div>
+    </div>
+      <!-- Indicador de progreso adicional -->
+    <div class="progress-steps">
+      <div class="step" [class.step-active]="currentStep >= 1">
+        <div class="step-circle">1</div>
+        <span class="step-label">Descargando</span>
+      </div>
+      <div class="step-line" [class.completed]="currentStep >= 2"></div>
+      <div class="step" [class.step-active]="currentStep >= 2">
+        <div class="step-circle">2</div>
+        <span class="step-label">Procesando</span>
+      </div>
+      <div class="step-line" [class.completed]="currentStep >= 3"></div>
+      <div class="step" [class.step-active]="currentStep >= 3">
+        <div class="step-circle">3</div>
+        <span class="step-label">Guardando</span>
+      </div>
+    </div>
+  </div>
+</div>
