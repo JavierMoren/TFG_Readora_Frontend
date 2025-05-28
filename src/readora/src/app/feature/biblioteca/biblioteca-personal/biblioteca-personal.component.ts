@@ -59,7 +59,8 @@ export class BibliotecaPersonalComponent implements OnInit {
     private libroService: LibrosService,
     public storageService: StorageService,
     private authService: AutenticacionService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) {
       }
 
@@ -569,5 +570,14 @@ export class BibliotecaPersonalComponent implements OnInit {
         this.actualizarEstadoLectura();
       }
     });
+  }
+
+  /**
+   * Navega a la vista de detalles del libro
+   */
+  irADetalleLibro(libro: any): void {
+    if (libro && libro.id) {
+      this.router.navigate(['/libros', libro.id]);
+    }
   }
 }

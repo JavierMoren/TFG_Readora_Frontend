@@ -44,9 +44,10 @@
                   - Presente
                 </ng-container>
               </span>
-              <span class="badge obras-badge" *ngIf="libros?.length">
-                <span class="material-icons small">auto_stories</span>
-                {{ libros.length }} {{ libros.length === 1 ? 'obra' : 'obras' }}
+            </div>
+            <div class="mt-2" *ngIf="libros">
+              <span class="text-muted">
+                Este autor tiene actualmente {{ libros.length }} {{ libros.length === 1 ? 'obra registrada' : 'obras registradas' }} en nuestra base de datos. Si desea buscar más libros, utilice el buscador general.
               </span>
             </div>
             
@@ -97,13 +98,19 @@
       </div>
     </div>
     
+    <!-- Info de obras actuales -->
+    <div class="alert alert-info mt-3" *ngIf="libros">
+      <span class="material-icons me-2 align-middle">auto_stories</span>
+      Este autor tiene actualmente {{ libros.length }} {{ libros.length === 1 ? 'obra registrada' : 'obras registradas' }} en nuestra base de datos.
+      <br>
+      Si quieres buscar más libros de este autor, utiliza el <a routerLink="/buscador">buscador</a> para una búsqueda más profunda.
+    </div>
     <!-- Libros del autor -->
     <div class="obras-section mt-4" *ngIf="libros && libros.length > 0">
       <h2 class="seccion-titulo">
         <span class="material-icons seccion-icon">auto_stories</span>
         <span>Obras</span>
       </h2>
-      
       <div class="obras-container mt-3">
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
           <div class="col" *ngFor="let libro of libros">
@@ -134,7 +141,6 @@
         </div>
       </div>
     </div>
-    
     <!-- Mensaje si no hay libros -->
     <div class="sin-obras-mensaje mt-4" *ngIf="!libros || !libros.length">
       <div class="card shadow-sm">

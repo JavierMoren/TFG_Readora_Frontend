@@ -1,5 +1,6 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-import-animation',
@@ -11,6 +12,7 @@ import { CommonModule } from '@angular/common';
 export class ImportAnimationComponent implements OnInit, OnDestroy, OnChanges {
   @Input() bookTitle: string = '';
   @Input() isVisible: boolean = false;
+  isDarkTheme: boolean = false;
   
   // Estados de la animación
   dotsLoading: string = '';
@@ -18,6 +20,12 @@ export class ImportAnimationComponent implements OnInit, OnDestroy, OnChanges {
   
   private dotsInterval: any;
   private stepInterval: any;
+
+  constructor(@Inject(ThemeService) private themeService: ThemeService) {
+    this.themeService.isDarkTheme$.subscribe(isDark => {
+      this.isDarkTheme = isDark;
+    });
+  }
 
   ngOnInit() {
     this.startDotsAnimation();

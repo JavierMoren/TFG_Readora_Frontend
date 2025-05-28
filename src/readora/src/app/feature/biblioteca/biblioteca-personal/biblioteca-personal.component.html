@@ -103,7 +103,7 @@
       </div>
       <div class="libros-grid">
           <div class="libro-item" *ngFor="let libro of librosLeyendo">
-              <div class="libro-card">
+              <div class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;">
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
@@ -178,7 +178,7 @@
       </div>
       <div class="libros-grid">
           <div class="libro-item" *ngFor="let libro of librosPendientes">
-              <div class="libro-card">
+              <div class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;">
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
@@ -247,7 +247,7 @@
       </div>
       <div class="libros-grid">
           <div class="libro-item" *ngFor="let libro of librosTerminados">
-              <div class="libro-card">
+              <div class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;">
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
@@ -311,7 +311,7 @@
       </div>
       <div class="libros-grid">
           <div class="libro-item" *ngFor="let libro of librosAbandonados">
-              <div class="libro-card">
+              <div class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;">
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">

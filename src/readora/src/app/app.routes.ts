@@ -15,6 +15,7 @@ import { AdminUsuarioLibrosComponent } from './feature/panel-administrador/admin
 import { BuscadorComponent } from './feature/buscador/buscador.component';
 import { DetalleUsuarioComponent } from './feature/usuario/detalle-usuario/detalle-usuario.component';
 import { BibliotecaPersonalComponent } from './feature/biblioteca/biblioteca-personal/biblioteca-personal.component';
+import { CreditsComponent } from './credits/credits.component';
 
 export const routes: Routes = [
   {
@@ -83,6 +84,10 @@ export const routes: Routes = [
         component: AdminUsuarioLibrosComponent 
       }
     ]
+  },
+  {
+    path: 'credits',
+    component: CreditsComponent,
   },
   {
     path: 'forbidden',
