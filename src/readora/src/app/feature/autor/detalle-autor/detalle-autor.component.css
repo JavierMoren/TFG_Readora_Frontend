@@ -395,37 +395,6 @@
   transform: scale(1.05);
 }
 
-/* Overlay para acción de ver libro */
-.libro-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.libro-card:hover .libro-overlay {
-  opacity: 1;
-}
-
-.ver-libro-texto {
-  color: white;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.ver-libro-icon {
-  color: white;
-  font-size: 2rem;
-}
-
 /* Información del libro */
 .libro-info {
   padding: 1rem;

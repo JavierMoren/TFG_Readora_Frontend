@@ -6,11 +6,8 @@ import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model';
 import { Libro } from '../../../models/libro/libro.model';
-import { Autor } from '../../../models/autor/autor.model';
-import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, switchMap, Observable } from 'rxjs';
+import { forkJoin, map, switchMap } from 'rxjs';
 import { Router, RouterModule } from '@angular/router';
 
 @Component({
@@ -449,23 +446,6 @@ export class BibliotecaPersonalComponent implements OnInit {
   /**
    * Genera un array para mostrar estrellas de valoración
    */
-  estrellasPorValoracion(valoracion: number | null): number[] {
-    return valoracion ? Array(valoracion).fill(0) : [];
-  }
-  
-  /**
-   * Obtiene el color de fondo según el estado del libro
-   */
-  getColorEstado(estado: string): string {
-    switch(estado) {
-      case 'LEYENDO': return 'bg-primary';
-      case 'PENDIENTE': return 'bg-warning text-dark';
-      case 'TERMINADO': return 'bg-success';
-      case 'ABANDONADO': return 'bg-secondary';
-      default: return 'bg-light text-dark';
-    }
-  }
-  
   /**
    * Obtiene la etiqueta para mostrar según el estado del libro
    */
@@ -515,12 +495,23 @@ export class BibliotecaPersonalComponent implements OnInit {
   formularioValido(): boolean {
     if (!this.libroSeleccionado) return false;
 
-    // Validar fecha de inicio
-    if (!this.libroSeleccionado.fechaInicioLectura) return false;
+    // La fecha de inicio solo es obligatoria si hay fecha de fin
+    if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
+      return false;
+    }
     
-    const fechaInicio = new Date(this.libroSeleccionado.fechaInicioLectura);
-    const hoy = new Date();
-    if (fechaInicio > hoy) return false;
+    // Si hay fecha de inicio, validar que no sea futura
+    if (this.libroSeleccionado.fechaInicioLectura) {
+      const fechaInicio = new Date(this.libroSeleccionado.fechaInicioLectura);
+      const hoy = new Date();
+      if (fechaInicio > hoy) return false;
+      
+      // Si hay fecha de fin, verificar que es posterior a la de inicio
+      if (this.libroSeleccionado.fechaFinLectura) {
+        const fechaFin = new Date(this.libroSeleccionado.fechaFinLectura);
+        if (fechaFin < fechaInicio || fechaFin > hoy) return false;
+      }
+    }
     
     // Validar fecha de fin para estados que la requieren
     if ((this.libroSeleccionado.estadoLectura === 'TERMINADO' || 
@@ -529,22 +520,10 @@ export class BibliotecaPersonalComponent implements OnInit {
       return false;
     }
     
-    // Si hay fecha de fin, verificar que es posterior a la de inicio
-    if (this.libroSeleccionado.fechaFinLectura) {
-      const fechaFin = new Date(this.libroSeleccionado.fechaFinLectura);
-      if (fechaFin < fechaInicio || fechaFin > hoy) return false;
-    }
-    
-    // Validar páginas leídas
+    // Validar páginas leídas (solo si se han especificado)
     if (this.libroSeleccionado.numeroPaginas && 
-        (this.libroSeleccionado.estadoLectura === 'LEYENDO' || 
-         this.libroSeleccionado.estadoLectura === 'PENDIENTE' || 
-         this.libroSeleccionado.estadoLectura === 'TERMINADO')) {
-      
-      if (this.libroSeleccionado.paginasLeidas === undefined || 
-          this.libroSeleccionado.paginasLeidas === null) {
-        return false;
-      }
+        this.libroSeleccionado.paginasLeidas !== undefined && 
+        this.libroSeleccionado.paginasLeidas !== null) {
       
       if (this.libroSeleccionado.paginasLeidas < 0 || 
           this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas) {
@@ -578,6 +557,33 @@ export class BibliotecaPersonalComponent implements OnInit {
   irADetalleLibro(libro: any): void {
     if (libro && libro.id) {
       this.router.navigate(['/libros', libro.id]);
+    }
+  }
+
+  /**
+   * Maneja los cambios en la fecha de fin de lectura
+   * Si se elimina la fecha de fin, la fecha de inicio deja de ser obligatoria
+   */
+  onFechaFinChange(): void {
+    // Si se borra la fecha de fin, no es necesario forzar fecha de inicio
+    // La validación se encarga de esto automáticamente
+  }
+
+  /**
+   * Maneja los cambios en la fecha de inicio de lectura
+   * Si hay fecha de fin pero no de inicio, mantiene la validación
+   */
+  onFechaInicioChange(): void {
+    // La validación se encarga automáticamente
+    // Solo verificamos que si hay fecha de fin, la de inicio no sea posterior
+    if (this.libroSeleccionado?.fechaInicioLectura && this.libroSeleccionado?.fechaFinLectura) {
+      const fechaInicio = new Date(this.libroSeleccionado.fechaInicioLectura);
+      const fechaFin = new Date(this.libroSeleccionado.fechaFinLectura);
+      
+      if (fechaInicio > fechaFin) {
+        // Si la fecha de inicio es posterior a la de fin, ajustar la fecha de fin
+        this.libroSeleccionado.fechaFinLectura = this.libroSeleccionado.fechaInicioLectura;
+      }
     }
   }
 }

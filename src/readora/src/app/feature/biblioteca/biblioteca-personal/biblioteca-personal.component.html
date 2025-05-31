@@ -107,12 +107,7 @@
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
-                      <div class="libro-overlay">
-                          <div class="libro-estado-badge" [ngClass]="getColorEstado('LEYENDO')">
-                              <span class="material-icons estado-icon">auto_stories</span>
-                              <span>Leyendo</span>
-                          </div>
-                      </div>
+
                   </div>
                   <div class="libro-info">
                       <h5 class="libro-titulo">{{libro.titulo}}</h5>
@@ -182,12 +177,7 @@
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
-                      <div class="libro-overlay">
-                          <div class="libro-estado-badge" [ngClass]="getColorEstado('PENDIENTE')">
-                              <span class="material-icons estado-icon">bookmark</span>
-                              <span>Por leer</span>
-                          </div>
-                      </div>
+
                   </div>
                   <div class="libro-info">
                       <h5 class="libro-titulo">{{libro.titulo}}</h5>
@@ -251,17 +241,7 @@
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
-                      <div class="libro-overlay">
-                          <div class="libro-estado-badge" [ngClass]="getColorEstado('TERMINADO')">
-                              <span class="material-icons estado-icon">check_circle</span>
-                              <span>Leído</span>
-                          </div>
-                          <div *ngIf="libro.valoracion" class="libro-valoracion">
-                              <span class="stars-rating">
-                                  <span *ngFor="let star of estrellasPorValoracion(libro.valoracion)">★</span>
-                              </span>
-                          </div>
-                      </div>
+
                   </div>
                   <div class="libro-info">
                       <h5 class="libro-titulo">{{libro.titulo}}</h5>
@@ -315,12 +295,7 @@
                   <div class="libro-img-container">
                       <img [src]="getImageUrl(libro.portadaUrl)" 
                            class="libro-portada" alt="Portada del libro {{libro.titulo}}">
-                      <div class="libro-overlay">
-                          <div class="libro-estado-badge" [ngClass]="getColorEstado('ABANDONADO')">
-                              <span class="material-icons estado-icon">cancel</span>
-                              <span>Abandonado</span>
-                          </div>
-                      </div>
+
                   </div>
                   <div class="libro-info">
                       <h5 class="libro-titulo">{{libro.titulo}}</h5>
@@ -365,99 +340,138 @@
                 </button>
             </div>
             <div class="modal-custom-body">
-                <div class="form-group">
-                    <label for="estadoLectura" class="form-label">Estado de lectura</label>
-                    <select class="form-select" id="estadoLectura" [(ngModel)]="libroSeleccionado.estadoLectura">
-                        <option *ngFor="let estado of estadosLectura" [value]="estado.valor">{{estado.etiqueta}}</option>
-                    </select>
-                </div>
+                <!-- Sección Estado y Valoración -->
+                <div class="form-section-edit">
+                    <h6 class="form-section-title-edit">
+                        <span class="material-icons">bookmark</span>
+                        Estado de Lectura
+                    </h6>
+                    <div class="form-row-edit">
+                        <div class="form-group-edit">
+                            <label for="estadoLectura" class="form-label-edit">Estado de lectura</label>
+                            <select class="form-select form-select-edit" id="estadoLectura" [(ngModel)]="libroSeleccionado.estadoLectura">
+                                <option *ngFor="let estado of estadosLectura" [value]="estado.valor">{{estado.etiqueta}}</option>
+                            </select>
+                        </div>
 
-                <div class="form-group" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO'">
-                    <label for="valoracion" class="form-label">Valoración</label>
-                    <select class="form-select" id="valoracion" [(ngModel)]="libroSeleccionado.valoracion">
-                        <option [ngValue]="null">Sin valoración</option>
-                        <option [value]="1">1 ★</option>
-                        <option [value]="2">2 ★★</option>
-                        <option [value]="3">3 ★★★</option>
-                        <option [value]="4">4 ★★★★</option>
-                        <option [value]="5">5 ★★★★★</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="fechaInicioLectura" class="form-label">Fecha de inicio de lectura</label>
-                    <input type="date" class="form-control" id="fechaInicioLectura" 
-                           [(ngModel)]="libroSeleccionado.fechaInicioLectura"
-                           [max]="fechaActual"
-                           #fechaInicio="ngModel"
-                           required>
-                    <div *ngIf="fechaInicio.invalid && (fechaInicio.dirty || fechaInicio.touched)" class="text-danger form-error">
-                        <small *ngIf="fechaInicio.errors?.['required']">La fecha de inicio es obligatoria</small>
-                        <small *ngIf="fechaInicio.errors?.['max']">La fecha de inicio no puede ser posterior a la fecha actual</small>
-                    </div>
-                </div>
-
-                <div class="form-group" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO' || libroSeleccionado?.estadoLectura === 'ABANDONADO'">
-                    <label for="fechaFinLectura" class="form-label">Fecha de finalización</label>
-                    <input type="date" class="form-control" id="fechaFinLectura" 
-                           [(ngModel)]="libroSeleccionado.fechaFinLectura"
-                           [min]="libroSeleccionado.fechaInicioLectura"
-                           [max]="fechaActual"
-                           #fechaFin="ngModel"
-                           required>
-                    <div *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)" class="text-danger form-error">
-                        <small *ngIf="fechaFin.errors?.['required']">La fecha de finalización es obligatoria</small>
-                        <small *ngIf="fechaFin.errors?.['min']">La fecha de finalización no puede ser anterior a la fecha de inicio</small>
-                        <small *ngIf="fechaFin.errors?.['max']">La fecha de finalización no puede ser posterior a la fecha actual</small>
-                    </div>
-                </div>
-
-                <div class="form-group" *ngIf="libroSeleccionado?.numeroPaginas && (libroSeleccionado?.estadoLectura === 'LEYENDO' || libroSeleccionado?.estadoLectura === 'PENDIENTE' || libroSeleccionado?.estadoLectura === 'TERMINADO')">
-                    <label for="paginasLeidas" class="form-label">Páginas leídas (de {{libroSeleccionado?.numeroPaginas}})</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control" id="paginasLeidas"
-                               [(ngModel)]="libroSeleccionado.paginasLeidas"
-                               name="paginasLeidas"
-                               #paginasLeidas="ngModel"
-                               [min]="0" [max]="libroSeleccionado.numeroPaginas"
-                               required
-                               placeholder="0">
-                        <span class="input-group-text">de {{libroSeleccionado?.numeroPaginas}} páginas</span>
-                    </div>
-                    <div *ngIf="paginasLeidas.invalid && (paginasLeidas.dirty || paginasLeidas.touched)" class="text-danger form-error">
-                        <small *ngIf="paginasLeidas.errors?.['required']">El número de páginas leídas es obligatorio</small>
-                        <small *ngIf="paginasLeidas.errors?.['min']">El número de páginas leídas debe ser al menos 0</small>
-                        <small *ngIf="paginasLeidas.errors?.['max']">El número de páginas leídas no puede ser mayor que el total de páginas</small>
-                    </div>
-                    
-                    <!-- Barra de progreso interactiva -->
-                    <div class="progress-interactive mt-3">
-                        <div class="progress-bar-container">
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" 
-                                     [style.width.%]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)" 
-                                     [attr.aria-valuenow]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)"
-                                     aria-valuemin="0" aria-valuemax="100">
-                                </div>
+                        <div class="form-group-edit" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO'">
+                            <label for="valoracion" class="form-label-edit">Valoración</label>
+                            <div class="rating-group-edit">
+                                <select class="form-select rating-select-edit" id="valoracion" [(ngModel)]="libroSeleccionado.valoracion">
+                                    <option [ngValue]="null">Sin valoración</option>
+                                    <option [value]="1">1 ★</option>
+                                    <option [value]="2">2 ★★</option>
+                                    <option [value]="3">3 ★★★</option>
+                                    <option [value]="4">4 ★★★★</option>
+                                    <option [value]="5">5 ★★★★★</option>
+                                </select>
+                                <span class="rating-display-edit" *ngIf="libroSeleccionado.valoracion">
+                                    {{'★'.repeat(libroSeleccionado.valoracion)}}
+                                </span>
                             </div>
-                            <input type="range" class="progress-slider" 
-                                  [min]="0" [max]="libroSeleccionado.numeroPaginas || 100" 
-                                  [(ngModel)]="libroSeleccionado.paginasLeidas"
-                                  (change)="actualizarProgresoBarra()"
-                                  aria-labelledby="paginasLeidas">
-                        </div>
-                        <div class="progress-info">
-                            <span class="progress-percentage">{{calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)}}%</span>
-                            <span class="progress-pages">{{libroSeleccionado?.paginasLeidas || 0}} de {{libroSeleccionado?.numeroPaginas}} páginas</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="comentario" class="form-label">Comentarios</label>
-                    <textarea class="form-control" id="comentario" rows="4"
-                              [(ngModel)]="libroSeleccionado.comentario"
-                              placeholder="Escribe tus impresiones sobre el libro..."></textarea>
+                <!-- Sección Fechas -->
+                <div class="form-section-edit">
+                    <h6 class="form-section-title-edit">
+                        <span class="material-icons">event</span>
+                        Fechas de Lectura
+                    </h6>
+                    <div class="form-row-edit">
+                        <div class="form-group-edit">
+                            <label for="fechaInicioLectura" class="form-label-edit">
+                                Fecha de inicio de lectura
+                                <span class="text-danger" *ngIf="libroSeleccionado.fechaFinLectura">*</span>
+                            </label>
+                            <input type="date" class="form-control form-control-edit" id="fechaInicioLectura" 
+                                   [(ngModel)]="libroSeleccionado.fechaInicioLectura"
+                                   [max]="fechaActual"
+                                   #fechaInicio="ngModel"
+                                   [required]="!!libroSeleccionado.fechaFinLectura"
+                                   (change)="onFechaInicioChange()">
+                            <div *ngIf="fechaInicio.invalid && (fechaInicio.dirty || fechaInicio.touched)" class="text-danger form-error">
+                                <small *ngIf="fechaInicio.errors?.['required']">La fecha de inicio es obligatoria cuando hay fecha de finalización</small>
+                                <small *ngIf="fechaInicio.errors?.['max']">La fecha de inicio no puede ser posterior a la fecha actual</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group-edit" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO' || libroSeleccionado?.estadoLectura === 'ABANDONADO'">
+                            <label for="fechaFinLectura" class="form-label-edit">Fecha de finalización</label>
+                            <input type="date" class="form-control form-control-edit" id="fechaFinLectura" 
+                                   [(ngModel)]="libroSeleccionado.fechaFinLectura"
+                                   [min]="libroSeleccionado.fechaInicioLectura"
+                                   [max]="fechaActual"
+                                   #fechaFin="ngModel"
+                                   (change)="onFechaFinChange()"
+                                   required>
+                            <div *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)" class="text-danger form-error">
+                                <small *ngIf="fechaFin.errors?.['required']">La fecha de finalización es obligatoria</small>
+                                <small *ngIf="fechaFin.errors?.['min']">La fecha de finalización no puede ser anterior a la fecha de inicio</small>
+                                <small *ngIf="fechaFin.errors?.['max']">La fecha de finalización no puede ser posterior a la fecha actual</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Progreso de Lectura -->
+                <div class="form-section-edit progress-section-edit" *ngIf="libroSeleccionado?.numeroPaginas && (libroSeleccionado?.estadoLectura === 'LEYENDO' || libroSeleccionado?.estadoLectura === 'PENDIENTE' || libroSeleccionado?.estadoLectura === 'TERMINADO')">
+                    <h6 class="form-section-title-edit">
+                        <span class="material-icons">trending_up</span>
+                        Progreso de Lectura
+                    </h6>
+                    <div class="form-group-edit">
+                        <label for="paginasLeidas" class="form-label-edit">Páginas leídas</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control form-control-edit" id="paginasLeidas"
+                                   [(ngModel)]="libroSeleccionado.paginasLeidas"
+                                   name="paginasLeidas"
+                                   #paginasLeidas="ngModel"
+                                   [min]="0" [max]="libroSeleccionado.numeroPaginas"
+                                   placeholder="0">
+                        </div>
+                        <small class="form-text text-muted">Introduce el número de páginas que has leído (opcional, máximo {{libroSeleccionado?.numeroPaginas}})</small>
+                        <div *ngIf="paginasLeidas.invalid && (paginasLeidas.dirty || paginasLeidas.touched)" class="text-danger form-error">
+                            <small *ngIf="paginasLeidas.errors?.['min']">El número de páginas leídas debe ser al menos 0</small>
+                            <small *ngIf="paginasLeidas.errors?.['max']">El número de páginas leídas no puede ser mayor que el total de páginas</small>
+                        </div>
+                        
+                        <!-- Barra de progreso interactiva -->
+                        <div class="progress-interactive-edit">
+                            <div class="progress-bar-container-edit">
+                                <div class="progress progress-edit">
+                                    <div class="progress-bar progress-bar-edit" role="progressbar" 
+                                         [style.width.%]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)" 
+                                         [attr.aria-valuenow]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <input type="range" class="progress-slider progress-slider-edit" 
+                                      [min]="0" [max]="libroSeleccionado.numeroPaginas || 100" 
+                                      [(ngModel)]="libroSeleccionado.paginasLeidas"
+                                      (change)="actualizarProgresoBarra()"
+                                      aria-labelledby="paginasLeidas">
+                            </div>
+                            <div class="progress-info progress-info-edit">
+                                <span class="progress-percentage progress-percentage-edit">{{calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)}}%</span>
+                                <span class="progress-pages progress-pages-edit">{{libroSeleccionado?.paginasLeidas || 0}} de {{libroSeleccionado?.numeroPaginas}} páginas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Comentarios -->
+                <div class="form-section-edit comments-section-edit">
+                    <h6 class="form-section-title-edit">
+                        <span class="material-icons">comment</span>
+                        Comentarios y Notas
+                    </h6>
+                    <div class="form-group-edit">
+                        <textarea class="form-control comments-textarea-edit" id="comentario" rows="4"
+                                  [(ngModel)]="libroSeleccionado.comentario"
+                                  placeholder="Escribe tus impresiones, opiniones o notas sobre el libro..."></textarea>
+                    </div>
                 </div>
             </div>
             <div class="modal-custom-footer">

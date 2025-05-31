@@ -115,8 +115,7 @@
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
           <div class="col" *ngFor="let libro of libros">
             <a [routerLink]="['/libros', libro.id]" class="libro-card-link">
-              <div class="libro-card">
-                <div class="libro-portada-container">
+              <div class="libro-card">                <div class="libro-portada-container">
                   <img [src]="getBookImageUrl(libro.portadaUrl)" 
                       alt="Portada de {{ libro.titulo }}"
                       class="libro-portada">
