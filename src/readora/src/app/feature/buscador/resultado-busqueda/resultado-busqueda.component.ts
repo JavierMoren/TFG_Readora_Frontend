@@ -20,7 +20,6 @@ export interface PageChangeEvent {
   selector: 'app-resultado-busqueda',
   templateUrl: './resultado-busqueda.component.html',
   styleUrls: ['./resultado-busqueda.component.css'],
-  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, ImportAnimationComponent]
 })
 export class ResultadoBusquedaComponent implements OnChanges {

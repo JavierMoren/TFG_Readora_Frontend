@@ -151,10 +151,10 @@
                           </div>
                       </div>
                       <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
                               <span class="material-icons">edit</span>
                           </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
                               <span class="material-icons">delete</span>
                           </button>
                       </div>
@@ -220,10 +220,10 @@
                           <p class="notas-texto">{{truncarTexto(libro.comentario, 120)}}</p>
                       </div>
                       <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
                               <span class="material-icons">edit</span>
                           </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
                               <span class="material-icons">delete</span>
                           </button>
                       </div>
@@ -284,10 +284,10 @@
                           <p class="notas-texto">{{truncarTexto(libro.comentario, 120)}}</p>
                       </div>
                       <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
                               <span class="material-icons">edit</span>
                           </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
                               <span class="material-icons">delete</span>
                           </button>
                       </div>
@@ -337,10 +337,10 @@
                           <p class="notas-texto">{{truncarTexto(libro.comentario, 120)}}</p>
                       </div>
                       <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro)">
+                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
                               <span class="material-icons">edit</span>
                           </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro)">
+                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
                               <span class="material-icons">delete</span>
                           </button>
                       </div>

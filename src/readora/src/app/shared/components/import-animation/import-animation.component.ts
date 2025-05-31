@@ -6,7 +6,6 @@ import { ThemeService } from '../../../core/services/theme.service';
   selector: 'app-import-animation',
   templateUrl: './import-animation.component.html',
   styleUrls: ['./import-animation.component.css'],
-  standalone: true,
   imports: [CommonModule]
 })
 export class ImportAnimationComponent implements OnInit, OnDestroy, OnChanges {
