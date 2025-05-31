@@ -863,3 +863,38 @@
   transform: scale(1.1);
   transition: transform 0.2s ease;
 }
+
+/* Estilos para el contenedor y la portada de libro en la biblioteca personal */
+.libro-img-container.book-cover-container {
+  position: relative;
+  width: 100%;
+  padding-top: 150%; /* Proporción 2:3 */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-subtle);
+}
+
+.libro-portada.book-cover-biblioteca {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.13);
+  transition: transform 0.2s;
+}
+
+.libro-card:hover .libro-portada.book-cover-biblioteca {
+  transform: scale(1.04) rotate(-1deg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+@media (max-width: 768px) {
+  .libro-img-container.book-cover-container {
+    padding-top: 160%;
+  }
+}
