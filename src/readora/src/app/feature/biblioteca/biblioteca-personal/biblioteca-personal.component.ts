@@ -123,7 +123,10 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
     this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
       next: (usuarioLibros) => {
         if (!usuarioLibros || usuarioLibros.length === 0) {
-            this.cargando = false; // Soluciona el loading infinito si no hay libros
+          this.cargando = false; // Soluciona el loading infinito si no hay libros
+          this.notificationService.info('Biblioteca vacía', {
+            description: 'No tienes libros en tu biblioteca personal. ¡Comienza agregando algunos!'
+          });
           return;
         }
         
@@ -548,6 +551,13 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   actualizarBusqueda(term: string): void {
     this.terminoBusqueda = term;
     this.searchTerms.next(term);
+    
+    // Notificar cambio de búsqueda para accesibilidad
+    if (term.length === 0) {
+      this.notificationService.info('Búsqueda limpiada', {
+        description: 'Mostrando todos los libros de la sección actual'
+      });
+    }
   }
 
   /**
@@ -744,6 +754,13 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
    * Muestra confirmación antes de actualizar
    */
   confirmarActualizacion(): void {
+    if (!this.formularioValido()) {
+      this.notificationService.warning('Datos incorrectos', {
+        description: 'Por favor, revisa los errores en el formulario antes de guardar'
+      });
+      return;
+    }
+    
     this.notificationService.confirm({
       title: '¿Guardar cambios?',
       text: '¿Estás seguro de guardar los cambios realizados a este libro?',

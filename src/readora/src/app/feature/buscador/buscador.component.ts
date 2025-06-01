@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { LibrosService } from '../../core/services/libros.service';
 import { AutorService } from '../../core/services/autor.service';
 import { GoogleBooksService } from '../../core/services/google-books.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { ResultadoBusquedaComponent, PageChangeEvent } from './resultado-busqueda/resultado-busqueda.component';
 
 @Component({
@@ -41,7 +42,8 @@ export class BuscadorComponent implements OnInit {
     private readonly formBuilder: FormBuilder,
     private readonly librosService: LibrosService,
     private readonly autorService: AutorService,
-    private readonly googleBooksService: GoogleBooksService
+    private readonly googleBooksService: GoogleBooksService,
+    private readonly notificationService: NotificationService
   ) { 
     this.searchForm = this.formBuilder.group({
       searchTerm: [''],
@@ -158,6 +160,9 @@ export class BuscadorComponent implements OnInit {
           this.results = [];
           this.hasError = true;
           this.errorMessage = 'Error al buscar en la biblioteca local. Por favor, inténtalo de nuevo.';
+          this.notificationService.error('Error de búsqueda', {
+            description: 'No se pudo buscar en la biblioteca local'
+          });
         }
       });
   }
@@ -176,6 +181,9 @@ export class BuscadorComponent implements OnInit {
           this.results = [];
           this.hasError = true;
           this.errorMessage = 'Error al buscar autores. Por favor, inténtalo de nuevo.';
+          this.notificationService.error('Error de búsqueda', {
+            description: 'No se pudo buscar autores'
+          });
         }
       });
   }

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { ThemeToggleComponent } from '../../shared/components/theme-toggle/theme-toggle.component';
 import { AutenticacionService } from '../../core/services/autenticacion.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { Observable, Subscription, filter } from 'rxjs';
-import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +19,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isGoogleUser: boolean = false;
   private readonly routerSubscription: Subscription; // Marcar como readonly
   
-  constructor(private readonly authService: AutenticacionService, public router: Router) {
+  constructor(
+    private readonly authService: AutenticacionService,
+    public router: Router,
+    private readonly notificationService: NotificationService
+  ) {
     this.isLoggedIn$ = this.authService.isLoggedIn();
     this.routerSubscription = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -139,10 +143,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
    * Cierra la sesión del usuario actual (solo local, no Google)
    */
   logout(): void {
-    toast.info('Cerrando sesión...', { 
+    this.notificationService.info('Cerrando sesión...', { 
       description: 'Por favor espera mientras cerramos tu sesión',
-      duration: 2000
+      duration: 1500
     });
-    this.authService.logout();
+    
+    // Realizar el logout y manejar la respuesta
+    this.authService.logout().subscribe({
+      next: () => {
+        this.notificationService.success('Sesión cerrada', { 
+          description: 'Has cerrado sesión exitosamente',
+          duration: 2000
+        });
+        setTimeout(() => {
+          this.router.navigate(['/api/v1/authenticate']);
+        }, 1000);
+      },
+      error: (error) => {
+        console.error('[Header] Error durante logout', error);
+        this.notificationService.warning('Sesión cerrada localmente', { 
+          description: 'Se cerró la sesión local aunque hubo un error en el servidor',
+          duration: 3000
+        });
+        setTimeout(() => {
+          this.router.navigate(['/api/v1/authenticate']);
+        }, 1000);
+      }
+    });
   }
 }

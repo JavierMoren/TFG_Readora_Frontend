@@ -68,27 +68,27 @@ export class AutenticacionService {
     return this.isAuthenticated.asObservable();
   }
 
-  logout(): void {
-    this.http.post<any>(this.logoutUrl, {}, { withCredentials: true })
-      .subscribe({
-        next: () => {
+  logout(): Observable<any> {
+    return this.http.post<any>(this.logoutUrl, {}, { withCredentials: true })
+      .pipe(
+        tap(() => {
           this.isAuthenticated.next(false);
           this.token = null;
           localStorage.removeItem('user_data');
-          this.router.navigate(['/api/v1/authenticate']).then(() => {
-          });
-        },
-        error: (error) => {
+          sessionStorage.removeItem('auth_provider');
+        }),
+        catchError((error) => {
           console.error('[AutenticacionService] Error al cerrar sesión localmente', error);
+          // Limpiar estado local incluso si falla la petición al servidor
           this.isAuthenticated.next(false);
           this.token = null;
           document.cookie = 'jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; SameSite=Lax;';
           document.cookie = 'jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
           sessionStorage.removeItem('auth_provider');
           localStorage.removeItem('user_data');
-          this.router.navigate(['/api/v1/authenticate']);
-        }
-      });
+          return of(null); // Retornar un observable válido aunque haya error
+        })
+      );
   }
 
   private clearEssentialCookies(): void {
