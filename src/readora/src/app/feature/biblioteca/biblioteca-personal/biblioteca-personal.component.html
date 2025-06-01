@@ -58,11 +58,59 @@
     </div>
   </div>
 
-  <!-- Mensaje cuando no hay libros -->
+  <!-- Buscador de libros - solo aparece si hay libros en el estado actual -->
+  <div class="mt-4" *ngIf="getLibrosParaMostrar().length > 0 && !mostrandoResultados || (mostrandoResultados && resultadosBusqueda.length > 0)">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text" id="basic-addon-search">
+        <span class="material-icons small" [class.animate-search]="cargandoBusqueda">search</span>
+      </span>
+      <input 
+        type="text" 
+        class="form-control form-control-sm" 
+        placeholder="Buscar por título..." 
+        #buscadorInput
+        [ngModel]="terminoBusqueda"
+        (ngModelChange)="actualizarBusqueda($event)"
+        aria-label="Buscar en biblioteca personal"
+        aria-describedby="basic-addon-search"
+        [attr.aria-busy]="cargandoBusqueda"
+        autocomplete="off">
+      <button class="btn btn-outline-secondary btn-sm" 
+              type="button" 
+              (click)="limpiarBusqueda(); buscadorInput.focus()"
+              *ngIf="terminoBusqueda || mostrandoResultados"
+              title="Limpiar búsqueda"
+              aria-label="Limpiar búsqueda">
+        <span class="material-icons small">clear</span>
+      </button>
+    </div>
+    <div class="search-feedback" *ngIf="cargandoBusqueda" aria-live="polite">
+      <small>Buscando en tu biblioteca...</small>
+    </div>
+  </div>
+
+  <!-- Indicador de carga de búsqueda -->
+  <div *ngIf="cargandoBusqueda" class="loading-state" aria-live="polite">
+      <div class="spinner">
+          <div class="spinner-border text-primary">
+              <span class="visually-hidden">Buscando...</span>
+          </div>
+      </div>
+      <p class="loading-text">Buscando en tu biblioteca...</p>
+  </div>
+
+  <!-- Indicador de resultados de búsqueda - más discreto -->
+  <div *ngIf="mostrandoResultados && !cargandoBusqueda && resultadosBusqueda.length > 0" class="mt-3 mb-1">
+    <div class="text-muted small">
+      <span class="material-icons small me-1 align-middle">filter_list</span>
+      Mostrando {{resultadosBusqueda.length}} {{resultadosBusqueda.length === 1 ? 'libro' : 'libros'}}
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay libros en toda la biblioteca -->
   <div *ngIf="!librosLeyendo.length && !librosPendientes.length && !librosTerminados.length && !librosAbandonados.length && !cargando"
        class="sin-libros"
-       aria-live="polite"
-       role="status">
+       aria-live="polite">
       <div class="sin-libros-icon">
         <span class="material-icons" aria-hidden="true">menu_book</span>
       </div>
@@ -77,37 +125,53 @@
       </a>
   </div>
   
+  <!-- Mensaje cuando no hay libros en el estado actual pero sí en otros -->
+  <div *ngIf="getLibrosParaMostrar().length === 0 && (librosLeyendo.length > 0 || librosPendientes.length > 0 || librosTerminados.length > 0 || librosAbandonados.length > 0) && !cargando && !mostrandoResultados"
+       class="sin-libros-estado mt-4"
+       aria-live="polite">
+      <div class="sin-libros-icon">
+        <span class="material-icons" aria-hidden="true">filter_alt</span>
+      </div>
+      <h3 class="sin-libros-title">No hay libros {{filtroActual === 'leyendo' ? 'que estés leyendo' : filtroActual === 'pendientes' ? 'pendientes por leer' : filtroActual === 'terminados' ? 'leídos' : 'abandonados'}}</h3>
+      <p class="sin-libros-text">
+          Prueba a cambiar a otra categoría o añade nuevos libros a esta sección.
+      </p>
+  </div>
+  
   <!-- Indicador de carga -->
-  <output *ngIf="cargando" class="loading-state" aria-live="polite">
+  <div *ngIf="cargando" class="loading-state" aria-live="polite">
       <div class="spinner">
           <div class="spinner-border text-primary">
               <span class="visually-hidden">Cargando...</span>
           </div>
       </div>
       <p class="loading-text">Cargando tu biblioteca...</p>
-  </output>
+  </div>
 
-  <!-- Sección de libros que estoy leyendo -->
-  <div *ngIf="(filtroActual === 'leyendo') && librosLeyendo.length > 0" 
+  <!-- Sección dinámica de libros -->
+  <div *ngIf="getLibrosParaMostrar().length > 0" 
        class="biblioteca-section" 
        role="tabpanel" 
-       id="seccion-leyendo" 
-       aria-labelledby="tab-leyendo">
+       [id]="'seccion-' + filtroActual" 
+       [attr.aria-labelledby]="'tab-' + filtroActual">
       
       <div class="section-header">
           <h2 class="section-title">
-            <span class="material-icons section-icon" aria-hidden="true">auto_stories</span>
-            Estoy leyendo
+            <span class="material-icons section-icon" aria-hidden="true">
+              {{filtroActual === 'leyendo' ? 'auto_stories' : filtroActual === 'pendientes' ? 'bookmark' : filtroActual === 'terminados' ? 'check_circle' : 'cancel'}}
+            </span>
+            {{getTituloSeccion()}}
           </h2>
-          <span class="section-count">{{librosLeyendo.length}} {{librosLeyendo.length === 1 ? 'libro' : 'libros'}}</span>
+          <span class="section-count">{{getLibrosParaMostrar().length}} {{getLibrosParaMostrar().length === 1 ? 'libro' : 'libros'}}</span>
       </div>
       <div class="libros-grid">
-          <div class="libro-item" *ngFor="let libro of librosLeyendo">
+          <div class="libro-item" *ngFor="let libro of getLibrosParaMostrar()">
               <button class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;" (keydown.enter)="irADetalleLibro(libro)" type="button">
                   <div class="libro-img-container book-cover-container">
-                      <img [src]="getImageUrl(libro.portadaUrl)" 
-                           class="libro-portada book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-
+                        <img [src]="getImageUrl(libro.portadaUrl)" 
+                             class="libro-portada book-cover-biblioteca" 
+                             alt="Portada del libro {{libro.titulo}}"
+                             loading="lazy">
                   </div>
                   <div class="libro-info">
                       <h5 class="libro-titulo">{{libro.titulo}}</h5>
@@ -116,22 +180,29 @@
                           <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
                       </div>
                       <div class="libro-meta">
-                          <div class="meta-item">
+                          <div class="meta-item" *ngIf="libro.fechaInicioLectura">
                               <span class="meta-label">Inicio:</span>
                               <span class="meta-value">{{formatearFecha(libro.fechaInicioLectura)}}</span>
                           </div>
-                          <!-- Barra de progreso de lectura -->
-                          <div class="progress-container">
+                          <div class="meta-item" *ngIf="libro.fechaFinLectura">
+                              <span class="meta-label">Finalizado:</span>
+                              <span class="meta-value">{{formatearFecha(libro.fechaFinLectura)}}</span>
+                          </div>
+                          <!-- Barra de progreso de lectura (solo para libros en progreso) -->
+                          <div class="progress-container" *ngIf="filtroActual === 'leyendo' && libro.numeroPaginas">
                               <div class="progress">
-                                  <div class="progress-bar bg-primary" role="progressbar" 
-                                       [style.width.%]="calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)" 
-                                       aria-valuemin="0" aria-valuemax="100" 
-                                       [attr.aria-valuenow]="calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)">
+                                  <div class="progress-bar-fill"
+                                       [style.width.%]="calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)"
+                                       [attr.aria-label]="'Progreso de lectura para ' + libro.titulo"
+                                       role="progressbar"
+                                       [attr.aria-valuenow]="calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)"
+                                       aria-valuemin="0"
+                                       aria-valuemax="100">
                                   </div>
                               </div>
                               <span class="progress-text">
                                   {{calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)}}% completado
-                                  <span class="pages-text" *ngIf="libro.numeroPaginas">
+                                  <span class="pages-text">
                                       ({{libro.paginasLeidas || 0}}/{{libro.numeroPaginas}} páginas)
                                   </span>
                               </span>
@@ -159,172 +230,14 @@
       </div>
   </div>
 
-  <!-- Sección de libros pendientes por leer -->
-  <div *ngIf="(filtroActual === 'pendientes') && librosPendientes.length > 0" class="biblioteca-section" 
-       role="tabpanel" 
-       id="seccion-pendientes" 
-       aria-labelledby="tab-pendientes">
-      <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-icons section-icon">bookmark</span>
-            Pendientes por leer
-          </h2>
-          <span class="section-count">{{librosPendientes.length}} {{librosPendientes.length === 1 ? 'libro' : 'libros'}}</span>
-      </div>
-      <div class="libros-grid">
-          <div class="libro-item" *ngFor="let libro of librosPendientes">
-              <button class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;" (keydown.enter)="irADetalleLibro(libro)" type="button">
-                  <div class="libro-img-container book-cover-container">
-                      <img [src]="getImageUrl(libro.portadaUrl)" 
-                           class="libro-portada book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-
-                  </div>
-                  <div class="libro-info">
-                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                      <div class="libro-autor">
-                          <span class="material-icons autor-icon">person</span>
-                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
-                      </div>
-                      <!-- Barra de progreso para libros pendientes -->
-                      <div class="progress-container" *ngIf="libro.numeroPaginas">
-                          <div class="progress">
-                              <div class="progress-bar bg-warning" role="progressbar" 
-                                   [style.width.%]="calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)" 
-                                   aria-valuemin="0" aria-valuemax="100" 
-                                   [attr.aria-valuenow]="calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)">
-                              </div>
-                          </div>
-                          <span class="progress-text">
-                              {{calcularProgreso(libro.paginasLeidas, libro.numeroPaginas)}}% completado
-                              <span class="pages-text">
-                                  ({{libro.paginasLeidas || 0}}/{{libro.numeroPaginas}} páginas)
-                              </span>
-                          </span>
-                      </div>
-                      <!-- Notas del usuario -->
-                      <div class="libro-notas mt-2" *ngIf="libro.comentario">
-                          <div class="notas-header">
-                              <span class="material-icons">note</span>
-                              <span class="notas-titulo">Notas:</span>
-                          </div>
-                          <p class="notas-texto">{{truncarTexto(libro.comentario, 120)}}</p>
-                      </div>
-                      <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
-                              <span class="material-icons">edit</span>
-                          </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
-                              <span class="material-icons">delete</span>
-                          </button>
-                      </div>
-                  </div>
-              </button>
-          </div>
+  <!-- Mensaje cuando no hay resultados en la búsqueda - más discreto -->
+  <div *ngIf="mostrandoResultados && resultadosBusqueda.length === 0 && !cargandoBusqueda" 
+       class="mt-4 text-center">
+      <div class="empty-search-results">
+          <span class="material-icons mb-2">search_off</span>
+          <p class="empty-results-text">No hay coincidencias para "{{terminoBusqueda}}" en libros {{filtroActual === 'leyendo' ? 'que estés leyendo' : filtroActual === 'pendientes' ? 'pendientes por leer' : filtroActual === 'terminados' ? 'leídos' : 'abandonados'}}.</p>
       </div>
   </div>
-
-  <!-- Sección de libros terminados -->
-  <div *ngIf="(filtroActual === 'terminados') && librosTerminados.length > 0" class="biblioteca-section" 
-       role="tabpanel" 
-       id="seccion-terminados" 
-       aria-labelledby="tab-terminados">
-      <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-icons section-icon">check_circle</span>
-            Libros leídos
-          </h2>
-          <span class="section-count">{{librosTerminados.length}} {{librosTerminados.length === 1 ? 'libro' : 'libros'}}</span>
-      </div>
-      <div class="libros-grid">
-          <div class="libro-item" *ngFor="let libro of librosTerminados">
-              <button class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;" (keydown.enter)="irADetalleLibro(libro)" type="button">
-                  <div class="libro-img-container book-cover-container">
-                      <img [src]="getImageUrl(libro.portadaUrl)" 
-                           class="libro-portada book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-
-                  </div>
-                  <div class="libro-info">
-                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                      <div class="libro-autor">
-                          <span class="material-icons autor-icon">person</span>
-                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
-                      </div>
-                      <div class="libro-meta">
-                          <div class="meta-item">
-                              <span class="meta-label">Terminado:</span>
-                              <span class="meta-value">{{formatearFecha(libro.fechaFinLectura)}}</span>
-                          </div>
-                      </div>
-                      <!-- Notas del usuario -->
-                      <div class="libro-notas mt-2" *ngIf="libro.comentario">
-                          <div class="notas-header">
-                              <span class="material-icons">note</span>
-                              <span class="notas-titulo">Notas:</span>
-                          </div>
-                          <p class="notas-texto">{{truncarTexto(libro.comentario, 120)}}</p>
-                      </div>
-                      <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
-                              <span class="material-icons">edit</span>
-                          </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
-                              <span class="material-icons">delete</span>
-                          </button>
-                      </div>
-                  </div>
-              </button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Sección de libros abandonados -->
-  <div *ngIf="(filtroActual === 'abandonados') && librosAbandonados.length > 0" class="biblioteca-section"
-       role="tabpanel" 
-       id="seccion-abandonados" 
-       aria-labelledby="tab-abandonados">
-      <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-icons section-icon">cancel</span>
-            Libros abandonados
-          </h2>
-          <span class="section-count">{{librosAbandonados.length}} {{librosAbandonados.length === 1 ? 'libro' : 'libros'}}</span>
-      </div>
-      <div class="libros-grid">
-          <div class="libro-item" *ngFor="let libro of librosAbandonados">
-              <button class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;" (keydown.enter)="irADetalleLibro(libro)" type="button">
-                  <div class="libro-img-container book-cover-container">
-                      <img [src]="getImageUrl(libro.portadaUrl)" 
-                           class="libro-portada book-cover-biblioteca" alt="Portada del libro {{libro.titulo}}">
-
-                  </div>
-                  <div class="libro-info">
-                      <h5 class="libro-titulo">{{libro.titulo}}</h5>
-                      <div class="libro-autor">
-                          <span class="material-icons autor-icon">person</span>
-                          <span>{{libro.autor?.nombre}} {{libro.autor?.apellido}}</span>
-                      </div>
-                      <!-- Notas del usuario -->
-                      <div class="libro-notas mt-2" *ngIf="libro.comentario">
-                          <div class="notas-header">
-                              <span class="material-icons">note</span>
-                              <span class="notas-titulo">Notas:</span>
-                          </div>
-                          <p class="notas-texto">{{truncarTexto(libro.comentario, 120)}}</p>
-                      </div>
-                      <div class="libro-actions">
-                          <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
-                              <span class="material-icons">edit</span>
-                          </button>
-                          <button class="btn btn-icon" title="Eliminar" (click)="eliminarDeColeccion(libro); $event.stopPropagation()">
-                              <span class="material-icons">delete</span>
-                          </button>
-                      </div>
-                  </div>
-              </button>
-          </div>
-      </div>
-  </div>
-</div>
 
 <!-- Modal de edición de estado de lectura -->
 <div *ngIf="mostrarEdicion" class="modal-custom-backdrop">
@@ -340,6 +253,12 @@
                 </button>
             </div>
             <div class="modal-custom-body">
+                <!-- Mensaje informativo sobre campos obligatorios (solo cuando hay errores) -->
+                <div class="alert alert-warning" role="alert" *ngIf="tieneErroresValidacion()">
+                    <span class="material-icons align-middle me-2">warning</span>
+                    <small>Revisa los campos: Los campos marcados con <span class="text-danger">*</span> son obligatorios. Recuerda que si indicas una fecha de fin, la fecha de inicio también es obligatoria.</small>
+                </div>
+                
                 <!-- Sección Estado y Valoración -->
                 <div class="form-section-edit">
                     <h6 class="form-section-title-edit">
@@ -398,16 +317,14 @@
                         </div>
 
                         <div class="form-group-edit" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO' || libroSeleccionado?.estadoLectura === 'ABANDONADO'">
-                            <label for="fechaFinLectura" class="form-label-edit">Fecha de finalización</label>
+                            <label for="fechaFinLectura" class="form-label-edit">Fecha de finalización <span class="text-muted">(opcional)</span></label>
                             <input type="date" class="form-control form-control-edit" id="fechaFinLectura" 
                                    [(ngModel)]="libroSeleccionado.fechaFinLectura"
                                    [min]="libroSeleccionado.fechaInicioLectura"
                                    [max]="fechaActual"
                                    #fechaFin="ngModel"
-                                   (change)="onFechaFinChange()"
-                                   required>
+                                   (change)="onFechaFinChange()">
                             <div *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)" class="text-danger form-error">
-                                <small *ngIf="fechaFin.errors?.['required']">La fecha de finalización es obligatoria</small>
                                 <small *ngIf="fechaFin.errors?.['min']">La fecha de finalización no puede ser anterior a la fecha de inicio</small>
                                 <small *ngIf="fechaFin.errors?.['max']">La fecha de finalización no puede ser posterior a la fecha actual</small>
                             </div>
@@ -441,10 +358,13 @@
                         <div class="progress-interactive-edit">
                             <div class="progress-bar-container-edit">
                                 <div class="progress progress-edit">
-                                    <div class="progress-bar progress-bar-edit" role="progressbar" 
-                                         [style.width.%]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)" 
+                                    <div class="progress-bar-fill progress-bar-edit"
+                                         [style.width.%]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)"
+                                         aria-labelledby="progreso-lectura"
+                                         role="progressbar"
                                          [attr.aria-valuenow]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)"
-                                         aria-valuemin="0" aria-valuemax="100">
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
                                     </div>
                                 </div>
                                 <input type="range" class="progress-slider progress-slider-edit" 
@@ -482,7 +402,8 @@
                 <button type="button" 
                        class="btn btn-primary" 
                        [disabled]="!formularioValido()"
-                       (click)="confirmarActualizacion()">
+                       (click)="confirmarActualizacion()"
+                       [title]="!formularioValido() ? getMensajeErrorValidacion() : 'Guardar cambios'">
                     <span class="material-icons me-1">save</span>
                     Guardar cambios
                 </button>
