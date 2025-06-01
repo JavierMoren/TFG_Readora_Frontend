@@ -144,10 +144,29 @@
             </span>
           </button>
           
+          <!-- Separador visual para OAuth2 -->
+          <div class="d-flex align-items-center my-4">
+            <hr class="flex-grow-1 border-secondary opacity-25">
+            <span class="px-3 text-secondary small">O</span>
+            <hr class="flex-grow-1 border-secondary opacity-25">
+          </div>
+          <a 
+            (click)="loginWithGoogle()"
+            class="btn btn-outline-secondary w-100 py-2 mb-3 d-block"
+            style="cursor:pointer;"
+            aria-label="Registrarse con Google">
+            <span class="d-flex align-items-center justify-content-center">
+              <img src="assets/logos/google-logo.svg" alt="Logo de Google" class="me-2" width="20" height="20">
+              Registrarse con Google
+            </span>
+          </a>
+          <!-- Fin OAuth2 -->
+
+          <!-- Enlace para usuarios ya registrados -->
           <div class="text-center mt-4">
             <p class="mb-0">
-              <a routerLink="/api/v1/authenticate" class="text-primary text-decoration-none auth-link">
-                ¿Ya tienes cuenta? <span class="fw-medium">Inicia sesión</span>
+              <a routerLink="/api/v1/authenticate" class="text-primary text-decoration-none auth-link" aria-label="Ir a la página de inicio de sesión">
+                ¿Ya tienes cuenta? <span class="fw-medium">Inicia sesión aquí</span>
               </a>
             </p>
           </div>

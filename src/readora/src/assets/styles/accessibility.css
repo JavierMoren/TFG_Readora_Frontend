@@ -5,7 +5,7 @@
   position: absolute;
   top: -40px;
   left: 0;
-  background: #4D6BFE;
+  background: var(--primary-color);
   color: white;
   padding: 8px;
   z-index: 9999;
@@ -22,8 +22,8 @@
 }
 
 /* ===== Mejoras de foco visual ===== */
-:focus {
-  outline: 3px solid rgba(77, 107, 254, 0.7) !important;
+:focus, :focus-visible, [tabindex]:not([tabindex="-1"]):focus {
+  outline: 3px solid rgba(var(--primary-color-rgb, 77, 107, 254), 0.7) !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   transition: outline 0.2s ease;
@@ -35,7 +35,7 @@
 }
 
 :focus-visible {
-  outline: 3px solid rgba(77, 107, 254, 0.7) !important;
+  outline: 3px solid rgba(var(--primary-color-rgb, 77, 107, 254), 0.7) !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
@@ -43,12 +43,12 @@
 /* ===== Mejoras de contraste ===== */
 /* Aseguramos un contraste adecuado para el texto */
 body {
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--text-primary);
 }
 
 /* Texto secundario con mejor contraste */
 .text-secondary {
-  color: rgba(0, 0, 0, 0.67) !important;
+  color: var(--text-secondary) !important;
 }
 
 /* Modo oscuro: mejor contraste en textos */
@@ -63,12 +63,12 @@ body {
 /* Mejorar contraste de botones */
 .btn-primary {
   color: #ffffff;
-  background-color: #4D6BFE;
+  background-color: var(--primary-color);
 }
 
 .btn-outline-primary {
-  color: #4D6BFE;
-  border-color: #4D6BFE;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* ===== Ayudas visuales ===== */
@@ -104,7 +104,7 @@ a[aria-current="page"] {
 /* ===== Navegación con teclado ===== */
 /* Asegurar que los elementos con tabindex sean claramente visibles al recibir foco */
 [tabindex]:not([tabindex="-1"]):focus {
-  outline: 3px solid rgba(77, 107, 254, 0.7) !important;
+  outline: 3px solid rgba(var(--primary-color-rgb, 77, 107, 254), 0.7) !important;
   outline-offset: 2px !important;
 }
 
@@ -137,16 +137,16 @@ body {
 /* ===== Mejoras en componentes específicos ===== */
 /* Mejorar la accesibilidad en cards */
 .card[role="button"]:focus {
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
 }
 
 /* Mejorar la accesibilidad en la paginación */
 .page-link:focus {
-  box-shadow: 0 0 0 0.2rem rgba(77, 107, 254, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb, 77, 107, 254), 0.25);
 }
 
 /* Mejorar visibilidad en el panel de administración */
 .admin-nav-link.active {
   font-weight: bold;
-  background-color: rgba(77, 107, 254, 0.15);
+  background-color: rgba(var(--primary-color-rgb, 77, 107, 254), 0.15);
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioLibroService } from '../../../core/services/usuario-libro.service';
@@ -6,19 +6,18 @@ import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { UsuarioLibro } from '../../../models/usuario-libro/usuario-libro.model';
 import { Libro } from '../../../models/libro/libro.model';
-import { Autor } from '../../../models/autor/autor.model';
-import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, switchMap, Observable } from 'rxjs';
+import { forkJoin, map, switchMap, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-biblioteca-personal',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './biblioteca-personal.component.html',
   styleUrls: ['./biblioteca-personal.component.css']
 })
-export class BibliotecaPersonalComponent implements OnInit {
+export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   // Colecciones de libros por estado
   librosLeyendo: any[] = [];
   librosPendientes: any[] = [];
@@ -33,7 +32,17 @@ export class BibliotecaPersonalComponent implements OnInit {
   usuarioId: number | null = null;
   
   // Filtro de visualización
-  filtroActual: string = 'todos';
+  filtroActual: string = 'leyendo';
+  
+  // Variables para la funcionalidad de búsqueda
+  terminoBusqueda: string = '';
+  mostrandoResultados: boolean = false;
+  resultadosBusqueda: any[] = [];
+  cargandoBusqueda: boolean = false;
+  
+  // Variables para el debounce de la búsqueda
+  private searchTerms = new Subject<string>();
+  private destroy$ = new Subject<void>();
   
   // Estados de lectura disponibles
   estadosLectura = [
@@ -47,6 +56,9 @@ export class BibliotecaPersonalComponent implements OnInit {
   readonly libroPlaceholder = 'assets/placeholders/book-placeholder.svg';
   readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
 
+  // Fecha actual para validaciones
+  fechaActual: string = new Date().toISOString().split('T')[0];
+
   // Indicador de carga
   cargando: boolean = false;
 
@@ -55,11 +67,25 @@ export class BibliotecaPersonalComponent implements OnInit {
     private libroService: LibrosService,
     public storageService: StorageService,
     private authService: AutenticacionService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) {
       }
 
   ngOnInit(): void {
+    // Configurar el debounce para la búsqueda
+    this.searchTerms.pipe(
+      takeUntil(this.destroy$),
+      debounceTime(300), // Esperar 300ms después de cada pulsación de tecla
+      distinctUntilChanged()
+    ).subscribe(term => {
+      if (!term || term.trim().length === 0) {
+        this.limpiarBusqueda();
+      } else {
+        this.buscarLibros();
+      }
+    });
+
     // Obtener el ID del usuario autenticado
     this.authService.getUserInfo().subscribe({
       next: (userData) => {
@@ -97,6 +123,10 @@ export class BibliotecaPersonalComponent implements OnInit {
     this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
       next: (usuarioLibros) => {
         if (!usuarioLibros || usuarioLibros.length === 0) {
+          this.cargando = false; // Soluciona el loading infinito si no hay libros
+          this.notificationService.info('Biblioteca vacía', {
+            description: 'No tienes libros en tu biblioteca personal. ¡Comienza agregando algunos!'
+          });
           return;
         }
         
@@ -137,7 +167,8 @@ export class BibliotecaPersonalComponent implements OnInit {
                     valoracion: usuarioLibro.valoracion,
                     comentario: usuarioLibro.comentario,
                     fechaInicioLectura: usuarioLibro.fechaInicioLectura,
-                    fechaFinLectura: usuarioLibro.fechaFinLectura
+                    fechaFinLectura: usuarioLibro.fechaFinLectura,
+                    paginasLeidas: usuarioLibro.paginasLeidas
                   };
                 })
               );
@@ -185,7 +216,7 @@ export class BibliotecaPersonalComponent implements OnInit {
             if (this.librosLeyendo.length > 0) {
               
               // Verificar si necesitamos mostrar la sección "Leyendo"
-              if (this.filtroActual === 'todos' || this.filtroActual === 'leyendo') {
+              if (this.filtroActual === 'leyendo') {
                 
                 // Forzar actualización de la vista cuando hay libros en estado "Leyendo"
                 setTimeout(() => {
@@ -232,19 +263,69 @@ export class BibliotecaPersonalComponent implements OnInit {
       valoracion: this.libroSeleccionado.valoracion,
       comentario: this.libroSeleccionado.comentario,
       fechaInicioLectura: this.libroSeleccionado.fechaInicioLectura,
-      fechaFinLectura: this.libroSeleccionado.fechaFinLectura
+      fechaFinLectura: this.libroSeleccionado.fechaFinLectura,
+      paginasLeidas: this.libroSeleccionado.paginasLeidas
     };
     
-    // Si cambia a TERMINADO y no tiene fecha de fin, establecerla a hoy
-    if (usuarioLibroActualizado.estadoLectura === 'TERMINADO' && !usuarioLibroActualizado.fechaFinLectura) {
-      usuarioLibroActualizado.fechaFinLectura = new Date().toISOString().split('T')[0];
+    // Si cambia a TERMINADO
+    if (usuarioLibroActualizado.estadoLectura === 'TERMINADO') {
+      // Establecer la fecha de fin a hoy si no existe
+      if (!usuarioLibroActualizado.fechaFinLectura) {
+        usuarioLibroActualizado.fechaFinLectura = new Date().toISOString().split('T')[0];
+      }
+      
+      // Si no ha leído todas las páginas, mostrar confirmación
+      if (this.libroSeleccionado.paginasLeidas !== this.libroSeleccionado.numeroPaginas && 
+          this.libroSeleccionado.numeroPaginas > 0) {
+        this.notificationService.confirm({
+          title: '¿Marcar como leído todo el libro?',
+          text: '¿Quieres establecer el progreso de lectura al 100%?',
+          icon: 'warning',
+          confirmButtonText: 'Sí, completar',
+          cancelButtonText: 'No, mantener progreso actual'
+        }).then(result => {
+          if (result) {
+            // Si confirma, establecer páginas leídas al total
+
+            usuarioLibroActualizado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+          }
+          this.ejecutarActualizacionLibro(usuarioLibroActualizado);
+        });
+        return;
+      }
+      
+      // Si está marcando como TERMINADO y no entró en la confirmación (porque ya tenía todas las páginas leídas),
+      // mantenemos el valor actual de páginas leídas y solo actualizamos si realmente hay una diferencia
+      if (this.libroSeleccionado.numeroPaginas > 0 && 
+          this.libroSeleccionado.paginasLeidas !== this.libroSeleccionado.numeroPaginas) {
+        usuarioLibroActualizado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+      }
     }
+    
+    // Para otros estados, actualizar directamente
+    this.ejecutarActualizacionLibro(usuarioLibroActualizado);
+  }
+
+  /**
+   * Ejecuta la actualización del libro con el servicio
+   */
+  private ejecutarActualizacionLibro(usuarioLibroActualizado: any): void {
+    // Aseguramos que paginasLeidas sea un número válido
+    if (usuarioLibroActualizado.paginasLeidas === undefined || usuarioLibroActualizado.paginasLeidas === null) {
+      usuarioLibroActualizado.paginasLeidas = 0;
+    }
+    
+    // Eliminamos la lógica que sobreescribía la elección del usuario
+    // para respetar si decidió NO completar las páginas al marcar como terminado
+    
+
     
     this.usuarioLibroService.updateUsuarioLibro(
       this.libroSeleccionado.usuarioLibroId, 
       usuarioLibroActualizado
     ).subscribe({
-      next: () => {
+      next: (response) => {
+
         this.notificationService.success('Estado actualizado', {
           description: 'El estado del libro se ha actualizado correctamente'
         });
@@ -335,9 +416,203 @@ export class BibliotecaPersonalComponent implements OnInit {
   }
 
   /**
+   * Realiza la búsqueda de libros por título dentro del estado de la pestaña activa
+   */
+  buscarLibros(): void {
+    if (!this.usuarioId || !this.terminoBusqueda.trim()) {
+      this.limpiarBusqueda();
+      return;
+    }
+
+    // Mapear el filtro actual al estado de lectura
+    const estadoMap: { [key: string]: string } = {
+      'leyendo': 'LEYENDO',
+      'pendientes': 'PENDIENTE', 
+      'terminados': 'TERMINADO',
+      'abandonados': 'ABANDONADO'
+    };
+
+    const estadoLectura = estadoMap[this.filtroActual];
+    if (!estadoLectura) {
+      return;
+    }
+
+    this.cargandoBusqueda = true;
+    this.mostrandoResultados = true;
+    
+    // Anunciar para lectores de pantalla
+    this.anunciarParaLectoresDePantalla('Buscando libros...');
+
+    this.usuarioLibroService.buscarLibrosPorEstadoYTitulo(
+      this.usuarioId, 
+      estadoLectura, 
+      this.terminoBusqueda.trim()
+    ).subscribe({
+      next: (usuarioLibros) => {
+        if (!usuarioLibros || usuarioLibros.length === 0) {
+          this.resultadosBusqueda = [];
+          this.cargandoBusqueda = false;
+          
+          // Anunciar que no se encontraron resultados
+          this.anunciarParaLectoresDePantalla('No se encontraron libros que coincidan con la búsqueda.');
+          return;
+        }
+
+        // Procesar los resultados igual que en cargarLibrosUsuario()
+        const observables = usuarioLibros.map(usuarioLibro => {
+          return this.libroService.getLibroById(usuarioLibro.libroId).pipe(
+            switchMap((libro: any) => {
+              return this.libroService.getAutoresByLibroId(libro.id).pipe(
+                map(autores => ({
+                  id: libro.id,
+                  titulo: libro.titulo,
+                  isbn: libro.isbn,
+                  editorial: libro.editorial,
+                  anioPublicacion: libro.anioPublicacion,
+                  genero: libro.genero,
+                  sinopsis: libro.sinopsis,
+                  portadaUrl: libro.portadaUrl,
+                  numeroPaginas: libro.numeroPaginas,
+                  autor: autores.length > 0 ? autores[0] : null,
+                  autores: autores,
+                  usuarioLibroId: usuarioLibro.id,
+                  estadoLectura: usuarioLibro.estadoLectura,
+                  valoracion: usuarioLibro.valoracion,
+                  comentario: usuarioLibro.comentario,
+                  fechaInicioLectura: usuarioLibro.fechaInicioLectura,
+                  fechaFinLectura: usuarioLibro.fechaFinLectura,
+                  paginasLeidas: usuarioLibro.paginasLeidas
+                }))
+              );
+            })
+          );
+        });
+
+        forkJoin(observables).subscribe({
+          next: (librosConEstado) => {
+            this.resultadosBusqueda = librosConEstado;
+            this.cargandoBusqueda = false;
+            
+            // Anunciar resultados encontrados
+            const mensaje = `Se encontraron ${librosConEstado.length} ${librosConEstado.length === 1 ? 'libro' : 'libros'}.`;
+            this.anunciarParaLectoresDePantalla(mensaje);
+          },
+          error: (error) => {
+            console.error('[BibliotecaPersonal] Error al obtener detalles de los libros de búsqueda', error);
+            this.notificationService.error('Error', {
+              description: 'No se pudieron cargar todos los detalles de los libros encontrados'
+            });
+            this.cargandoBusqueda = false;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('[BibliotecaPersonal] Error en la búsqueda', error);
+        this.notificationService.error('Error', {
+          description: 'No se pudo realizar la búsqueda'
+        });
+        this.cargandoBusqueda = false;
+      }
+    });
+  }
+
+  /**
+   * Limpia los resultados de búsqueda y vuelve a mostrar todos los libros
+   * @param mantenerFoco Si es verdadero, la función no intenta volver a enfocar el buscador
+   */
+  limpiarBusqueda(mantenerFoco: boolean = false): void {
+    this.terminoBusqueda = '';
+    this.mostrandoResultados = false;
+    this.resultadosBusqueda = [];
+    this.cargandoBusqueda = false;
+    
+    // Anuncio para lectores de pantalla
+    this.anunciarParaLectoresDePantalla('Búsqueda limpiada. Mostrando todos los libros.');
+  }
+
+  /**
+   * Maneja el cambio en el término de búsqueda.
+   * Limpia resultados si está vacío y realiza búsqueda inmediata si hay contenido
+   * @deprecated Usar actualizarBusqueda en su lugar
+   */
+  onTerminoBusquedaChange(): void {
+    if (!this.terminoBusqueda || this.terminoBusqueda.trim().length === 0) {
+      this.limpiarBusqueda();
+    } else if (this.terminoBusqueda.trim()) {
+      // Búsqueda inmediata sin restricción de longitud mínima
+      this.buscarLibros();
+    }
+  }
+  
+  /**
+   * Actualiza el término de búsqueda y dispara el evento de debounce
+   * para realizar la búsqueda con un retraso para evitar perder el foco
+   */
+  actualizarBusqueda(term: string): void {
+    this.terminoBusqueda = term;
+    this.searchTerms.next(term);
+    
+    // Notificar cambio de búsqueda para accesibilidad
+    if (term.length === 0) {
+      this.notificationService.info('Búsqueda limpiada', {
+        description: 'Mostrando todos los libros de la sección actual'
+      });
+    }
+  }
+
+  /**
+   * Obtiene la lista de libros a mostrar según el filtro y si hay búsqueda activa
+   */
+  getLibrosParaMostrar(): any[] {
+    if (this.mostrandoResultados) {
+      return this.resultadosBusqueda;
+    }
+
+    switch (this.filtroActual) {
+      case 'leyendo':
+        return this.librosLeyendo;
+      case 'pendientes':
+        return this.librosPendientes;
+      case 'terminados':
+        return this.librosTerminados;
+      case 'abandonados':
+        return this.librosAbandonados;
+      default:
+        return [];
+    }
+  }
+
+  /**
+   * Obtiene el título de la sección actual
+   */
+  getTituloSeccion(): string {
+    if (this.mostrandoResultados) {
+      return `Resultados de búsqueda: "${this.terminoBusqueda}"`;
+    }
+
+    switch (this.filtroActual) {
+      case 'leyendo':
+        return 'Estoy leyendo';
+      case 'pendientes':
+        return 'Pendientes por leer';
+      case 'terminados':
+        return 'Leídos';
+      case 'abandonados':
+        return 'Abandonados';
+      default:
+        return '';
+    }
+  }
+
+  /**
    * Cambia el filtro de visualización de libros y maneja la accesibilidad
    */
   cambiarFiltro(filtro: string, event?: KeyboardEvent): void {
+    // Si hay una búsqueda activa, limpiarla al cambiar de pestaña
+    if (this.mostrandoResultados) {
+      this.limpiarBusqueda();
+    }
+    
     this.filtroActual = filtro;
     
     // Si el evento existe y es un evento de teclado, mover el foco al panel correspondiente
@@ -392,23 +667,6 @@ export class BibliotecaPersonalComponent implements OnInit {
   /**
    * Genera un array para mostrar estrellas de valoración
    */
-  estrellasPorValoracion(valoracion: number | null): number[] {
-    return valoracion ? Array(valoracion).fill(0) : [];
-  }
-  
-  /**
-   * Obtiene el color de fondo según el estado del libro
-   */
-  getColorEstado(estado: string): string {
-    switch(estado) {
-      case 'LEYENDO': return 'bg-primary';
-      case 'PENDIENTE': return 'bg-warning text-dark';
-      case 'TERMINADO': return 'bg-success';
-      case 'ABANDONADO': return 'bg-secondary';
-      default: return 'bg-light text-dark';
-    }
-  }
-  
   /**
    * Obtiene la etiqueta para mostrar según el estado del libro
    */
@@ -423,10 +681,241 @@ export class BibliotecaPersonalComponent implements OnInit {
   }
   
   /**
+   * Calcula el porcentaje de progreso de lectura basado en páginas leídas y total
+   */
+  calcularProgreso(paginasLeidas: number | null | undefined, totalPaginas: number | null | undefined): number {
+    if (!paginasLeidas || !totalPaginas || paginasLeidas <= 0 || totalPaginas <= 0) {
+      return 0;
+    }
+    
+    // Asegurar que el porcentaje no exceda el 100%
+    return Math.min(Math.round((paginasLeidas / totalPaginas) * 100), 100);
+  }
+  
+  /**
    * Trunca un texto largo para mostrar una versión corta
    */
   truncarTexto(texto: string | null, longitud: number = 100): string {
     if (!texto) return '';
     return texto.length > longitud ? texto.substring(0, longitud) + '...' : texto;
+  }
+
+  /**
+   * Actualiza el progreso cuando se mueve la barra interactiva
+   */
+  actualizarProgresoBarra(): void {
+    // Asegurar que no se exceda el máximo de páginas
+    if (this.libroSeleccionado && this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas) {
+      this.libroSeleccionado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+    }
+  }
+
+  /**
+   * Valida si el formulario está listo para enviarse
+   */
+  formularioValido(): boolean {
+    if (!this.libroSeleccionado) return false;
+
+    // La fecha de inicio solo es obligatoria si hay fecha de fin
+    if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
+      return false;
+    }
+    
+    // Si hay fecha de inicio, validar que no sea futura
+    if (this.libroSeleccionado.fechaInicioLectura) {
+      const fechaInicio = new Date(this.libroSeleccionado.fechaInicioLectura);
+      const hoy = new Date();
+      if (fechaInicio > hoy) return false;
+      
+      // Si hay fecha de fin, verificar que es posterior a la de inicio
+      if (this.libroSeleccionado.fechaFinLectura) {
+        const fechaFin = new Date(this.libroSeleccionado.fechaFinLectura);
+        if (fechaFin < fechaInicio || fechaFin > hoy) return false;
+      }
+    }
+    
+    // La fecha de fin ya no es obligatoria para TERMINADO o ABANDONADO
+    
+    // Validar páginas leídas (solo si se han especificado)
+    if (this.libroSeleccionado.numeroPaginas && 
+        this.libroSeleccionado.paginasLeidas !== undefined && 
+        this.libroSeleccionado.paginasLeidas !== null) {
+      
+      if (this.libroSeleccionado.paginasLeidas < 0 || 
+          this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Muestra confirmación antes de actualizar
+   */
+  confirmarActualizacion(): void {
+    if (!this.formularioValido()) {
+      this.notificationService.warning('Datos incorrectos', {
+        description: 'Por favor, revisa los errores en el formulario antes de guardar'
+      });
+      return;
+    }
+    
+    this.notificationService.confirm({
+      title: '¿Guardar cambios?',
+      text: '¿Estás seguro de guardar los cambios realizados a este libro?',
+      icon: 'question',
+      confirmButtonText: 'Sí, guardar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result) {
+        this.actualizarEstadoLectura();
+      }
+    });
+  }
+  
+  /**
+   * Devuelve un mensaje indicando los errores de validación en el formulario
+   */
+  getMensajeErrorValidacion(): string {
+    if (!this.libroSeleccionado) return 'Falta información del libro';
+    
+    let errores = [];
+    
+    // Validar fecha de inicio si hay fecha de fin
+    if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
+      errores.push('Si indicas fecha de fin, también debes indicar fecha de inicio');
+    }
+    
+    // Validar fechas futuras
+    if (this.libroSeleccionado.fechaInicioLectura) {
+      const fechaInicio = new Date(this.libroSeleccionado.fechaInicioLectura);
+      const hoy = new Date();
+      if (fechaInicio > hoy) errores.push('La fecha de inicio no puede ser futura');
+      
+      // Validar que fecha fin sea posterior a fecha inicio
+      if (this.libroSeleccionado.fechaFinLectura) {
+        const fechaFin = new Date(this.libroSeleccionado.fechaFinLectura);
+        if (fechaFin < fechaInicio) errores.push('La fecha de fin debe ser posterior a la de inicio');
+        if (fechaFin > hoy) errores.push('La fecha de fin no puede ser futura');
+      }
+    }
+    
+    // Validar páginas leídas
+    if (this.libroSeleccionado.paginasLeidas !== undefined && this.libroSeleccionado.paginasLeidas !== null) {
+      if (this.libroSeleccionado.paginasLeidas < 0) {
+        errores.push('Las páginas leídas no pueden ser negativas');
+      } else if (this.libroSeleccionado.numeroPaginas && 
+                 this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas) {
+        errores.push('Las páginas leídas no pueden superar el total de páginas');
+      }
+    }
+    
+    return errores.length > 0 ? 'Errores: ' + errores.join('. ') : 'Completa los campos requeridos';
+  }
+
+  /**
+   * Navega a la vista de detalles del libro
+   */
+  irADetalleLibro(libro: any): void {
+    if (libro && libro.id) {
+      this.router.navigate(['/libros', libro.id]);
+    }
+  }
+
+  /**
+   * Navega a la vista de detalles del autor
+   */
+  irADetalleAutor(autor: any): void {
+    if (autor && autor.id) {
+      this.router.navigate(['/autores', autor.id]);
+    }
+  }
+
+  /**
+   * Verifica si hay errores de validación en el formulario
+   */
+  tieneErroresValidacion(): boolean {
+    if (!this.libroSeleccionado) return false;
+    
+    // Verificar si hay fecha de fin pero no fecha de inicio
+    if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
+      return true;
+    }
+    
+    // Verificar si la fecha de inicio es posterior a la fecha actual
+    if (this.libroSeleccionado.fechaInicioLectura && this.libroSeleccionado.fechaInicioLectura > this.fechaActual) {
+      return true;
+    }
+    
+    // Verificar si la fecha de fin es anterior a la fecha de inicio
+    if (this.libroSeleccionado.fechaFinLectura && this.libroSeleccionado.fechaInicioLectura && 
+        this.libroSeleccionado.fechaFinLectura < this.libroSeleccionado.fechaInicioLectura) {
+      return true;
+    }
+    
+    // Verificar si la fecha de fin es posterior a la fecha actual
+    if (this.libroSeleccionado.fechaFinLectura && this.libroSeleccionado.fechaFinLectura > this.fechaActual) {
+      return true;
+    }
+    
+    // Verificar páginas leídas
+    if (this.libroSeleccionado.paginasLeidas !== null && this.libroSeleccionado.paginasLeidas !== undefined) {
+      if (this.libroSeleccionado.paginasLeidas < 0 || 
+          (this.libroSeleccionado.numeroPaginas && this.libroSeleccionado.paginasLeidas > this.libroSeleccionado.numeroPaginas)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Limpia los recursos al destruir el componente
+   */
+  ngOnDestroy(): void {
+    // Notificar a los observables que se complete la suscripción
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Maneja los cambios en la fecha de inicio de lectura
+   */
+  onFechaInicioChange(): void {
+    if (this.libroSeleccionado?.fechaInicioLectura && this.libroSeleccionado?.fechaFinLectura) {
+      // Validar que la fecha de inicio no sea posterior a la fecha de fin
+      if (new Date(this.libroSeleccionado.fechaInicioLectura) > new Date(this.libroSeleccionado.fechaFinLectura)) {
+        // Limpiar la fecha de fin si es anterior a la de inicio
+        this.libroSeleccionado.fechaFinLectura = '';
+      }
+    }
+  }
+
+  /**
+   * Maneja los cambios en la fecha de fin de lectura
+   */
+  onFechaFinChange(): void {
+    if (this.libroSeleccionado?.fechaFinLectura && !this.libroSeleccionado?.fechaInicioLectura) {
+      // Si hay fecha de fin pero no de inicio, establecer la fecha de inicio como la misma fecha de fin
+      this.libroSeleccionado.fechaInicioLectura = this.libroSeleccionado.fechaFinLectura;
+    }
+  }
+
+  /**
+   * Anuncia mensajes para lectores de pantalla usando regiones live
+   * @param mensaje Mensaje a anunciar
+   */
+  anunciarParaLectoresDePantalla(mensaje: string): void {
+    const liveRegion = document.createElement('div');
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.setAttribute('class', 'visually-hidden');
+    liveRegion.textContent = mensaje;
+    document.body.appendChild(liveRegion);
+    
+    // Eliminar después de un tiempo para no sobrecargar el DOM
+    setTimeout(() => {
+      document.body.removeChild(liveRegion);
+    }, 1000);
   }
 }

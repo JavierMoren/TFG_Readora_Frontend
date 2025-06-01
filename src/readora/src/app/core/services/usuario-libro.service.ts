@@ -61,6 +61,29 @@ export class UsuarioLibroService {
     );
   }
 
+  getUsuariosByLibroId(libroId: number): Observable<UsuarioLibro[]> {
+    return this.http.get<UsuarioLibro[]>(`${this.apiUrl}/libro/${libroId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Busca libros en la biblioteca personal de un usuario filtrados por estado de lectura y título
+   * @param usuarioId ID del usuario
+   * @param estado Estado de lectura (LEYENDO, TERMINADO, PENDIENTE, ABANDONADO)
+   * @param query Título o parte del título del libro a buscar
+   * @returns Observable con la lista de libros que coinciden con los criterios
+   */
+  buscarLibrosPorEstadoYTitulo(usuarioId: number, estado: string, query: string): Observable<UsuarioLibro[]> {
+    let params = new HttpParams()
+      .set('estado', estado)
+      .set('query', query);
+    
+    return this.http.get<UsuarioLibro[]>(`${this.apiUrl}/usuario/${usuarioId}/buscar`, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getUsuarioLibrosDetalladosPaginados(page: number = 0, size: number = 10, sort: string = 'id', direction: string = 'asc'): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())

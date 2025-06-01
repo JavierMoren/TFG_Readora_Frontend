@@ -1,31 +1,28 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, throwError, Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroments';
-import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AutenticacionService {
-  
-  private apiUrl = `${environment.apiUrl}/v1/authenticate`;
-  private logoutUrl = `${environment.apiUrl}/v1/logout`;
-  private checkAuthUrl = `${environment.apiUrl}/v1/check-auth`;
-  private isAuthenticated = new BehaviorSubject<boolean>(false);
-  private token: string | null = null; // Para compatibilidad con componentes existentes
+  readonly apiUrl = `${environment.apiUrl}/v1/authenticate`;
+  readonly logoutUrl = `${environment.apiUrl}/v1/logout`;
+  readonly checkAuthUrl = `${environment.apiUrl}/v1/check-auth`;
+  readonly isAuthenticated = new BehaviorSubject<boolean>(false);
+  private token: string | null = null;
 
-  constructor(private http: HttpClient, private router: Router) {
-    // Comprobar si el usuario está autenticado al inicializar el servicio
+  constructor(private readonly http: HttpClient, private readonly router: Router) {
     this.checkAuthentication();
-  }  checkAuthentication(): void {
-    // Consultar al backend sobre el estado de autenticación utilizando las cookies
+  }
+
+  checkAuthentication(): void {
     this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
       .pipe(
         catchError((error) => {
-          // Si hay un error, asumimos que no está autenticado
           console.error('[AutenticacionService] Error al verificar autenticación', error);
           this.isAuthenticated.next(false);
           this.token = null;
@@ -33,35 +30,28 @@ export class AutenticacionService {
         })
       )
       .subscribe(response => {
-        // Verificar explícitamente si la respuesta indica que el usuario está autenticado
         const isAuth = response && response.isAuthenticated === true;
         this.isAuthenticated.next(isAuth);
-        
-        // Si el backend nos proporciona un token en la respuesta, lo almacenamos
-        // para compatibilidad con los componentes que lo utilizan
-        if (response && response.token) {
+        if (response?.token) {
           this.token = response.token;
         }
       });
-  }  authenticateUsuario(usuario: string, contrasenna: string): Observable<any> {
+  }
+
+  authenticateUsuario(usuario: string, contrasenna: string): Observable<any> {
     return this.http.post<any>(
       this.apiUrl,
       { usuario, contrasenna },
       { 
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-        withCredentials: true // Importante para que se envíen y reciban cookies
+        withCredentials: true
       }
     ).pipe(
       tap((response) => {
-        // Cuando la autenticación es exitosa, actualizamos el estado
         if (response && response.mensage === "Authentication successful") {
           this.isAuthenticated.next(true);
-          
-          // Verificar el estado actual llamando a checkAuthentication
           setTimeout(() => this.checkAuthentication(), 500);
-          
-          // Si el backend devuelve un token en la respuesta, lo guardamos para compatibilidad
-          if (response && response.token) {
+          if (response?.token) {
             this.token = response.token;
           }
         }
@@ -71,38 +61,60 @@ export class AutenticacionService {
         return throwError(() => error);
       })
     );
-  }  isLoggedIn(): Observable<boolean> {
-    // Al suscribirse a este observable, verificamos primero el estado de autenticación
+  }
+
+  isLoggedIn(): Observable<boolean> {
     this.checkAuthentication();
     return this.isAuthenticated.asObservable();
-  }  logout(): void {
-    // Llamar al endpoint de logout para invalidar la cookie del lado del servidor
-    this.http.post<any>(this.logoutUrl, {}, { withCredentials: true })
-      .subscribe({
-        next: () => {
+  }
+
+  logout(): Observable<any> {
+    return this.http.post<any>(this.logoutUrl, {}, { withCredentials: true })
+      .pipe(
+        tap(() => {
           this.isAuthenticated.next(false);
           this.token = null;
-          this.router.navigate(['/']);
-        },
-        error: (error) => {
-          console.error('[Autenticacion] Error al cerrar sesión', error);
-          // Incluso si hay un error, limpiamos el estado local
+          localStorage.removeItem('user_data');
+          sessionStorage.removeItem('auth_provider');
+        }),
+        catchError((error) => {
+          console.error('[AutenticacionService] Error al cerrar sesión localmente', error);
+          // Limpiar estado local incluso si falla la petición al servidor
           this.isAuthenticated.next(false);
           this.token = null;
-          this.router.navigate(['/']);
-        }
-      });
-  }  getUserInfo(): Observable<any> {
+          document.cookie = 'jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; SameSite=Lax;';
+          document.cookie = 'jwt_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+          sessionStorage.removeItem('auth_provider');
+          localStorage.removeItem('user_data');
+          return of(null); // Retornar un observable válido aunque haya error
+        })
+      );
+  }
+
+  private clearEssentialCookies(): void {
+    const essentialCookies = ['jwt_token', 'JSESSIONID']; 
+    
+    essentialCookies.forEach(name => {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; SameSite=Lax;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+    });
+  }
+  
+  getUserInfo(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/v1/user-info`, { withCredentials: true }).pipe(
       catchError((error) => {
         console.error('[AutenticacionService] Error al obtener información del usuario', error);
         return throwError(() => error);
       })
     );
-  }  setToken(token: string): void {
+  }
+  
+  setToken(token: string): void {
     this.token = token;
     this.isAuthenticated.next(!!token);
-  }  getToken(): string | null {
+  }
+  
+  getToken(): string | null {
     if (!this.token && this.isAuthenticated.getValue()) {
       this.http.get<any>(this.checkAuthUrl, { withCredentials: true })
         .pipe(
@@ -112,7 +124,7 @@ export class AutenticacionService {
           })
         )
         .subscribe(response => {
-          if (response && response.token) {
+          if (response?.token) {
             this.token = response.token;
           }
         });

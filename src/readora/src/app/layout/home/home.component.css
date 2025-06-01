@@ -111,7 +111,7 @@
 }
 
 .book-2 .book-cover {
-  background-image: linear-gradient(45deg, #4a93e0, var(--primary-light));
+  background-image: linear-gradient(45deg, var(--primary-color), var(--primary-light));
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -120,14 +120,14 @@
   height: 250px;
   top: 40%;
   left: 25%;
-  background-color: #5e9ae2;
+  background-color: var(--primary-light);
   transform: rotate(2deg);
   z-index: 1;
   animation: float 5s 1s infinite;
 }
 
 .book-3 .book-cover {
-  background-image: linear-gradient(45deg, #2b5b8c, var(--primary-dark));
+  background-image: linear-gradient(45deg, var(--primary-dark), var(--primary-light));
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -152,7 +152,7 @@
 
 /* En el modo oscuro, mantenemos un color distintivo */
 [data-theme="dark"] .features-section {
-  background-color: #2f353a; /* Valor original de --background-subtle en modo oscuro */
+  background-color: var(--background-subtle);
 }
 
 .section-title {
@@ -192,7 +192,7 @@
 .feature-icon {
   width: 70px;
   height: 70px;
-  background-color: rgba(58, 110, 165, 0.1);
+  background-color: rgba(var(--primary-color-rgb, 77, 107, 254), 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -348,19 +348,11 @@
 
 /* Modo oscuro específico */
 [data-theme="dark"] .feature-icon {
-  background-color: rgba(86, 135, 189, 0.15);
+  background-color: rgba(var(--primary-color-rgb, 77, 107, 254), 0.15);
 }
 
 [data-theme="dark"] .cta-section {
-  background: linear-gradient(135deg, var(--primary-color), #2a5280);
-}
-
-[data-theme="dark"] .cta-button {
-  color: var(--primary-dark);
-}
-
-[data-theme="dark"] .cta-button:hover {
-  color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
 }
 
 /* Tarjetas invisibles en ambos temas */

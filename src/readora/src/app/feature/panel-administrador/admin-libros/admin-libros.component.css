@@ -1,10 +1,24 @@
+/* Estilos para el contenedor de la tabla */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Estilos para la tabla principal */
+.table {
+  width: 100%;
+  table-layout: fixed;
+}
+
 /* Estilos para las imágenes de libros en el panel de administración */
 .img-thumbnail {
   height: 80px;
   width: 60px;
   object-fit: cover;
   object-position: center top;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -47,6 +61,35 @@
 /* Garantizar visibilidad del texto en modo oscuro */
 [data-theme="dark"] td {
   color: var(--text-primary) !important;
+}
+
+/* Estilos específicos para columnas de la tabla */
+.table th, .table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estilos específicos para columnas con contenido largo */
+.text-truncate-container {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Evita que los botones de acciones se apilen en resoluciones pequeñas */
+.actions-column {
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+/* Mejora la visualización en pantallas pequeñas */
+@media (max-width: 768px) {
+  .table-responsive {
+    border: 0;
+    margin-bottom: 0;
+  }
 }
 
 [data-theme="dark"] td a,

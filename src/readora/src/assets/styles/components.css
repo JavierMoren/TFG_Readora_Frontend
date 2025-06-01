@@ -170,7 +170,7 @@
 
 /* Estrellas de valoración */
 .stars-rating {
-  color: #ffc107;
+  color: var(--warning-color);
 }
 
 /* Estilos para los contenedores de imágenes */

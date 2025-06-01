@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AutorService } from '../../../core/services/autor.service';
 import { LibrosService } from '../../../core/services/libros.service';
 import { StorageService } from '../../../core/services/storage.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Autor } from '../../../models/autor/autor.model';
 import { Libro } from '../../../models/libro/libro.model';
 
@@ -26,16 +27,27 @@ export class DetalleAutorComponent implements OnInit {
   readonly autorPlaceholder = 'assets/placeholders/author-placeholder.svg';
 
   constructor(
-    private route: ActivatedRoute,
-    private autorService: AutorService,
-    private libroService: LibrosService,
-    public storageService: StorageService
+    private readonly route: ActivatedRoute,
+    private readonly autorService: AutorService,
+    private readonly libroService: LibrosService,
+    public readonly storageService: StorageService,
+    private readonly notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
     // Obtener el ID del autor de la URL
     this.route.params.subscribe(params => {
-      this.autorId = +params['id'];
+      const idParam = params['id'];
+      this.autorId = +idParam;
+      
+      // Validar que el ID sea un número válido
+      if (isNaN(this.autorId) || this.autorId <= 0) {
+        console.error('[DetalleAutor] ID de autor inválido:', idParam);
+        this.error = 'El ID del autor no es válido.';
+        this.loading = false;
+        return;
+      }
+      
       this.loadAutor();
     });
   }
@@ -53,12 +65,15 @@ export class DetalleAutorComponent implements OnInit {
         console.error('Error al cargar el autor', error);
         this.error = 'No se pudo cargar la información del autor. Por favor, inténtelo de nuevo más tarde.';
         this.loading = false;
+        this.notificationService.error('Error', {
+          description: 'No se pudo cargar la información del autor'
+        });
       }
     });
   }
 
   cargarLibros(): void {
-    if (this.autor && this.autor.id) {
+    if (this.autor?.id) {
       this.autorService.getLibrosByAutorId(this.autor.id).subscribe({
         next: (libros: Libro[]) => {
           this.libros = libros;
@@ -67,6 +82,9 @@ export class DetalleAutorComponent implements OnInit {
         error: (error: any) => {
           console.error('Error al cargar libros del autor', error);
           this.loading = false;
+          this.notificationService.error('Error', {
+            description: 'No se pudieron cargar los libros del autor'
+          });
         }
       });
     } else {

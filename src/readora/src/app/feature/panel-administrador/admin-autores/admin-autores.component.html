@@ -11,6 +11,80 @@
       </button>
     </div>
   </div>
+  
+  <!-- Campo de búsqueda -->
+  <div *ngIf="!showForm" class="mb-4">
+    <div class="form-group mb-3">
+      <label class="form-label">Buscar por:</label>
+      <div class="btn-group w-100" role="group">
+        <input type="radio" class="btn-check" name="tipoBusqueda" id="buscarTexto" 
+               [(ngModel)]="tipoBusqueda" [value]="'texto'" autocomplete="off">
+        <label class="btn btn-outline-primary" for="buscarTexto">
+          <span class="material-icons small me-1">person</span>
+          Nombre/Apellido
+        </label>
+        
+        <input type="radio" class="btn-check" name="tipoBusqueda" id="buscarId" 
+               [(ngModel)]="tipoBusqueda" [value]="'id'" autocomplete="off">
+        <label class="btn btn-outline-primary" for="buscarId">
+          <span class="material-icons small me-1">tag</span>
+          ID
+        </label>
+      </div>
+    </div>
+
+    <!-- Búsqueda por texto (nombre, apellido) -->
+    <div *ngIf="tipoBusqueda === 'texto'" class="input-group">
+      <span class="input-group-text">
+        <span class="material-icons small">search</span>
+      </span>
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Buscar por nombre o apellido..." 
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="buscarAutores()">
+      <button 
+        class="btn btn-primary" 
+        type="button" 
+        (click)="buscarAutores()">
+        Buscar
+      </button>
+      <button 
+        *ngIf="searchTerm" 
+        class="btn btn-outline-secondary" 
+        type="button" 
+        (click)="limpiarBusqueda()">
+        Limpiar
+      </button>
+    </div>
+
+    <!-- Búsqueda por ID -->
+    <div *ngIf="tipoBusqueda === 'id'" class="input-group">
+      <span class="input-group-text">
+        <span class="material-icons small">tag</span>
+      </span>
+      <input 
+        type="number" 
+        class="form-control" 
+        placeholder="Buscar por ID del autor..." 
+        [(ngModel)]="searchId"
+        (keyup.enter)="buscarAutorPorId()">
+      <button 
+        class="btn btn-primary" 
+        type="button" 
+        (click)="buscarAutorPorId()">
+        Buscar
+      </button>
+      <button 
+        *ngIf="searchId" 
+        class="btn btn-outline-secondary" 
+        type="button" 
+        (click)="limpiarBusquedaId()">
+        Limpiar
+      </button>
+    </div>
+  </div>
 
   <!-- Formulario para añadir/editar autor -->
   <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
@@ -93,6 +167,13 @@
             <!-- Vista previa de la imagen actual si existe -->
             <div *ngIf="previewImageUrl" class="mb-2" style="max-width: 150px;">
               <img [src]="previewImageUrl" alt="Vista previa" class="img-fluid rounded">
+              <!-- Botón para eliminar la foto -->
+              <div class="d-flex mt-2 gap-2">
+                <button *ngIf="currentAutor.fotoUrl" type="button" class="btn btn-danger btn-sm d-inline-flex align-items-center" (click)="eliminarFoto()">
+                  <span class="material-icons small me-1">delete</span>
+                  Eliminar foto
+                </button>
+              </div>
             </div>
             <div class="flex-grow-1">
               <input type="file" class="form-control" id="foto" (change)="onFileSelected($event)" accept="image/*">

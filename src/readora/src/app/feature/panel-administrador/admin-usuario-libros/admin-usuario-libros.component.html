@@ -9,6 +9,70 @@
       <span>Registrar Lectura</span>
     </button>
   </div>
+  
+  <!-- Selector de tipo de búsqueda -->
+  <div *ngIf="!showForm" class="mb-4">
+    <div class="form-group mb-3">
+      <label class="form-label">Buscar por:</label>
+      <div class="btn-group w-100" role="group">
+        <input type="radio" class="btn-check" name="tipoBusqueda" id="buscarUsuario" 
+               [(ngModel)]="tipoBusqueda" [value]="'usuario'" autocomplete="off">
+        <label class="btn btn-outline-primary" for="buscarUsuario">
+          <span class="material-icons small me-1">person</span>
+          Usuario
+        </label>
+        
+        <input type="radio" class="btn-check" name="tipoBusqueda" id="buscarLibro" 
+               [(ngModel)]="tipoBusqueda" [value]="'libro'" autocomplete="off">
+        <label class="btn btn-outline-primary" for="buscarLibro">
+          <span class="material-icons small me-1">book</span>
+          Libro
+        </label>
+      </div>
+    </div>
+    
+    <!-- Buscador por ID de usuario -->
+    <div *ngIf="tipoBusqueda === 'usuario'" class="mb-3">
+      <div class="input-group">
+        <span class="input-group-text bg-light">
+          <span class="material-icons small">person</span>
+        </span>
+        <input type="number" [(ngModel)]="filtroUsuarioId" class="form-control" placeholder="Buscar por ID de usuario..." min="1">
+        <button (click)="buscarPorUsuarioId()" class="btn btn-primary" [disabled]="!filtroUsuarioId">
+          Buscar
+        </button>
+        <button *ngIf="filtroUsuarioId" (click)="limpiarFiltroUsuario()" class="btn btn-outline-secondary">
+          <span class="material-icons small">clear</span>
+        </button>
+      </div>
+      <small class="text-muted">Introduce el ID del usuario para ver todas sus lecturas</small>
+    </div>
+    
+    <!-- Buscador por ID de libro -->
+    <div *ngIf="tipoBusqueda === 'libro'" class="mb-3">
+      <div class="input-group">
+        <span class="input-group-text bg-light">
+          <span class="material-icons small">book</span>
+        </span>
+        <input type="number" [(ngModel)]="filtroLibroId" class="form-control" placeholder="Buscar por ID de libro..." min="1">
+        <button (click)="buscarPorLibroId()" class="btn btn-primary" [disabled]="!filtroLibroId">
+          Buscar
+        </button>
+        <button *ngIf="filtroLibroId" (click)="limpiarFiltroLibro()" class="btn btn-outline-secondary">
+          <span class="material-icons small">clear</span>
+        </button>
+      </div>
+      <small class="text-muted">Introduce el ID del libro para ver todos los usuarios que lo han leído</small>
+    </div>
+    
+    <!-- Botón para limpiar filtros y mostrar todo -->
+    <div *ngIf="filtroUsuarioId || filtroLibroId" class="text-end mt-3">
+      <button (click)="limpiarFiltros()" class="btn btn-secondary btn-sm">
+        <span class="material-icons small me-1">filter_alt_off</span>
+        Mostrar todas las lecturas
+      </button>
+    </div>
+  </div>
 
   <!-- Formulario para añadir/editar relación usuario-libro -->
   <div *ngIf="showForm" class="card shadow-sm border-0 mb-4">
@@ -18,7 +82,7 @@
     </div>
     
     <div class="card-body">
-      <form (submit)="saveUsuarioLibro()" #lecturaForm="ngForm" class="mb-3">
+      <form (submit)="saveUsuarioLibro(); $event.preventDefault();" #lecturaForm="ngForm" class="mb-3">
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-6">
             <label for="usuarioId" class="form-label">ID del Usuario <span class="text-danger">*</span></label>
@@ -49,6 +113,7 @@
                 class="form-control" 
                 required
                 min="1"
+                (change)="onLibroChange()"
                 #libroIdInput="ngModel"
                 [ngClass]="{'is-invalid': libroIdInput.invalid && (libroIdInput.dirty || libroIdInput.touched)}">
             </div>
@@ -88,15 +153,13 @@
               <input type="date" id="fechaFinLectura" [(ngModel)]="currentUsuarioLibro.fechaFinLectura" name="fechaFinLectura" 
                 class="form-control"
                 [min]="currentUsuarioLibro.fechaInicioLectura"
-                [max]="getMaxDate()"
                 #fechaFinInput="ngModel"
                 [ngClass]="{'is-invalid': fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched)}">
             </div>
             <div *ngIf="fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched)" class="text-danger small mt-1">
               <span *ngIf="fechaFinInput.errors?.['min']">La fecha de finalización debe ser posterior a la fecha de inicio</span>
-              <span *ngIf="fechaFinInput.errors?.['max']">La fecha no puede ser futura</span>
             </div>
-            <p class="form-text text-secondary small">Dejar en blanco si aún no ha terminado la lectura</p>
+            <p class="form-text text-secondary small">Dejar en blanco si aún no ha terminado la lectura. Para libros pendientes puede indicar una fecha futura planificada.</p>
           </div>
         </div>
         
@@ -111,6 +174,7 @@
                 class="form-control" 
                 required
                 #estadoInput="ngModel"
+                (change)="onEstadoLecturaChange()"
                 [ngClass]="{'is-invalid': estadoInput.invalid && (estadoInput.dirty || estadoInput.touched)}">
                 <option value="LEYENDO">LEYENDO</option>
                 <option value="TERMINADO">TERMINADO</option>
@@ -141,6 +205,40 @@
           </div>
         </div>
         
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <label for="paginasLeidas" class="form-label">Páginas leídas <span *ngIf="detalleLibro && detalleLibro.numeroPaginas">(de {{detalleLibro.numeroPaginas}})</span></label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <span class="material-icons small">menu_book</span>
+              </span>
+              <input type="number" id="paginasLeidas" [(ngModel)]="currentUsuarioLibro.paginasLeidas" name="paginasLeidas"
+                class="form-control"
+                min="0"
+                [max]="detalleLibro?.numeroPaginas"
+                #paginasLeidasInput="ngModel"
+                [ngClass]="{'is-invalid': paginasLeidasInput.invalid && (paginasLeidasInput.dirty || paginasLeidasInput.touched)}">
+              <span class="input-group-text" *ngIf="detalleLibro && detalleLibro.numeroPaginas">de {{detalleLibro.numeroPaginas}}</span>
+            </div>
+            <div *ngIf="paginasLeidasInput.invalid && (paginasLeidasInput.dirty || paginasLeidasInput.touched)" class="text-danger small mt-1">
+              <span *ngIf="paginasLeidasInput.errors?.['min']">Las páginas leídas no pueden ser negativas</span>
+              <span *ngIf="paginasLeidasInput.errors?.['max']">Las páginas leídas no pueden superar el total de páginas</span>
+            </div>
+            
+            <!-- Barra de progreso -->
+            <div class="progress mt-2" style="height: 8px;" *ngIf="detalleLibro && detalleLibro.numeroPaginas">
+              <div class="progress-bar" role="progressbar"
+                   [style.width.%]="calcularProgreso(currentUsuarioLibro.paginasLeidas, detalleLibro.numeroPaginas)"
+                   [attr.aria-valuenow]="calcularProgreso(currentUsuarioLibro.paginasLeidas, detalleLibro.numeroPaginas)"
+                   aria-valuemin="0" aria-valuemax="100">
+              </div>
+            </div>
+            <p class="text-secondary small mt-1" *ngIf="detalleLibro && detalleLibro.numeroPaginas">
+              Progreso: {{calcularProgreso(currentUsuarioLibro.paginasLeidas, detalleLibro.numeroPaginas)}}%
+            </p>
+          </div>
+        </div>
+
         <div class="mb-3">
           <label for="comentario" class="form-label">Comentario</label>
           <textarea id="comentario" [(ngModel)]="currentUsuarioLibro.comentario" name="comentario" 
@@ -206,6 +304,12 @@
               {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
             </span>
           </th>
+          <th scope="col" class="text-primary small">
+            Progreso
+          </th>
+          <th scope="col" class="text-primary small">
+            Notas
+          </th>
           <th scope="col" class="text-primary small text-center">Acciones</th>
         </tr>
       </thead>
@@ -240,6 +344,53 @@
               {{usuarioLibro.estadoLectura}}
             </span>
           </td>
+          <td style="width: 170px;">
+            <div class="d-flex flex-column">
+              <!-- Mostrar progreso si hay datos y no está en estado ABANDONADO -->
+              <div *ngIf="usuarioLibro.paginasLeidas !== undefined && usuarioLibro.paginasLeidas !== null && usuarioLibro.numeroPaginas && usuarioLibro.estadoLectura !== 'ABANDONADO'">
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar" role="progressbar"
+                      [ngClass]="{
+                        'bg-warning': usuarioLibro.estadoLectura === 'PENDIENTE',
+                        'bg-info': usuarioLibro.estadoLectura === 'LEYENDO',
+                        'bg-success': usuarioLibro.estadoLectura === 'TERMINADO'
+                      }"
+                      [style.width.%]="calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)"
+                      [attr.aria-valuenow]="calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)"
+                      aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                  <span class="small text-secondary">
+                    {{calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)}}%
+                  </span>
+                  <span class="small text-secondary">
+                    {{usuarioLibro.paginasLeidas}}/{{usuarioLibro.numeroPaginas}}
+                  </span>
+                </div>
+              </div>
+              <!-- Mensaje cuando no hay datos de páginas -->
+              <span *ngIf="usuarioLibro.paginasLeidas === undefined || usuarioLibro.paginasLeidas === null || !usuarioLibro.numeroPaginas" class="small text-secondary">
+                Sin datos de progreso
+              </span>
+              <!-- Mensaje para libros abandonados -->
+              <span *ngIf="usuarioLibro.estadoLectura === 'ABANDONADO'" class="small text-secondary">
+                No aplicable
+              </span>
+            </div>
+          </td>
+          <td style="max-width: 200px;">
+            <!-- Mostrar comentarios/notas -->
+            <div *ngIf="usuarioLibro.comentario" class="notas-container">
+              <div class="notas-content text-secondary small">
+                <span class="material-icons small me-1 text-primary align-middle">note</span>
+                <span>{{usuarioLibro.comentario | slice:0:60}}{{usuarioLibro.comentario.length > 60 ? '...' : ''}}</span>
+              </div>
+            </div>
+            <div *ngIf="!usuarioLibro.comentario" class="small text-secondary">
+              Sin notas
+            </div>
+          </td>
           <td class="text-center">
             <div class="d-flex justify-content-center gap-2">
               <button (click)="prepareUpdateUsuarioLibro(usuarioLibro)" 
@@ -256,7 +407,7 @@
         
         <!-- Mensaje cuando no hay relaciones -->
         <tr *ngIf="usuarioLibros.length === 0">
-          <td colspan="6" class="text-center text-secondary py-4">
+          <td colspan="8" class="text-center text-secondary py-4">
             No hay lecturas registradas
           </td>
         </tr>
@@ -334,3 +485,5 @@
     </div>
   </div>
 </div>
+
+<!-- El modal de confirmación ha sido reemplazado por SweetAlert2 desde NotificationService -->

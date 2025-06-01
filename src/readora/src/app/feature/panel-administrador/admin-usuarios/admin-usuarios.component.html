@@ -34,11 +34,17 @@
               </span>
               <input type="text" id="usuario" formControlName="usuario" 
                 class="form-control"
-                [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched}">
+                [readonly]="isEditing && esUsuarioGoogle"
+                [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched, 
+                           'bg-light-subtle': isEditing && esUsuarioGoogle}">
             </div>
             <div *ngIf="usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio</span>
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">Solo letras, números y guion bajo. Entre 4 y 100 caracteres</span>
+            </div>
+            <div *ngIf="isEditing && esUsuarioGoogle" class="form-text text-info small mt-1">
+              <span class="material-icons small align-middle me-1">info</span>
+              El nombre de usuario no puede modificarse en cuentas vinculadas con Google.
             </div>
           </div>
           
@@ -50,11 +56,17 @@
               </span>
               <input type="email" id="gmail" formControlName="gmail" 
                 class="form-control"
-                [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched}">
+                [readonly]="isEditing && esUsuarioGoogle"
+                [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched,
+                           'bg-light-subtle': isEditing && esUsuarioGoogle}">
             </div>
             <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El email es obligatorio</span>
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Introduce un email válido</span>
+            </div>
+            <div *ngIf="isEditing && esUsuarioGoogle" class="form-text text-info small mt-1">
+              <span class="material-icons small align-middle me-1">info</span>
+              El correo electrónico no puede modificarse en cuentas vinculadas con Google.
             </div>
           </div>
         </div>
@@ -111,11 +123,29 @@
           <small class="form-text text-muted">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
         </div>
         
-        <!-- Opción para cambiar la contraseña solo en modo edición -->
-        <div *ngIf="isEditing" class="form-check mb-3">
+        <!-- Opción para cambiar la contraseña solo en modo edición y si NO es usuario de Google -->
+        <div *ngIf="isEditing && !esUsuarioGoogle" class="form-check mb-3">
           <input type="checkbox" id="cambiarContrasenna" [(ngModel)]="cambiarContrasenna" [ngModelOptions]="{standalone: true}" 
             class="form-check-input">
           <label for="cambiarContrasenna" class="form-check-label">Cambiar contraseña</label>
+        </div>
+        
+        <!-- Indicador visual para cuentas de Google -->
+        <div *ngIf="isEditing && esUsuarioGoogle" class="alert alert-info mb-3 d-flex align-items-center">
+          <span class="material-icons me-2">google</span>
+          <div>
+            <strong>Cuenta de Google</strong>
+            <p class="mb-0">Este usuario inicia sesión con Google. Algunos campos no se pueden modificar.</p>
+          </div>
+        </div>
+        
+        <!-- Mensaje informativo para usuarios de Google -->
+        <div *ngIf="isEditing && esUsuarioGoogle" class="alert alert-info d-flex align-items-center mb-3">
+          <span class="material-icons me-2">google</span>
+          <div>
+            <strong>Usuario autenticado con Google</strong>
+            <p class="mb-0">Este usuario inicia sesión mediante Google y no utiliza contraseña tradicional.</p>
+          </div>
         </div>
         
         <!-- Formulario de cambio de contraseña que solo aparece si se marca la casilla -->

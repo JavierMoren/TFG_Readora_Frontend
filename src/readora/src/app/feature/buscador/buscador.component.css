@@ -30,7 +30,7 @@
 .input-group .form-control {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
   background-color: var(--input-bg);
   color: var(--text-primary);
   font-size: 1.1rem;
@@ -39,7 +39,7 @@
 }
 
 .input-group .form-control:focus {
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
   box-shadow: 0 0 0 0.25rem rgba(77, 107, 254, 0.3);
   outline: none;
 }
@@ -47,16 +47,16 @@
 .input-group .btn {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   box-shadow: 0 3px 6px rgba(77, 107, 254, 0.2);
 }
 
 .input-group .btn:hover {
-  background-color: #3A58D6;
-  border-color: #3A58D6;
+  background-color: var(--primary-color-dark);
+  border-color: var(--primary-color-dark);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(77, 107, 254, 0.3);
 }
@@ -68,22 +68,22 @@
 
 /* Personalización de los botones de radio */
 .btn-check:checked + .btn-outline-primary {
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   box-shadow: 0 3px 6px rgba(77, 107, 254, 0.2);
 }
 
 .btn-outline-primary {
-  color: #4D6BFE;
-  border-color: #4D6BFE;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .btn-outline-primary:hover {
   background-color: rgba(77, 107, 254, 0.1);
-  color: #4D6BFE;
-  border-color: #4D6BFE;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 /* Ajustes para tema oscuro */
@@ -95,7 +95,7 @@
 [data-theme="dark"] .input-group .form-control {
   background-color: var(--input-bg);
   color: var(--text-primary);
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
 }
 
 [data-theme="dark"] .input-group .form-control::placeholder {
@@ -113,7 +113,7 @@
 
 [data-theme="dark"] .btn-outline-primary {
   color: #7791FE;
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
 }
 
 [data-theme="dark"] .btn-outline-primary:hover {
@@ -123,7 +123,7 @@
 }
 
 [data-theme="dark"] .btn-check:checked + .btn-outline-primary {
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: white;
 }

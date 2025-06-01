@@ -11,12 +11,38 @@
   border: 1px solid var(--border-color);
   background-color: var(--card-bg);
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Estilos para las imágenes de autores */
+.author-image .img-author {
+  border: 2px solid var(--card-bg);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+}
+
+/* Estilos para la biografía del autor */
+.author-bio {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Iconos para información del autor */
+.bi {
+  font-size: 0.875rem;
 }
 
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
-  border-color: #4D6BFE;
+  border-color: var(--primary-color);
 }
 
 .book-cover img {
@@ -50,6 +76,7 @@
   color: var(--text-secondary);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.6;
@@ -64,15 +91,15 @@
 }
 
 .pagination .page-item.active .page-link {
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: #fff;
   box-shadow: 0 0.25rem 0.5rem rgba(77, 107, 254, 0.25);
 }
 
 .pagination .page-link:hover {
   background-color: var(--background-subtle);
-  color: #4D6BFE;
+  color: var(--primary-color);
   z-index: 2;
 }
 
@@ -94,23 +121,16 @@
   text-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
-/* Estilo para las imágenes de autores */
-.author-image .img-author {
-  border: 2px solid var(--card-bg);
-  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
-  border-radius: 50%;
-}
-
 /* Estilos para botones de acción en las tarjetas */
 .btn-primary, .btn-outline-primary:hover {
-  background-color: #4D6BFE;
-  border-color: #4D6BFE;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   box-shadow: 0 0.25rem 0.5rem rgba(77, 107, 254, 0.25);
 }
 
 .btn-outline-primary {
-  color: #4D6BFE;
-  border-color: #4D6BFE;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
   font-weight: 500;
 }
 
@@ -166,4 +186,190 @@
 [data-theme="dark"] .btn-outline-primary:hover {
   background-color: #4D6BFE;
   color: white;
+}
+
+/* Estilos para la animación de importación */
+.card.importing {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@keyframes pulse-glow {
+  0% {
+    background-color: rgba(32, 74, 135, 0.8);
+    box-shadow: 0 0 10px rgba(32, 74, 135, 0.5);
+  }
+  50% {
+    background-color: rgba(32, 74, 135, 0.85);
+    box-shadow: 0 0 25px rgba(32, 74, 135, 0.8);
+  }
+  100% {
+    background-color: rgba(32, 74, 135, 0.8);
+    box-shadow: 0 0 10px rgba(32, 74, 135, 0.5);
+  }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dots-loading {
+  0%, 20% { opacity: 0; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0; }
+}
+
+.import-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(32, 74, 135, 0.85) 0%, rgba(45, 85, 155, 0.9) 100%);
+  z-index: 10;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(3px);
+  animation: pulse-glow 2s ease-in-out infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.import-content {
+  animation: floating 3s ease infinite;
+}
+
+.import-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.import-icon {
+  font-size: 2.5rem;
+  color: #fff;
+  display: block;
+}
+
+.import-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  width: 1.5rem;
+  height: 1.5rem;
+  animation: rotate 1s linear infinite;
+}
+
+.import-text h6 {
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.import-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.3px;
+}
+
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.progress-dots .dot {
+  width: 6px;
+  height: 6px;
+  background-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: dots-loading 1.5s ease-in-out infinite;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+.progress-dots .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.progress-dots .dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.progress-dots .dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+/* Efecto adicional para el card durante la importación */
+.card.importing {
+  transform: scale(0.98);
+  transition: transform 0.3s ease;
+}
+
+/* Animación pulsante para el overlay */
+@keyframes pulse {
+  0% {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  50% {
+    background-color: rgba(77, 107, 254, 0.8);
+  }
+  100% {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Estilos para paginación responsiva */
+.pagination-container {
+  margin-top: 2rem;
+}
+
+/* Cuando hay pocos resultados (menos de 3 por fila), centrar la paginación */
+@media (max-width: 767.98px) {
+  .pagination-container .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  
+  .pagination-container .text-secondary {
+    text-align: center;
+  }
+}
+
+/* Para tablets y pantallas medianas */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .pagination-container .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  
+  .pagination-container .text-secondary {
+    text-align: center;
+  }
+}
+
+/* Para pantallas grandes, mantener diseño horizontal solo cuando hay suficientes resultados */
+@media (min-width: 992px) {
+  .pagination-container.few-results .d-flex {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+  
+  .pagination-container.few-results .text-secondary {
+    text-align: center;
+  }
 }

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RegisterService } from '../../core/services/register.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpResponse } from '@angular/common/http';
-import { toast } from 'ngx-sonner';
+import { OAuth2Service } from '../../core/services/oauth2.service';
 
 @Component({
   selector: 'app-register',
@@ -25,18 +26,16 @@ export class RegisterComponent {
   
   constructor(
     private registerService: RegisterService, 
-    private router: Router
+    private router: Router,
+    private oauth2Service: OAuth2Service,
+    private notificationService: NotificationService
   ) {}
 
   onSubmit(form: NgForm) {
     // Si el formulario es inválido, se muestra un error y no se procesa el envío.
     if (form.invalid) {
-      toast.error('Error', { 
-        description: 'Por favor, completa correctamente el formulario',
-        action: {
-          label: 'Cerrar',
-          onClick: () => toast.dismiss(),
-        },
+      this.notificationService.error('Error', { 
+        description: 'Por favor, completa correctamente el formulario'
       });
       return;
     }
@@ -47,24 +46,16 @@ export class RegisterComponent {
     );
 
     if (!isValid) {
-      toast.error('Error', { 
-        description: 'Todos los campos son obligatorios y no pueden estar vacíos',
-        action: {
-          label: 'Cerrar',
-          onClick: () => toast.dismiss(),
-        },
+      this.notificationService.error('Error', { 
+        description: 'Todos los campos son obligatorios y no pueden estar vacíos'
       });
       return;
     }
 
     // Validar longitud de contraseña
     if (this.registerRequest.contrasenna.length < 6) {
-      toast.error('Error', {
-        description: 'La contraseña debe tener al menos 6 caracteres',
-        action: {
-          label: 'Cerrar',
-          onClick: () => toast.dismiss(),
-        },
+      this.notificationService.error('Error', {
+        description: 'La contraseña debe tener al menos 6 caracteres'
       });
       return;
     }
@@ -76,23 +67,17 @@ export class RegisterComponent {
       next: (response: HttpResponse<any>) => {
         // Verifica si el código de estado es 201 (Created)
         if (response.status === 201) {
-          toast.success('¡Registrado!', { 
-            description: 'Usuario registrado con éxito',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.success('¡Registrado!', { 
+            description: 'Usuario registrado con éxito'
           });
+          // Forzar comprobación de autenticación tras registro
           setTimeout(() => {
+            this.oauth2Service.checkAuthAfterRegister();
             this.router.navigate(['/']);
           }, 1500);
         } else {
-          toast.error('Error', { 
-            description: 'Respuesta inesperada del servidor',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'Respuesta inesperada del servidor'
           });
         }
       },
@@ -100,39 +85,27 @@ export class RegisterComponent {
         console.error('[Register] Error al registrar usuario', error);
         // Maneja errores específicos
         if (error.status === 500) {
-          toast.error('Error', { 
-            description: 'Error interno del servidor',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'Error interno del servidor'
           });
         } else if (error.status === 400) {
-          toast.error('Error', { 
-            description: 'Datos de registro inválidos',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'Datos de registro inválidos'
           });
         } else if (error.status === 409) {
-          toast.error('Error', { 
-            description: 'El usuario o correo ya está registrado',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'El usuario o correo ya está registrado'
           });
         } else {
-          toast.error('Error', { 
-            description: 'No se pudo registrar el usuario',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'No se pudo registrar el usuario'
           });
         }
       },
     });
+  }
+
+  loginWithGoogle() {
+    this.oauth2Service.loginWithGoogle();
   }
 }

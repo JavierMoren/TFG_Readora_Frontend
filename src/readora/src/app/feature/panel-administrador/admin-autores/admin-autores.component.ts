@@ -36,6 +36,9 @@ export class AdminAutoresComponent implements OnInit {
   totalPages: number = 0;
   sortBy: string = 'id';
   sortDirection: string = 'asc';
+  searchTerm: string = '';
+  searchId: number | null = null;
+  tipoBusqueda: 'texto' | 'id' = 'texto';
   
   // Exponer Math para usarlo en la plantilla
   Math = Math;
@@ -56,19 +59,88 @@ export class AdminAutoresComponent implements OnInit {
   }
 
   loadAutoresPaginados(): void {
-    this.autorService.getAllAutoresPaginados(this.currentPage, this.pageSize, this.sortBy, this.sortDirection).subscribe({
+    this.autorService.getAllAutoresPaginados(
+      this.currentPage, 
+      this.pageSize, 
+      this.sortBy, 
+      this.sortDirection,
+      this.searchTerm
+    ).subscribe({
       next: (data) => {
         this.autores = data.content;
         this.totalElements = data.totalElements;
         this.totalPages = data.totalPages;
       },
       error: (error) => {
-        console.error('[AdminAutores] Error al cargar autores', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los autores'
         });
       }
     });
+  }
+
+  /**
+   * Busca autores según el término de búsqueda ingresado
+   */
+  buscarAutores(): void {
+    if (!this.searchTerm.trim()) {
+      this.notificationService.warning('Atención', { 
+        description: 'Ingrese un término de búsqueda'
+      });
+      return;
+    }
+    this.currentPage = 0; // Volver a la primera página al buscar
+    this.loadAutoresPaginados();
+  }
+
+  /**
+   * Busca un autor específico por su ID
+   */
+  buscarAutorPorId(): void {
+    if (!this.searchId || this.searchId <= 0) {
+      this.notificationService.warning('Atención', { 
+        description: 'Ingrese un ID de autor válido'
+      });
+      return;
+    }
+    
+    this.autorService.getAutorById(this.searchId).subscribe({
+      next: (autor) => {
+        this.autores = [autor];
+        this.totalElements = 1;
+        this.totalPages = 1;
+        
+        this.notificationService.success('Búsqueda completada', {
+          description: `Se encontró el autor con ID ${this.searchId}`
+        });
+      },
+      error: (error) => {
+        this.notificationService.error('Error', { 
+          description: `No se encontró el autor con ID ${this.searchId}`
+        });
+        this.autores = [];
+        this.totalElements = 0;
+        this.totalPages = 0;
+      }
+    });
+  }
+
+  /**
+   * Limpia la búsqueda por ID
+   */
+  limpiarBusquedaId(): void {
+    this.searchId = null;
+    this.currentPage = 0;
+    this.loadAutoresPaginados();
+  }
+
+  /**
+   * Limpia el término de búsqueda y muestra todos los autores
+   */
+  limpiarBusqueda(): void {
+    this.searchTerm = '';
+    this.currentPage = 0;
+    this.loadAutoresPaginados();
   }
 
   goToPage(page: number): void {
@@ -98,19 +170,6 @@ export class AdminAutoresComponent implements OnInit {
     this.pageSize = size;
     this.currentPage = 0; // Vuelve a la primera página
     this.loadAutoresPaginados();
-  }
-
-  // Método legacy para cargar todos los autores, ahora es un respaldo
-  loadAutores(): void {
-    this.autorService.getAllAutores().subscribe({
-      next: (autores) => {
-        this.autores = autores;
-      },
-      error: (error) => {
-        console.error('[AdminAutores] Error al cargar la lista completa de autores', error);
-        this.notificationService.error('Error', { description: 'No se pudo cargar la lista de autores' });
-      }
-    });
   }
 
   prepareCreateAutor(): void {
@@ -182,7 +241,6 @@ export class AdminAutoresComponent implements OnInit {
             this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
-            console.error(`[AdminAutores] Error al actualizar autor ID=${this.currentAutor.id}`, error);
             this.notificationService.error('Error', { description: 'No se pudo actualizar el autor' });
             this.isUploading = false;
           }
@@ -196,7 +254,6 @@ export class AdminAutoresComponent implements OnInit {
             this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
-            console.error('[AdminAutores] Error al crear autor', error);
             this.notificationService.error('Error', { description: 'No se pudo crear el autor' });
             this.isUploading = false;
           }
@@ -208,11 +265,14 @@ export class AdminAutoresComponent implements OnInit {
     if (this.selectedFile) {
       this.storageService.uploadAutorFoto(this.selectedFile).subscribe({
         next: (response: any) => {
-          this.currentAutor.fotoUrl = response.filename;
+
+          if (response && response.path) {
+            // Usar path en lugar de filename para mantener consistencia
+            this.currentAutor.fotoUrl = response.path;
+          }
           saveAutorFn();
         },
         error: (error: any) => {
-          console.error('[AdminAutores] Error al subir foto del autor', error);
           this.notificationService.error('Error', { description: 'No se pudo subir la foto del autor' });
           this.isUploading = false;
         }
@@ -237,7 +297,6 @@ export class AdminAutoresComponent implements OnInit {
             this.loadAutoresPaginados(); // Usar paginación en lugar de loadAutores
           },
           error: (error) => {
-            console.error(`[AdminAutores] Error al eliminar autor ID=${id}`, error);
             this.notificationService.error('Error', { description: 'No se pudo eliminar el autor' });
           }
         });
@@ -250,5 +309,40 @@ export class AdminAutoresComponent implements OnInit {
       return this.autorPlaceholder;
     }
     return this.storageService.getFullImageUrl(url);
+  }
+
+  /**
+   * Elimina la foto de un autor
+   */
+  eliminarFoto(): void {
+    // Confirmar la eliminación
+    this.notificationService.confirm({
+      title: '¿Eliminar fotografía?',
+      text: 'Esta acción establecerá una imagen predeterminada para el autor',
+      icon: 'warning',
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result) {
+        // Si el usuario confirma, eliminamos la foto
+        if (this.currentAutor.fotoUrl) {
+          // Si la foto ya se había guardado en el servidor
+          if (this.isEditing && this.currentAutor.id) {
+            // Establecemos la URL a null (se usará la predeterminada)
+            this.currentAutor.fotoUrl = null;
+            this.previewImageUrl = this.autorService.getImageUrl(null);
+            
+            this.notificationService.success('Fotografía eliminada', { 
+              description: 'Se ha establecido la imagen predeterminada'
+            });
+          } else {
+            // Si el autor es nuevo, simplemente resetear
+            this.currentAutor.fotoUrl = null;
+            this.selectedFile = null;
+            this.previewImageUrl = null;
+          }
+        }
+      }
+    });
   }
 }

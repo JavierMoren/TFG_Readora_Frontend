@@ -7,6 +7,16 @@
   padding: 3rem 1rem;
 }
 
+/* Eliminar cuadrado cian de autocompletado en Chrome */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .auth-form {
   width: 100%;
   max-width: 450px;
@@ -297,18 +307,3 @@
   color: var(--text-secondary);
 }
 
-[data-theme="dark"] .form-control {
-  background-color: var(--input-bg);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .form-control:focus {
-  background-color: var(--input-bg);
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(77, 107, 254, 0.2);
-}
-
-[data-theme="dark"] .form-control::placeholder {
-  color: var(--text-muted);
-}

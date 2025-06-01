@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { AutenticacionService } from '../../core/services/autenticacion.service';
+import { OAuth2Service } from '../../core/services/oauth2.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
-import { toast } from 'ngx-sonner';
  
 
 @Component({
@@ -17,21 +18,19 @@ export class AutenticacionComponent {
   authRequest = {
     usuario: '',
     contrasenna: ''
-  };
-
-  constructor(
+  };  constructor(
     private autenticacionService: AutenticacionService, 
     private router: Router,
+    private oauth2Service: OAuth2Service,
+    private notificationService: NotificationService
   ) {}
-
+  loginWithGoogle() {
+    this.oauth2Service.loginWithGoogle();
+  }
   onSubmit(form: NgForm) {
     if (form.invalid) {
-      toast.error('Error', { 
-        description: 'Por favor, completa correctamente el formulario',
-        action: {
-          label: 'Cerrar',
-          onClick: () => toast.dismiss(),
-        },
+      this.notificationService.error('Error', { 
+        description: 'Por favor, completa correctamente el formulario'
       }); 
       return;
     }
@@ -41,22 +40,16 @@ export class AutenticacionComponent {
     );
 
     if (!isValid) {
-      toast.error('Error', { 
-        description: 'Todos los campos son obligatorios y no pueden estar vacíos',
-        action: {
-          label: 'Cerrar',
-          onClick: () => toast.dismiss(),
-        },
+      this.notificationService.error('Error', { 
+        description: 'Todos los campos son obligatorios y no pueden estar vacíos'
       }); 
       return;
-    }    this.autenticacionService.authenticateUsuario(this.authRequest.usuario, this.authRequest.contrasenna).subscribe({
+    }
+
+    this.autenticacionService.authenticateUsuario(this.authRequest.usuario, this.authRequest.contrasenna).subscribe({
       next: (response) => {
-        toast.success('¡Autenticado!', { 
-          description: 'Usuario autenticado con éxito',
-          action: {
-            label: 'Cerrar',
-            onClick: () => toast.dismiss(),
-          },
+        this.notificationService.success('¡Autenticado!', { 
+          description: 'Usuario autenticado con éxito'
         }); 
         this.autenticacionService.setToken(response.token);
         setTimeout(() => {
@@ -67,20 +60,12 @@ export class AutenticacionComponent {
         console.error('Error al autenticar usuario', error);
 
         if (error.status === 401) {
-          toast.error('Error', { 
-            description: 'Credenciales inválidas',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'Credenciales inválidas'
           }); 
         } else {
-          toast.error('Error', { 
-            description: 'No se pudo autenticar el usuario',
-            action: {
-              label: 'Cerrar',
-              onClick: () => toast.dismiss(),
-            },
+          this.notificationService.error('Error', { 
+            description: 'No se pudo autenticar el usuario'
           }); 
         }
       }
