@@ -172,18 +172,6 @@ export class AdminAutoresComponent implements OnInit {
     this.loadAutoresPaginados();
   }
 
-  // Método legacy para cargar todos los autores, ahora es un respaldo
-  loadAutores(): void {
-    this.autorService.getAllAutores().subscribe({
-      next: (autores) => {
-        this.autores = autores;
-      },
-      error: (error) => {
-        this.notificationService.error('Error', { description: 'No se pudo cargar la lista de autores' });
-      }
-    });
-  }
-
   prepareCreateAutor(): void {
     this.isEditing = false;
     this.currentAutor = {

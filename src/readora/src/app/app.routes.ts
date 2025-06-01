@@ -15,6 +15,8 @@ import { AdminUsuarioLibrosComponent } from './feature/panel-administrador/admin
 import { BuscadorComponent } from './feature/buscador/buscador.component';
 import { DetalleUsuarioComponent } from './feature/usuario/detalle-usuario/detalle-usuario.component';
 import { BibliotecaPersonalComponent } from './feature/biblioteca/biblioteca-personal/biblioteca-personal.component';
+import { DetalleLibroComponent } from './feature/libro/detalle-libro/detalle-libro.component';
+import { DetalleAutorComponent } from './feature/autor/detalle-autor/detalle-autor.component';
 import { CreditsComponent } from './credits/credits.component';
 
 export const routes: Routes = [
@@ -42,16 +44,13 @@ export const routes: Routes = [
     path: 'biblioteca',
     component: BibliotecaPersonalComponent,
     canActivate: [autenticacionGuard]
-  },
-  {
+  },  {
     path: 'libros/:id',
-    loadComponent: () => import('./feature/libro/detalle-libro/detalle-libro.component')
-      .then(m => m.DetalleLibroComponent)
+    component: DetalleLibroComponent
   },
   {
     path: 'autores/:id',
-    loadComponent: () => import('./feature/autor/detalle-autor/detalle-autor.component')
-      .then(m => m.DetalleAutorComponent)
+    component: DetalleAutorComponent
   },
   {
     path: 'panel-administrador',

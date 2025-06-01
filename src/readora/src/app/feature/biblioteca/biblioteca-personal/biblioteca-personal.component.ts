@@ -824,6 +824,15 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Navega a la vista de detalles del autor
+   */
+  irADetalleAutor(autor: any): void {
+    if (autor && autor.id) {
+      this.router.navigate(['/autores', autor.id]);
+    }
+  }
+
+  /**
    * Verifica si hay errores de validación en el formulario
    */
   tieneErroresValidacion(): boolean {
@@ -862,26 +871,35 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Manejador para el cambio en la fecha de inicio
-   */
-  onFechaInicioChange(): void {
-    // Lógica adicional si es necesaria
-  }
-
-  /**
-   * Manejador para el cambio en la fecha de fin
-   */
-  onFechaFinChange(): void {
-    // Lógica adicional si es necesaria
-  }
-
-  /**
    * Limpia los recursos al destruir el componente
    */
   ngOnDestroy(): void {
     // Notificar a los observables que se complete la suscripción
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Maneja los cambios en la fecha de inicio de lectura
+   */
+  onFechaInicioChange(): void {
+    if (this.libroSeleccionado?.fechaInicioLectura && this.libroSeleccionado?.fechaFinLectura) {
+      // Validar que la fecha de inicio no sea posterior a la fecha de fin
+      if (new Date(this.libroSeleccionado.fechaInicioLectura) > new Date(this.libroSeleccionado.fechaFinLectura)) {
+        // Limpiar la fecha de fin si es anterior a la de inicio
+        this.libroSeleccionado.fechaFinLectura = '';
+      }
+    }
+  }
+
+  /**
+   * Maneja los cambios en la fecha de fin de lectura
+   */
+  onFechaFinChange(): void {
+    if (this.libroSeleccionado?.fechaFinLectura && !this.libroSeleccionado?.fechaInicioLectura) {
+      // Si hay fecha de fin pero no de inicio, establecer la fecha de inicio como la misma fecha de fin
+      this.libroSeleccionado.fechaInicioLectura = this.libroSeleccionado.fechaFinLectura;
+    }
   }
 
   /**

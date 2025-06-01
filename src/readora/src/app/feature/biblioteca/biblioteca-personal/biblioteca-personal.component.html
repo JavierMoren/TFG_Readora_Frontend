@@ -166,7 +166,7 @@
       </div>
       <div class="libros-grid">
           <div class="libro-item" *ngFor="let libro of getLibrosParaMostrar()">
-              <button class="libro-card" (click)="irADetalleLibro(libro)" style="cursor:pointer;" (keydown.enter)="irADetalleLibro(libro)" type="button">
+              <button class="libro-card" (click)="editarLibro(libro)" style="cursor:pointer;" (keydown.enter)="editarLibro(libro)" type="button">
                   <div class="libro-img-container book-cover-container">
                         <img [src]="getImageUrl(libro.portadaUrl)" 
                              class="libro-portada book-cover-biblioteca" 
@@ -217,6 +217,9 @@
                           </div>
                       </div>
                       <div class="libro-actions">
+                          <button class="btn btn-icon" title="Ver detalles" (click)="irADetalleLibro(libro); $event.stopPropagation()">
+                              <span class="material-icons">info</span>
+                          </button>
                           <button class="btn btn-icon" title="Editar" (click)="editarLibro(libro); $event.stopPropagation()">
                               <span class="material-icons">edit</span>
                           </button>
@@ -253,6 +256,50 @@
                 </button>
             </div>
             <div class="modal-custom-body">
+                <!-- Tarjeta de información del libro -->
+                <div class="libro-info-card">
+                    <div class="libro-info-content">
+                        <div class="libro-portada-modal">
+                            <img [src]="getImageUrl(libroSeleccionado?.portadaUrl)" 
+                                 alt="Portada de {{libroSeleccionado?.titulo}}" 
+                                 class="portada-imagen">
+                        </div>
+                        <div class="libro-detalles-modal">
+                            <h4 class="libro-titulo-modal">{{libroSeleccionado?.titulo}}</h4>
+                            <div class="libro-autor-modal">
+                                <span class="material-icons">person</span>
+                                <span>{{libroSeleccionado?.autor?.nombre}} {{libroSeleccionado?.autor?.apellido}}</span>
+                            </div>
+                            <div class="libro-metadata-modal" *ngIf="libroSeleccionado?.numeroPaginas || libroSeleccionado?.fechaPublicacion">
+                                <div class="metadata-item" *ngIf="libroSeleccionado?.numeroPaginas">
+                                    <span class="material-icons">menu_book</span>
+                                    <span>{{libroSeleccionado.numeroPaginas}} páginas</span>
+                                </div>
+                                <div class="metadata-item" *ngIf="libroSeleccionado?.fechaPublicacion">
+                                    <span class="material-icons">calendar_month</span>
+                                    <span>{{formatearFecha(libroSeleccionado.fechaPublicacion)}}</span>
+                                </div>
+                            </div>
+                            <div class="libro-sinopsis-modal" *ngIf="libroSeleccionado?.sinopsis">
+                                <p>{{truncarTexto(libroSeleccionado.sinopsis, 200)}}</p>
+                            </div>
+                            <div class="libro-actions-modal">
+                                <button class="btn-detalle-modal" (click)="irADetalleLibro(libroSeleccionado)" title="Ver detalles completos del libro">
+                                    <span class="material-icons">info</span>
+                                    <span>Ver detalles</span>
+                                </button>
+                                <button class="btn-autor-modal" (click)="irADetalleAutor(libroSeleccionado.autor)" title="Ver información del autor" *ngIf="libroSeleccionado?.autor">
+                                    <span class="material-icons">person</span>
+                                    <span>Ver autor</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Separador -->
+                <hr class="modal-separator">
+
                 <!-- Mensaje informativo sobre campos obligatorios (solo cuando hay errores) -->
                 <div class="alert alert-warning" role="alert" *ngIf="tieneErroresValidacion()">
                     <span class="material-icons align-middle me-2">warning</span>
@@ -358,9 +405,9 @@
                         <div class="progress-interactive-edit">
                             <div class="progress-bar-container-edit">
                                 <div class="progress progress-edit">
-                                    <div class="progress-bar-fill progress-bar-edit"
+                                    <div class="progress-bar-edit"
                                          [style.width.%]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)"
-                                         aria-labelledby="progreso-lectura"
+                                         [attr.aria-label]="'Progreso de lectura para ' + libroSeleccionado?.titulo"
                                          role="progressbar"
                                          [attr.aria-valuenow]="calcularProgreso(libroSeleccionado?.paginasLeidas, libroSeleccionado?.numeroPaginas)"
                                          aria-valuemin="0"

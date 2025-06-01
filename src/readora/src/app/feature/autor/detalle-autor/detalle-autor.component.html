@@ -44,13 +44,7 @@
                   - Presente
                 </ng-container>
               </span>
-            </div>
-            <div class="mt-2" *ngIf="libros">
-              <span class="text-muted">
-                Este autor tiene actualmente {{ libros.length }} {{ libros.length === 1 ? 'obra registrada' : 'obras registradas' }} en nuestra base de datos. Si desea buscar más libros, utilice el buscador general.
-              </span>
-            </div>
-            
+            </div>            
             <div class="autor-meta">
               <div class="meta-item" *ngIf="autor.nacionalidad">
                 <span class="meta-icon">
