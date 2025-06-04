@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://54.162.120.115/api',
-    apiBaseUrl: 'https://54.162.120.115'
+    apiUrl: 'https://3.218.179.158/api',
+    apiBaseUrl: 'https://3.218.179.158'
   };
