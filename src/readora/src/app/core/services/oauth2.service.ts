@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroments';
 import { Router } from '@angular/router';
 import { AutenticacionService } from './autenticacion.service';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class OAuth2Service {
   constructor(
     private readonly http: HttpClient, 
     private readonly router: Router,
-    public readonly authService: AutenticacionService
+    public readonly authService: AutenticacionService,
+    private readonly notificationService: NotificationService // inyectar servicio de notificaciones
   ) { }
 
   /**
@@ -50,6 +52,10 @@ export class OAuth2Service {
   handleOAuthSuccess(token: string): void {
     if (token) {
       this.authService.setToken(token);
+      // Mostrar toast de éxito igual que en login/registro por correo
+      this.notificationService.success('¡Autenticado!', {
+        description: 'Usuario autenticado con éxito'
+      });
       // Forzar comprobación de autenticación tras login OAuth
       this.authService.checkAuthentication();
       this.router.navigate(['/']);
