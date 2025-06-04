@@ -425,8 +425,8 @@ export class AdminLibrosComponent implements OnInit {
             description: 'Este libro no puede ser eliminado porque tiene registros de lectura asociados. Primero debe eliminar estas relaciones desde el panel "Gestión de Lecturas".'
           });
         } else {
-          // Para otros errores, mostrar como error real
-          this.notificationService.error('Error', {
+          // Para otros errores, mostrar como advertencia
+          this.notificationService.warning('Advertencia', {
             description: 'No se pudo eliminar el libro. Verifique si existen registros dependientes.'
           });
         }
