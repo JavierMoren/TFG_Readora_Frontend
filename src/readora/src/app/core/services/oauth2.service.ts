@@ -54,11 +54,13 @@ export class OAuth2Service {
       this.authService.setToken(token);
       // Forzar comprobación de autenticación tras login OAuth
       this.authService.checkAuthentication();
-      // Mostrar notificación de éxito
-      this.notificationService.success('¡Autenticado!', {
-        description: 'Has iniciado sesión correctamente con Google'
-      });
       this.router.navigate(['/']);
+      setTimeout(() => {
+        // Mostrar notificación de éxito
+        this.notificationService.success('¡Autenticado!', {
+          description: 'Has iniciado sesión correctamente con Google'
+        });
+      }, 2000);
     }
   }
 
