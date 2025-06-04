@@ -45,6 +45,13 @@ export class AdminUsuariosComponent implements OnInit {
   ngOnInit(): void {
     // Inicializar formularios
     this.initForms();
+    // Forzar revalidación de usuario/email al cambiar valor
+    this.usuarioForm.get('usuario')?.valueChanges.subscribe(() => {
+      this.usuarioForm.get('usuario')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+    this.usuarioForm.get('gmail')?.valueChanges.subscribe(() => {
+      this.usuarioForm.get('gmail')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
     // Carga los usuarios paginados al inicializar el componente
     this.getUsuariosPaginados();
   }
@@ -166,14 +173,10 @@ export class AdminUsuariosComponent implements OnInit {
       if (!control.value || control.value.trim() === '') {
         return of(null);
       }
-
-      // Si estamos editando y el usuario no ha cambiado, no validar
       if (this.isEditing && this.currentUsuario.usuario === control.value) {
         return of(null);
       }
-
       this.usuarioVerificandose = true;
-      
       return this.usuarioService.checkUsuarioExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
@@ -193,17 +196,13 @@ export class AdminUsuariosComponent implements OnInit {
   // Validador asíncrono para comprobar si el email ya existe
   emailUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value || control.value.trim() === '') {
+      if (!control.value || control.value.trim() === '' || !control.parent?.get('gmail')?.valid) {
         return of(null);
       }
-
-      // Si estamos editando y el email no ha cambiado, no validar
       if (this.isEditing && this.currentUsuario.gmail === control.value) {
         return of(null);
       }
-
       this.gmailVerificandose = true;
-      
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),

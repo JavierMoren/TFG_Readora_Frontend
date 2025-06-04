@@ -45,6 +45,13 @@ export class DetalleUsuarioComponent implements OnInit {
   ngOnInit(): void {
     this.inicializarFormularios();
     this.cargarDatosUsuario();
+    // Forzar revalidación de usuario/email al cambiar valor
+    this.usuarioForm.get('usuario')?.valueChanges.subscribe(() => {
+      this.usuarioForm.get('usuario')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+    this.usuarioForm.get('gmail')?.valueChanges.subscribe(() => {
+      this.usuarioForm.get('gmail')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
   }
 
   /**
@@ -119,14 +126,10 @@ export class DetalleUsuarioComponent implements OnInit {
       if (!control.value || control.value.trim() === '') {
         return of(null);
       }
-
-      // Si estamos editando y el username no ha cambiado, no validar
       if (this.usuario && this.usuario.usuario === control.value) {
         return of(null);
       }
-
       this.usuarioVerificandose = true;
-      
       return this.usuarioService.checkUsuarioExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
@@ -148,22 +151,16 @@ export class DetalleUsuarioComponent implements OnInit {
    */
   emailUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value || control.value.trim() === '') {
+      if (!control.value || control.value.trim() === '' || !control.parent?.get('gmail')?.valid) {
         return of(null);
       }
-
-      // Si estamos editando y el email no ha cambiado, no validar
       if (this.usuario && this.usuario.gmail === control.value) {
         return of(null);
       }
-
-      // Si es usuario de Google, no validar ya que el campo está deshabilitado
       if (this.esUsuarioGoogle) {
         return of(null);
       }
-
       this.gmailVerificandose = true;
-      
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
