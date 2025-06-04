@@ -17,7 +17,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   username: string = '';
   isAdmin: boolean = false;
   isGoogleUser: boolean = false;
-  private readonly routerSubscription: Subscription; // Marcar como readonly
+  private readonly routerSubscription: Subscription;
   
   constructor(
     private readonly authService: AutenticacionService,

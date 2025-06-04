@@ -52,12 +52,15 @@ export class OAuth2Service {
   handleOAuthSuccess(token: string): void {
     if (token) {
       this.authService.setToken(token);
-      // Mostrar toast de éxito igual que en login/registro por correo
-      this.notificationService.success('¡Autenticado!', {
-        description: 'Usuario autenticado con éxito'
-      });
       // Forzar comprobación de autenticación tras login OAuth
       this.authService.checkAuthentication();
+      // Mostrar notificación de éxito SIEMPRE aquí (como en el flujo normal)
+      this.notificationService.success('¡Autenticado!', {
+        description: 'Has iniciado sesión correctamente con Google'
+      });
+      // Guardar en sessionStorage que es un usuario de Google
+      sessionStorage.setItem('auth_provider', 'google');
+      // Redireccionar a la página principal
       this.router.navigate(['/']);
     }
   }
