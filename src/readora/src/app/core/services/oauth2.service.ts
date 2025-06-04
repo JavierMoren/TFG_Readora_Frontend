@@ -17,7 +17,7 @@ export class OAuth2Service {
     private readonly http: HttpClient, 
     private readonly router: Router,
     public readonly authService: AutenticacionService,
-    private readonly notificationService: NotificationService // inyectar servicio de notificaciones
+    private readonly notificationService: NotificationService
   ) { }
 
   /**
