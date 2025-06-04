@@ -54,13 +54,12 @@ export class OAuth2Service {
       this.authService.setToken(token);
       // Forzar comprobación de autenticación tras login OAuth
       this.authService.checkAuthentication();
+      
+      // Guardar flag en localStorage para indicar login exitoso con Google
+      localStorage.setItem('google_login_success', 'true');
+      
+      // Navegar a la página principal
       this.router.navigate(['/']);
-      setTimeout(() => {
-        // Mostrar notificación de éxito
-        this.notificationService.success('¡Autenticado!', {
-          description: 'Has iniciado sesión correctamente con Google'
-        });
-      }, 2000);
     }
   }
 
