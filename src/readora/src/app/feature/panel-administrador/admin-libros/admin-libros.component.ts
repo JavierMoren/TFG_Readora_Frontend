@@ -419,23 +419,23 @@ export class AdminLibrosComponent implements OnInit {
           error?.error?.message?.includes(term) || error?.error?.includes(term)
         );
         
-        const mensaje = esErrorRelacional 
-          ? 'Este libro no puede ser eliminado porque tiene registros de lectura asociados. Primero debe eliminar estas relaciones desde el panel "Gestión de Lecturas".'
-          : 'No se pudo eliminar el libro. Verifique si existen registros dependientes.';
-          
-        this.notificationService.error(
-          esErrorRelacional ? 'Error de integridad referencial' : 'Error', 
-          { description: mensaje }
-        );
+        if (esErrorRelacional) {
+          // Para errores de integridad referencial, mostrar como información
+          this.notificationService.info('No se puede eliminar', {
+            description: 'Este libro no puede ser eliminado porque tiene registros de lectura asociados. Primero debe eliminar estas relaciones desde el panel "Gestión de Lecturas".'
+          });
+        } else {
+          // Para otros errores, mostrar como error real
+          this.notificationService.error('Error', {
+            description: 'No se pudo eliminar el libro. Verifique si existen registros dependientes.'
+          });
+        }
         
         this.libroIdToDelete = null;
       }
     });
   }
 
-  // Alias para mantener compatibilidad con código existente
-  confirmDeleteLibro = (): void => this.procesarEliminacionLibro();
-  
   cancelDeleteLibro(): void {
     this.libroIdToDelete = null;
   }
