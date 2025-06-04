@@ -1,4 +1,30 @@
+# Directorios de dependencias y compilación
 node_modules
-npm-debug.log
 dist
+.angular
+.vscode
+.git
+.github
+e2e
+coverage
+
+# Archivos de logs y temporales
+npm-debug.log
+*.log
 .DS_Store
+*.lock
+*~
+.nyc_output
+tmp
+
+# Configuración y documentación
+.editorconfig
+.gitignore
+.prettierrc
+.eslintrc.json
+*.md
+docs
+karma.conf.js
+test.ts
+Dockerfile
+.dockerignore
