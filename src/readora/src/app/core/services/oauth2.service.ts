@@ -53,17 +53,42 @@ export class OAuth2Service {
     if (token) {
       this.authService.setToken(token);
       this.authService.checkAuthentication();
-      
-      // Primero navegamos a la ruta principal
-      this.router.navigate(['/'])
-        .then(() => {
-          // Una vez completada la navegación, mostramos la notificación
-          setTimeout(() => {
-            this.notificationService.success('¡Autenticado!', {
-              description: 'Has iniciado sesión correctamente con Google'
-            });
-          }, 1000); // 1 segundo de retraso
-        });
+
+      try {
+        // Guardar la intención de mostrar la notificación en window para que persista
+        // entre navegaciones de Angular
+        (window as any).showGoogleLoginSuccess = true;
+
+        // Primero navegamos a la ruta principal
+        this.router.navigate(['/']);
+
+        // Crear un intervalo para intentar mostrar la notificación varias veces
+        const intervalId = setInterval(() => {
+          try {
+            if ((window as any).showGoogleLoginSuccess) {
+              // Mostrar la notificación
+              this.notificationService.success('¡Autenticado!', {
+                description: 'Has iniciado sesión correctamente con Google'
+              });
+              
+              // Limpiar el flag y detener el intervalo
+              (window as any).showGoogleLoginSuccess = false;
+              clearInterval(intervalId);
+            }
+          } catch (e) {
+            console.error('Error al mostrar notificación:', e);
+          }
+        }, 1000); // Intentar cada segundo hasta 5 veces
+        
+        // Detener después de 5 segundos como máximo
+        setTimeout(() => {
+          clearInterval(intervalId);
+        }, 5000);
+      } catch (e) {
+        console.error('Error en handleOAuthSuccess:', e);
+        // Como último recurso, mostrar una alerta básica
+        setTimeout(() => alert('Has iniciado sesión correctamente con Google'), 1500);
+      }
     }
   }
 
