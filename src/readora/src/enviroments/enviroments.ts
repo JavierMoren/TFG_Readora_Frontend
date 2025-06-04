@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://3.218.179.158/api',
-    apiBaseUrl: 'https://3.218.179.158'
+    apiUrl: 'https://readora.site/api',
+    apiBaseUrl: 'https://readora.site'
   };
