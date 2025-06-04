@@ -11,7 +11,7 @@
 
   <!-- Spinner de carga -->
   <div *ngIf="cargando" class="text-center my-5">
-    <div class="spinner-border text-primary" role="status">
+    <div class="spinner-border text-primary" aria-label="Cargando datos del usuario">
       <span class="visually-hidden">Cargando...</span>
     </div>
     <p class="mt-2 text-muted">Cargando datos...</p>
@@ -51,9 +51,13 @@
                 <input type="text" id="usuario" formControlName="usuario" 
                   class="form-control" 
                   [readonly]="!modoEdicion"
-                  [ngClass]="{'is-invalid': (nombreUsuarioInvalido || (usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched))}">
+                  [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched}">
+                <!-- Spinner de carga para validación asíncrona -->
+                <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando disponibilidad">
+                  <span class="visually-hidden">Verificando...</span>
+                </div>
                 <!-- Icono de check para usuarios normales en modo edición y campo válido -->
-                <span *ngIf="modoEdicion && !nombreUsuarioInvalido && usuarioForm.get('usuario')?.valid" 
+                <span *ngIf="modoEdicion && !usuarioVerificandose && usuarioForm.get('usuario')?.valid" 
                       class="input-group-text bg-success text-white">
                   <span class="material-icons small">check_circle</span>
                 </span>
@@ -69,11 +73,15 @@
                   <input type="text" id="usuarioGoogle" formControlName="usuario" 
                     class="form-control" 
                     [readonly]="false"
-                    [ngClass]="{'is-invalid': (nombreUsuarioInvalido || (usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched))}">
+                    [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched}">
                   <span class="input-group-text bg-light" title="Cuenta vinculada con Google">
                     <span class="material-icons small">google</span>
                   </span>
-                  <span *ngIf="!nombreUsuarioInvalido && usuarioForm.get('usuario')?.valid" 
+                  <!-- Spinner de carga para validación asíncrona -->
+                  <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando disponibilidad">
+                    <span class="visually-hidden">Verificando...</span>
+                  </div>
+                  <span *ngIf="!usuarioVerificandose && usuarioForm.get('usuario')?.valid" 
                         class="input-group-text bg-success text-white">
                     <span class="material-icons small">check_circle</span>
                   </span>
@@ -92,14 +100,12 @@
               </ng-container>
               
               <!-- Mensajes de error -->
-              <div class="invalid-feedback d-block" *ngIf="nombreUsuarioInvalido">
-                {{ mensajeErrorUsuario }}
-              </div>
-              <div class="invalid-feedback d-block" *ngIf="!nombreUsuarioInvalido && usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched">
+              <div class="invalid-feedback d-block" *ngIf="usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched">
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio.</span>
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">El nombre de usuario sólo puede contener letras, números, puntos, guiones y guiones bajos.</span>
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['minlength']">El nombre de usuario debe tener al menos 4 caracteres.</span>
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['maxlength']">El nombre de usuario no puede exceder los 100 caracteres.</span>
+                <span *ngIf="usuarioForm.get('usuario')?.errors?.['usuarioExistente']">Este nombre de usuario ya está en uso. Elige otro.</span>
               </div>
             </div>
 
@@ -146,6 +152,15 @@
                 <input type="email" id="gmail" formControlName="gmail" class="form-control"
                   [readonly]="!modoEdicion"
                   [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched}">
+                <!-- Spinner de carga para validación asíncrona del email -->
+                <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando email">
+                  <span class="visually-hidden">Verificando...</span>
+                </div>
+                <!-- Icono de check para email válido -->
+                <span *ngIf="modoEdicion && !gmailVerificandose && usuarioForm.get('gmail')?.valid" 
+                      class="input-group-text bg-success text-white">
+                  <span class="material-icons small">check_circle</span>
+                </span>
               </div>
               
               <!-- Campo de solo lectura para usuarios de Google -->
@@ -162,6 +177,7 @@
               <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback d-block">
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El correo electrónico es obligatorio.</span>
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Formato de correo electrónico inválido.</span>
+                <span *ngIf="usuarioForm.get('gmail')?.errors?.['gmailExistente']">Este correo electrónico ya está registrado.</span>
               </div>
               <div *ngIf="esUsuarioGoogle" class="form-text text-info mt-1">
                 <small><span class="material-icons small align-middle">info</span> El correo electrónico no puede modificarse en cuentas vinculadas con Google.</small>

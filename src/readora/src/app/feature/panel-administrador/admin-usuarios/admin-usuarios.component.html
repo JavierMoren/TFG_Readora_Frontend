@@ -38,9 +38,13 @@
                 [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched, 
                            'bg-light-subtle': isEditing && esUsuarioGoogle}">
             </div>
+            <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+              <span class="visually-hidden">Verificando...</span>
+            </div>
             <div *ngIf="usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio</span>
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">Solo letras, números y guion bajo. Entre 4 y 100 caracteres</span>
+              <span *ngIf="usuarioForm.get('usuario')?.errors?.['usuarioExistente']">Este nombre de usuario ya está en uso</span>
             </div>
             <div *ngIf="isEditing && esUsuarioGoogle" class="form-text text-info small mt-1">
               <span class="material-icons small align-middle me-1">info</span>
@@ -60,9 +64,13 @@
                 [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched,
                            'bg-light-subtle': isEditing && esUsuarioGoogle}">
             </div>
+            <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+              <span class="visually-hidden">Verificando...</span>
+            </div>
             <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El email es obligatorio</span>
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Introduce un email válido</span>
+              <span *ngIf="usuarioForm.get('gmail')?.errors?.['gmailExistente']">Este correo electrónico ya está registrado</span>
             </div>
             <div *ngIf="isEditing && esUsuarioGoogle" class="form-text text-info small mt-1">
               <span class="material-icons small align-middle me-1">info</span>

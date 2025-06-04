@@ -1,3 +1,4 @@
+<!-- filepath: /home/javier/Documentos/Escolar/TFG/Proyecto_TFG/TFG_Readora_Frontend/src/readora/src/app/feature/register/register.component.html -->
 <div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
   <div class="col-12 col-md-8 col-lg-7 col-xl-6">
     <div class="text-center mb-4">
@@ -9,7 +10,7 @@
     <div class="card shadow border-0 auth-card">
       <div class="card-body p-0">
         
-        <form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm" class="auth-form p-4">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form p-4">
           <div class="row">
             <div class="col-md-6 mb-4">
               <label for="usuario" class="form-label fw-medium">Usuario <span class="text-danger">*</span></label>
@@ -18,20 +19,16 @@
                 <input 
                   type="text" 
                   id="usuario" 
-                  [(ngModel)]="registerRequest.usuario" 
-                  name="usuario"
-                  required 
-                  minlength="3"
-                  maxlength="50"
-                  #usuario="ngModel"
+                  formControlName="usuario"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': usuario.invalid && (usuario.dirty || usuario.touched)}"
+                  [ngClass]="{'is-invalid': registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || registerForm.get('usuario')?.dirty)}"
                   placeholder="Elige un nombre de usuario">
+                <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+                  <span class="visually-hidden">Verificando...</span>
+                </div>
               </div>
-              <div *ngIf="usuario.invalid && (usuario.dirty || usuario.touched)" class="invalid-feedback d-block small mt-1">
-                <div *ngIf="usuario.errors?.['required']">El usuario es requerido.</div>
-                <div *ngIf="usuario.errors?.['minlength']">El usuario debe tener al menos 3 caracteres.</div>
-                <div *ngIf="usuario.errors?.['maxlength']">El usuario no puede exceder 50 caracteres.</div>
+              <div *ngIf="registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || registerForm.get('usuario')?.dirty)" class="invalid-feedback d-block small mt-1">
+                {{ getErrorMessage('usuario') }}
               </div>
             </div>
 
@@ -42,18 +39,16 @@
                 <input 
                   type="email" 
                   id="gmail" 
-                  [(ngModel)]="registerRequest.gmail" 
-                  name="gmail"
-                  required 
-                  email
-                  #gmail="ngModel"
+                  formControlName="gmail"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': gmail.invalid && (gmail.dirty || gmail.touched)}"
+                  [ngClass]="{'is-invalid': registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || registerForm.get('gmail')?.dirty)}"
                   placeholder="Ingresa tu correo electrónico">
+                <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+                  <span class="visually-hidden">Verificando...</span>
+                </div>
               </div>
-              <div *ngIf="gmail.invalid && (gmail.dirty || gmail.touched)" class="invalid-feedback d-block small mt-1">
-                <div *ngIf="gmail.errors?.['required']">El correo electrónico es requerido.</div>
-                <div *ngIf="gmail.errors?.['email']">Ingresa un correo electrónico válido.</div>
+              <div *ngIf="registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || registerForm.get('gmail')?.dirty)" class="invalid-feedback d-block small mt-1">
+                {{ getErrorMessage('gmail') }}
               </div>
             </div>
 
@@ -64,20 +59,13 @@
                 <input 
                   type="text" 
                   id="nombre" 
-                  [(ngModel)]="registerRequest.nombre" 
-                  name="nombre"
-                  required 
-                  minlength="2"
-                  maxlength="50"
-                  #nombre="ngModel"
+                  formControlName="nombre"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': nombre.invalid && (nombre.dirty || nombre.touched)}"
+                  [ngClass]="{'is-invalid': registerForm.get('nombre')?.invalid && (registerForm.get('nombre')?.touched || registerForm.get('nombre')?.dirty)}"
                   placeholder="Ingresa tu nombre">
               </div>
-              <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="invalid-feedback d-block small mt-1">
-                <div *ngIf="nombre.errors?.['required']">El nombre es requerido.</div>
-                <div *ngIf="nombre.errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</div>
-                <div *ngIf="nombre.errors?.['maxlength']">El nombre no puede exceder 50 caracteres.</div>
+              <div *ngIf="registerForm.get('nombre')?.invalid && (registerForm.get('nombre')?.touched || registerForm.get('nombre')?.dirty)" class="invalid-feedback d-block small mt-1">
+                {{ getErrorMessage('nombre') }}
               </div>
             </div>
 
@@ -88,20 +76,13 @@
                 <input 
                   type="text" 
                   id="apellido" 
-                  [(ngModel)]="registerRequest.apellido" 
-                  name="apellido"
-                  required 
-                  minlength="2"
-                  maxlength="50"
-                  #apellido="ngModel"
+                  formControlName="apellido"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': apellido.invalid && (apellido.dirty || apellido.touched)}"
+                  [ngClass]="{'is-invalid': registerForm.get('apellido')?.invalid && (registerForm.get('apellido')?.touched || registerForm.get('apellido')?.dirty)}"
                   placeholder="Ingresa tu apellido">
               </div>
-              <div *ngIf="apellido.invalid && (apellido.dirty || apellido.touched)" class="invalid-feedback d-block small mt-1">
-                <div *ngIf="apellido.errors?.['required']">El apellido es requerido.</div>
-                <div *ngIf="apellido.errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</div>
-                <div *ngIf="apellido.errors?.['maxlength']">El apellido no puede exceder 50 caracteres.</div>
+              <div *ngIf="registerForm.get('apellido')?.invalid && (registerForm.get('apellido')?.touched || registerForm.get('apellido')?.dirty)" class="invalid-feedback d-block small mt-1">
+                {{ getErrorMessage('apellido') }}
               </div>
             </div>
 
@@ -112,20 +93,13 @@
                 <input 
                   type="password" 
                   id="contrasenna" 
-                  [(ngModel)]="registerRequest.contrasenna" 
-                  name="contrasenna"
-                  required
-                  minlength="6"
-                  maxlength="100" 
-                  #contrasenna="ngModel"
+                  formControlName="contrasenna"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)}"
+                  [ngClass]="{'is-invalid': registerForm.get('contrasenna')?.invalid && (registerForm.get('contrasenna')?.touched || registerForm.get('contrasenna')?.dirty)}"
                   placeholder="Crea una contraseña segura (mínimo 6 caracteres)">
               </div>
-              <div *ngIf="contrasenna.invalid && (contrasenna.dirty || contrasenna.touched)" class="invalid-feedback d-block small mt-1">
-                <div *ngIf="contrasenna.errors?.['required']">La contraseña es requerida.</div>
-                <div *ngIf="contrasenna.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
-                <div *ngIf="contrasenna.errors?.['maxlength']">La contraseña no puede exceder 100 caracteres.</div>
+              <div *ngIf="registerForm.get('contrasenna')?.invalid && (registerForm.get('contrasenna')?.touched || registerForm.get('contrasenna')?.dirty)" class="invalid-feedback d-block small mt-1">
+                {{ getErrorMessage('contrasenna') }}
               </div>
               <small class="form-text text-muted mt-2">
                 <i class="material-icons small align-middle">info</i>
@@ -136,7 +110,7 @@
 
           <button 
             type="submit" 
-            [disabled]="registerForm.invalid"
+            [disabled]="registerForm.invalid || registerForm.pending"
             class="btn btn-primary w-100 py-2 mb-3 auth-btn mt-2">
             <span class="d-flex align-items-center justify-content-center">
               <i class="material-icons me-2">how_to_reg</i>

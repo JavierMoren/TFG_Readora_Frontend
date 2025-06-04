@@ -86,6 +86,54 @@ export class UsuarioService {
       })
     );
   }
+  
+  /**
+   * Obtiene un usuario por su correo electrónico
+   */
+  getUsuarioByEmail(email: string): Observable<Usuario | null> {
+    return this.http.get<Usuario | null>(`${this.apiUrl}/buscar-por-email/${email}`).pipe(
+      catchError(err => {
+        if (err.status === 404) return new Observable<Usuario | null>(observer => { observer.next(null); observer.complete(); });
+        return this.handleError(err);
+      })
+    );
+  }
+  
+  /**
+   * Verifica si un nombre de usuario ya existe
+   */
+  checkUsuarioExiste(username: string): Observable<boolean> {
+    return this.http.get<any>(`${this.apiUrl}/buscar-por-usuario/${username}`).pipe(
+      // Si la petición es exitosa, el usuario existe
+      data => new Observable<boolean>(observer => { observer.next(true); observer.complete(); }),
+      catchError(err => {
+        if (err.status === 404) {
+          // El usuario no existe
+          return new Observable<boolean>(observer => { observer.next(false); observer.complete(); });
+        }
+        // Para cualquier otro error, asumimos que existe para prevenir registros con errores
+        return new Observable<boolean>(observer => { observer.next(true); observer.complete(); });
+      })
+    );
+  }
+  
+  /**
+   * Verifica si un correo electrónico ya está registrado
+   */
+  checkEmailExiste(email: string): Observable<boolean> {
+    return this.http.get<any>(`${this.apiUrl}/buscar-por-email/${email}`).pipe(
+      // Si la petición es exitosa, el email existe
+      data => new Observable<boolean>(observer => { observer.next(true); observer.complete(); }),
+      catchError(err => {
+        if (err.status === 404) {
+          // El email no existe
+          return new Observable<boolean>(observer => { observer.next(false); observer.complete(); });
+        }
+        // Para cualquier otro error, asumimos que existe para prevenir registros con errores
+        return new Observable<boolean>(observer => { observer.next(true); observer.complete(); });
+      })
+    );
+  }
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';

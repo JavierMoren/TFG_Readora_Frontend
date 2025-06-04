@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import { map, debounceTime, distinctUntilChanged, first, catchError } from 'rxjs/operators';
 import { Usuario } from '../../../models/usuario/usuario.model';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -110,10 +112,18 @@ export class AdminUsuariosComponent implements OnInit {
     // Formulario principal de usuario
     this.usuarioForm = this.fb.group({
       id: [null],
-      usuario: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9_]{4,100}$')]],
+      usuario: ['', {
+        validators: [Validators.required, Validators.pattern('^[a-zA-Z0-9_]{4,100}$')],
+        asyncValidators: [this.usuarioUnicoValidator()],
+        updateOn: 'blur'
+      }],
       nombre: ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$')]],
       apellido: ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$')]],
-      gmail: ['', [Validators.required, Validators.pattern('[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}$')]],
+      gmail: ['', {
+        validators: [Validators.required, Validators.pattern('[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}$')],
+        asyncValidators: [this.emailUnicoValidator()],
+        updateOn: 'blur'
+      }],
       contrasenna: [''],
       enabled: [true]
     });
@@ -144,6 +154,70 @@ export class AdminUsuariosComponent implements OnInit {
       formGroup.get('confirmarContrasenna')?.setErrors(null);
       return null;
     }
+  }
+  
+  // Variables para control de estado de validación
+  usuarioVerificandose = false;
+  gmailVerificandose = false;
+  
+  // Validador asíncrono para comprobar si el usuario ya existe
+  usuarioUnicoValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
+
+      // Si estamos editando y el usuario no ha cambiado, no validar
+      if (this.isEditing && this.currentUsuario.usuario === control.value) {
+        return of(null);
+      }
+
+      this.usuarioVerificandose = true;
+      
+      return this.usuarioService.checkUsuarioExiste(control.value).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(existe => {
+          this.usuarioVerificandose = false;
+          return existe ? { usuarioExistente: true } : null;
+        }),
+        first(),
+        catchError(() => {
+          this.usuarioVerificandose = false;
+          return of(null);
+        })
+      );
+    };
+  }
+
+  // Validador asíncrono para comprobar si el email ya existe
+  emailUnicoValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
+
+      // Si estamos editando y el email no ha cambiado, no validar
+      if (this.isEditing && this.currentUsuario.gmail === control.value) {
+        return of(null);
+      }
+
+      this.gmailVerificandose = true;
+      
+      return this.usuarioService.checkEmailExiste(control.value).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(existe => {
+          this.gmailVerificandose = false;
+          return existe ? { gmailExistente: true } : null;
+        }),
+        first(),
+        catchError(() => {
+          this.gmailVerificandose = false;
+          return of(null);
+        })
+      );
+    };
   }
 
   /**

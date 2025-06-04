@@ -1,69 +1,150 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RegisterService } from '../../core/services/register.service';
+import { UsuarioService } from '../../core/services/usuario.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpResponse } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map, debounceTime, distinctUntilChanged, first, catchError } from 'rxjs/operators';
 import { OAuth2Service } from '../../core/services/oauth2.service';
 
 @Component({
   selector: 'app-register',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
-  registerRequest = {
-    usuario: '',
-    nombre: '',
-    apellido: '',
-    gmail: '',
-    contrasenna: '',
-    fechaCreacion: new Date()
-  };
+export class RegisterComponent implements OnInit {
+  registerForm!: FormGroup;
+  usuarioVerificandose = false;
+  gmailVerificandose = false;
   
   constructor(
-    private registerService: RegisterService, 
+    private registerService: RegisterService,
+    private usuarioService: UsuarioService, 
     private router: Router,
     private oauth2Service: OAuth2Service,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private fb: FormBuilder
   ) {}
+  
+  ngOnInit(): void {
+    this.initForm();
+  }
+  
+  initForm(): void {
+    this.registerForm = this.fb.group({
+      usuario: ['', {
+        validators: [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(50)
+        ],
+        asyncValidators: [this.usuarioUnicoValidator()],
+        updateOn: 'blur'
+      }],
+      gmail: ['', {
+        validators: [
+          Validators.required,
+          Validators.email
+        ],
+        asyncValidators: [this.emailUnicoValidator()],
+        updateOn: 'blur'
+      }],
+      nombre: ['', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50)
+      ]],
+      apellido: ['', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(50)
+      ]],
+      contrasenna: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(100)
+      ]]
+    });
+  }
+  
+  // Validador asíncrono para comprobar si el usuario ya existe
+  usuarioUnicoValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
 
-  onSubmit(form: NgForm) {
-    // Si el formulario es inválido, se muestra un error y no se procesa el envío.
-    if (form.invalid) {
+      this.usuarioVerificandose = true;
+      
+      return this.usuarioService.checkUsuarioExiste(control.value).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(existe => {
+          this.usuarioVerificandose = false;
+          return existe ? { usuarioExistente: true } : null;
+        }),
+        first(),
+        catchError(() => {
+          this.usuarioVerificandose = false;
+          return of(null);
+        })
+      );
+    };
+  }
+
+  // Validador asíncrono para comprobar si el email ya existe
+  emailUnicoValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '' || !Validators.email(control)) {
+        return of(null);
+      }
+
+      this.gmailVerificandose = true;
+      
+      return this.usuarioService.checkEmailExiste(control.value).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(existe => {
+          this.gmailVerificandose = false;
+          return existe ? { gmailExistente: true } : null;
+        }),
+        first(),
+        catchError(() => {
+          this.gmailVerificandose = false;
+          return of(null);
+        })
+      );
+    };
+  }
+
+  onSubmit() {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
       this.notificationService.error('Error', { 
         description: 'Por favor, completa correctamente el formulario'
       });
       return;
     }
 
-    // Validar que ningún campo esté vacío o contenga solo espacios en blanco
-    const isValid = Object.values(this.registerRequest).every(
-      (value) => typeof value === 'string' && value.trim().length > 0 || value instanceof Date
-    );
-
-    if (!isValid) {
+    if (this.registerForm.pending) {
       this.notificationService.error('Error', { 
-        description: 'Todos los campos son obligatorios y no pueden estar vacíos'
-      });
-      return;
-    }
-
-    // Validar longitud de contraseña
-    if (this.registerRequest.contrasenna.length < 6) {
-      this.notificationService.error('Error', {
-        description: 'La contraseña debe tener al menos 6 caracteres'
+        description: 'Por favor, espera mientras verificamos tus datos'
       });
       return;
     }
     
-    // Actualizar la fecha de creación al momento exacto del registro
-    this.registerRequest.fechaCreacion = new Date();
+    // Crear el objeto de registro
+    const registerRequest = {
+      ...this.registerForm.value,
+      fechaCreacion: new Date()
+    };
 
-    this.registerService.registerUsuario(this.registerRequest).subscribe({
+    this.registerService.registerUsuario(registerRequest).subscribe({
       next: (response: HttpResponse<any>) => {
         // Verifica si el código de estado es 201 (Created)
         if (response.status === 201) {
@@ -101,11 +182,48 @@ export class RegisterComponent {
             description: 'No se pudo registrar el usuario'
           });
         }
-      },
+      }
     });
   }
 
   loginWithGoogle() {
     this.oauth2Service.loginWithGoogle();
+  }
+  
+  // Método para obtener mensajes de error específicos
+  getErrorMessage(controlName: string): string | null {
+    const control = this.registerForm.get(controlName);
+    
+    if (!control || !control.touched || !control.errors) {
+      return null;
+    }
+    
+    if (control.errors['required']) {
+      return 'Este campo es requerido.';
+    }
+    
+    if (control.errors['minlength']) {
+      const minLength = control.errors['minlength'].requiredLength;
+      return `Debe tener al menos ${minLength} caracteres.`;
+    }
+    
+    if (control.errors['maxlength']) {
+      const maxLength = control.errors['maxlength'].requiredLength;
+      return `No puede exceder ${maxLength} caracteres.`;
+    }
+    
+    if (control.errors['email']) {
+      return 'Ingresa un correo electrónico válido.';
+    }
+    
+    if (control.errors['usuarioExistente']) {
+      return 'Este nombre de usuario ya está en uso.';
+    }
+    
+    if (control.errors['gmailExistente']) {
+      return 'Este correo electrónico ya está registrado.';
+    }
+    
+    return 'Campo inválido.';
   }
 }

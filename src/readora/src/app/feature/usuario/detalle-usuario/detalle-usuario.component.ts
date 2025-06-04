@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { AutenticacionService } from '../../../core/services/autenticacion.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Router } from '@angular/router';
 import { Usuario } from '../../../models/usuario/usuario.model';
+import { Observable, of } from 'rxjs';
+import { map, catchError, debounceTime, distinctUntilChanged, first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-detalle-usuario',
@@ -23,9 +25,11 @@ export class DetalleUsuarioComponent implements OnInit {
   cargando: boolean = true;
   errorCarga: boolean = false;
   modoEdicion: boolean = false; // Controla si los campos están en modo edición o no
-  nombreUsuarioInvalido: boolean = false; // Controla si el nombre de usuario ya existe
-  mensajeErrorUsuario: string = ''; // Mensaje de error para el campo usuario
   esUsuarioGoogle: boolean = false; // Controla si el usuario se ha autenticado con Google
+
+  // Variables para indicadores de validación asíncrona
+  usuarioVerificandose: boolean = false;
+  gmailVerificandose: boolean = false;
 
   // Añadimos una variable userData para guardar la respuesta original del backend
   userData: any = null;
@@ -49,24 +53,26 @@ export class DetalleUsuarioComponent implements OnInit {
   inicializarFormularios(): void {
     this.usuarioForm = this.fb.group({
       id: [null],
-      usuario: ['', [
-        Validators.required,
-        Validators.pattern('^[a-zA-Z0-9._-]+$'),
-        Validators.minLength(4),
-        Validators.maxLength(100)
-      ]],
+      usuario: ['', {
+        validators: [
+          Validators.required,
+          Validators.pattern('^[a-zA-Z0-9._-]+$'),
+          Validators.minLength(4),
+          Validators.maxLength(100)
+        ],
+        asyncValidators: [this.usuarioUnicoValidator()],
+        updateOn: 'blur'
+      }],
       nombre: ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$')]],
       apellido: ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$')]],
-      gmail: ['', [Validators.required, Validators.pattern('[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}$')]]
-    });
-    
-    // Añadir listener para validar el nombre de usuario cuando cambia su valor
-    this.usuarioForm.get('usuario')?.valueChanges.subscribe(value => {
-      if (value && this.usuario && value !== this.usuario.usuario) {
-        this.validarNombreUsuario(value);
-      } else {
-        this.nombreUsuarioInvalido = false;
-      }
+      gmail: ['', {
+        validators: [
+          Validators.required, 
+          Validators.pattern('[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}$')
+        ],
+        asyncValidators: [this.emailUnicoValidator()],
+        updateOn: 'blur'
+      }]
     });
 
     this.passwordForm = this.fb.group({
@@ -103,6 +109,75 @@ export class DetalleUsuarioComponent implements OnInit {
       formGroup.get('confirmarContrasenna')?.setErrors(null);
       return null;
     }
+  }
+
+  /**
+   * Validador asíncrono para verificar que el nombre de usuario sea único
+   */
+  usuarioUnicoValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
+
+      // Si estamos editando y el username no ha cambiado, no validar
+      if (this.usuario && this.usuario.usuario === control.value) {
+        return of(null);
+      }
+
+      this.usuarioVerificandose = true;
+      
+      return this.usuarioService.checkUsuarioExiste(control.value).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(existe => {
+          this.usuarioVerificandose = false;
+          return existe ? { usuarioExistente: true } : null;
+        }),
+        first(),
+        catchError(() => {
+          this.usuarioVerificandose = false;
+          return of(null);
+        })
+      );
+    };
+  }
+
+  /**
+   * Validador asíncrono para verificar que el email sea único
+   */
+  emailUnicoValidator() {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
+
+      // Si estamos editando y el email no ha cambiado, no validar
+      if (this.usuario && this.usuario.gmail === control.value) {
+        return of(null);
+      }
+
+      // Si es usuario de Google, no validar ya que el campo está deshabilitado
+      if (this.esUsuarioGoogle) {
+        return of(null);
+      }
+
+      this.gmailVerificandose = true;
+      
+      return this.usuarioService.checkEmailExiste(control.value).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        map(existe => {
+          this.gmailVerificandose = false;
+          return existe ? { gmailExistente: true } : null;
+        }),
+        first(),
+        catchError(() => {
+          this.gmailVerificandose = false;
+          return of(null);
+        })
+      );
+    };
   }
 
   /**
@@ -169,13 +244,6 @@ export class DetalleUsuarioComponent implements OnInit {
     this.detectarUsuarioGoogle();
     
     if (this.usuarioForm.valid && this.usuario) {
-      // Verificar si el nombre de usuario ya está marcado como inválido
-      if (this.nombreUsuarioInvalido) {
-        this.notificationService.error('Error', {
-          description: this.mensajeErrorUsuario || 'El nombre de usuario no es válido.'
-        });
-        return;
-      }
       
       // Obtenemos los valores del formulario
       const formValues = this.usuarioForm.getRawValue();
@@ -201,44 +269,17 @@ export class DetalleUsuarioComponent implements OnInit {
 
       // Validación asíncrona de usuario repetido (solo si cambia el nombre de usuario)
       if (formValues.usuario !== this.usuario.usuario) {
-        // Notificar al usuario que estamos verificando
-        this.notificationService.info('Verificando', {
-          description: 'Comprobando disponibilidad del nombre de usuario...'
-        });
-        
-        this.usuarioService.getUsuarioByUsername(formValues.usuario).subscribe({
-          next: (usuarioExistente) => {
-            if (usuarioExistente) {
-              this.nombreUsuarioInvalido = true;
-              this.mensajeErrorUsuario = 'El nombre de usuario ya está en uso. Elige otro.';
-              this.notificationService.error('Error', {
-                description: 'El nombre de usuario ya está en uso. Elige otro.'
-              });
-              // No desactivamos el modo edición para que el usuario pueda corregir
-            } else {
-              // Desactivar modo edición después de la validación exitosa
-              this.modoEdicion = false;
-              this.enviarActualizacion(usuarioActualizado);
-            }
-          },
-          error: (error) => {
-            console.error('[DetalleUsuario] Error al verificar nombre de usuario:', error);
-            
-            if (error.status === 403) {
-              this.notificationService.error('Error de permisos', {
-                description: 'No tienes permiso para verificar este nombre de usuario.'
-              });
-            } else if (error.status === 404) {
-              // Si es 404, significa que el usuario no existe y podemos continuar
-              this.modoEdicion = false;
-              this.enviarActualizacion(usuarioActualizado);
-            } else {
-              this.notificationService.error('Error', {
-                description: 'Ocurrió un error al verificar el nombre de usuario. Inténtalo más tarde.'
-              });
-            }
-          }
-        });
+        // Los validadores asíncronos ya se encargan de la validación
+        // Si llegamos aquí y el formulario es válido, podemos continuar
+        if (this.usuarioForm.get('usuario')?.hasError('usuarioExistente')) {
+          this.notificationService.error('Error', {
+            description: 'El nombre de usuario ya está en uso. Elige otro.'
+          });
+        } else {
+          // Desactivar modo edición después de la validación exitosa
+          this.modoEdicion = false;
+          this.enviarActualizacion(usuarioActualizado);
+        }
       } else {
         // Desactivar modo edición para casos en que no cambia el nombre de usuario
         this.modoEdicion = false;
@@ -434,9 +475,7 @@ export class DetalleUsuarioComponent implements OnInit {
     const authProvider = sessionStorage.getItem('auth_provider');
     if (authProvider === 'google') {
       this.esUsuarioGoogle = true;
-      return;
     }
-    
   }
 
   /**
@@ -462,7 +501,6 @@ export class DetalleUsuarioComponent implements OnInit {
     this.detectarUsuarioGoogle();
     
     this.modoEdicion = true;
-    this.nombreUsuarioInvalido = false;
     
     // Configurar el formulario para validación en tiempo real
     this.usuarioForm.markAsUntouched();
@@ -476,23 +514,6 @@ export class DetalleUsuarioComponent implements OnInit {
       // Marcar campo gmail como readonly programáticamente
       this.usuarioForm.get('gmail')?.disable();
     }
-    
-    // Añadir listeners para todos los campos para validación en tiempo real
-    Object.keys(this.usuarioForm.controls).forEach(key => {
-      const control = this.usuarioForm.get(key);
-      if (control?.enabled) {  // Solo para controles habilitados
-        control?.valueChanges.subscribe(() => {
-          if (control.invalid) {
-            control.markAsTouched();
-          }
-          
-          // Validación especial para nombre de usuario
-          if (key === 'usuario') { // Ya no se restringe por esUsuarioGoogle aquí
-            this.validarNombreUsuario(control.value);
-          }
-        });
-      }
-    });
   }
 
   /**
@@ -500,7 +521,6 @@ export class DetalleUsuarioComponent implements OnInit {
    */
   cancelarEdicion(): void {
     this.modoEdicion = false;
-    this.nombreUsuarioInvalido = false;
     
     // Restaurar los valores originales si hay un usuario cargado
     if (this.usuario) {
@@ -517,56 +537,5 @@ export class DetalleUsuarioComponent implements OnInit {
   // Servicio para comprobar si un nombre de usuario ya existe
   getUsuarioByUsername(username: string) {
     return this.usuarioService.getUsuarioByUsername(username);
-  }
-  
-  /**
-   * Valida si el nombre de usuario ya existe
-   * @param username Nombre de usuario a validar
-   */
-  validarNombreUsuario(username: string): void {
-    // Reiniciar estado
-    this.nombreUsuarioInvalido = false;
-    
-    // No validar si es el mismo usuario o si está vacío
-    if (!username || (this.usuario && username === this.usuario.usuario)) {
-      // Se elimina el return redundante que causaba el error.
-      this.mensajeErrorUsuario = ''; // Limpiar mensaje si no hay validación necesaria
-      return; 
-    }
-    
-    // Ya no se impide cambiar el nombre de usuario si es cuenta de Google aquí
-    
-    // Validación de formato antes de consultar al servidor
-    const usernameRegex = /^[a-zA-Z0-9._-]+$/;
-    if (!usernameRegex.test(username) || username.length < 4 || username.length > 100) {
-      return; // No consultar al servidor si el formato no es válido
-    }
-    
-    // Mostrar indicador de carga
-    this.mensajeErrorUsuario = 'Comprobando disponibilidad...';
-    
-    // Establece un pequeño delay para no hacer demasiadas peticiones al escribir
-    setTimeout(() => {
-      this.usuarioService.getUsuarioByUsername(username).subscribe({
-        next: (usuarioExistente) => {
-          if (usuarioExistente) {
-            this.nombreUsuarioInvalido = true;
-            this.mensajeErrorUsuario = 'El nombre de usuario ya está en uso. Elige otro.';
-          } else {
-            this.nombreUsuarioInvalido = false;
-          }
-        },
-        error: (error) => {
-          if (error.status === 404) {
-            // Si es 404, significa que el usuario no existe y es válido
-            this.nombreUsuarioInvalido = false;
-          } else {
-            console.error('[DetalleUsuario] Error al validar nombre de usuario:', error);
-            this.nombreUsuarioInvalido = true;
-            this.mensajeErrorUsuario = 'Error al comprobar disponibilidad. Inténtalo más tarde.';
-          }
-        }
-      });
-    }, 500);
   }
 }
