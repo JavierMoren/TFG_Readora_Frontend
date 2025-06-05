@@ -51,16 +51,16 @@
                 <input type="text" id="usuario" formControlName="usuario" 
                   class="form-control" 
                   [readonly]="!modoEdicion"
-                  [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched}">
+                  [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched,
+                             'is-valid': usuarioValido && usuarioForm.get('usuario')?.touched}">
                 <!-- Spinner de carga para validación asíncrona -->
                 <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando disponibilidad">
                   <span class="visually-hidden">Verificando...</span>
                 </div>
                 <!-- Icono de check para usuarios normales en modo edición y campo válido -->
-                <span *ngIf="modoEdicion && !usuarioVerificandose && usuarioForm.get('usuario')?.valid" 
-                      class="input-group-text bg-success text-white">
-                  <span class="material-icons small">check_circle</span>
-                </span>
+                <div *ngIf="usuarioValido && !usuarioVerificandose && usuarioForm.get('usuario')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                  <i class="material-icons text-success small">check_circle</i>
+                </div>
               </div>
               
               <!-- CASO 2: Usuario ES de Google -->
@@ -73,7 +73,8 @@
                   <input type="text" id="usuarioGoogle" formControlName="usuario" 
                     class="form-control" 
                     [readonly]="false"
-                    [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched}">
+                    [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched,
+                               'is-valid': usuarioValido && usuarioForm.get('usuario')?.touched}">
                   <span class="input-group-text bg-light" title="Cuenta vinculada con Google">
                     <span class="material-icons small">google</span>
                   </span>
@@ -81,10 +82,9 @@
                   <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando disponibilidad">
                     <span class="visually-hidden">Verificando...</span>
                   </div>
-                  <span *ngIf="!usuarioVerificandose && usuarioForm.get('usuario')?.valid" 
-                        class="input-group-text bg-success text-white">
-                    <span class="material-icons small">check_circle</span>
-                  </span>
+                  <div *ngIf="usuarioValido && !usuarioVerificandose && usuarioForm.get('usuario')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                    <i class="material-icons text-success small">check_circle</i>
+                  </div>
                 </div>
 
                 <!-- SUB-CASO 2b: Usuario de Google Y NO EN MODO EDICIÓN -->
@@ -151,16 +151,16 @@
                 </span>
                 <input type="email" id="gmail" formControlName="gmail" class="form-control"
                   [readonly]="!modoEdicion"
-                  [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched}">
+                  [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched,
+                             'is-valid': gmailValido && usuarioForm.get('gmail')?.touched}">
                 <!-- Spinner de carga para validación asíncrona del email -->
                 <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando email">
                   <span class="visually-hidden">Verificando...</span>
                 </div>
                 <!-- Icono de check para email válido -->
-                <span *ngIf="modoEdicion && !gmailVerificandose && usuarioForm.get('gmail')?.valid" 
-                      class="input-group-text bg-success text-white">
-                  <span class="material-icons small">check_circle</span>
-                </span>
+                <div *ngIf="gmailValido && !gmailVerificandose && usuarioForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                  <i class="material-icons text-success small">check_circle</i>
+                </div>
               </div>
               
               <!-- Campo de solo lectura para usuarios de Google -->
@@ -200,6 +200,11 @@
                   Verificando...
                 </span>
               </button>
+            </div>
+            <!-- Mensaje de formulario enviado con errores -->
+            <div *ngIf="formularioEnviado && usuarioForm.invalid" class="alert alert-danger mt-3">
+              <span class="material-icons align-middle me-1">error_outline</span>
+              Por favor, corrige los errores en el formulario antes de guardar.
             </div>
           </form>
         </div>

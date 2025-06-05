@@ -30,6 +30,11 @@ export class DetalleUsuarioComponent implements OnInit {
   // Variables para indicadores de validación asíncrona
   usuarioVerificandose: boolean = false;
   gmailVerificandose: boolean = false;
+  
+  // Variables para mejorar el control de validación
+  usuarioValido: boolean = false;
+  gmailValido: boolean = false;
+  formularioEnviado: boolean = false;
 
   // Añadimos una variable userData para guardar la respuesta original del backend
   userData: any = null;
@@ -117,26 +122,31 @@ export class DetalleUsuarioComponent implements OnInit {
   usuarioUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value || control.value.trim() === '') {
+        this.usuarioValido = false;
         return of(null);
       }
 
       // Si estamos editando y el username no ha cambiado, no validar
       if (this.usuario && this.usuario.usuario === control.value) {
+        this.usuarioValido = true;
         return of(null);
       }
 
       this.usuarioVerificandose = true;
+      this.usuarioValido = false;
       
       return this.usuarioService.checkUsuarioExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
           this.usuarioVerificandose = false;
+          this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
         catchError(() => {
           this.usuarioVerificandose = false;
+          this.usuarioValido = false;
           return of(null);
         })
       );
@@ -149,31 +159,37 @@ export class DetalleUsuarioComponent implements OnInit {
   emailUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value || control.value.trim() === '') {
+        this.gmailValido = false;
         return of(null);
       }
 
       // Si estamos editando y el email no ha cambiado, no validar
       if (this.usuario && this.usuario.gmail === control.value) {
+        this.gmailValido = true;
         return of(null);
       }
 
       // Si es usuario de Google, no validar ya que el campo está deshabilitado
       if (this.esUsuarioGoogle) {
+        this.gmailValido = true;
         return of(null);
       }
 
       this.gmailVerificandose = true;
+      this.gmailValido = false;
       
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
           this.gmailVerificandose = false;
+          this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;
         }),
         first(),
         catchError(() => {
           this.gmailVerificandose = false;
+          this.gmailValido = false;
           return of(null);
         })
       );
@@ -240,6 +256,9 @@ export class DetalleUsuarioComponent implements OnInit {
    * Guarda los cambios en el perfil del usuario
    */
   guardarCambios(): void {
+    // Marcar el formulario como enviado
+    this.formularioEnviado = true;
+    
     // Verificar nuevamente si es usuario de Google
     this.detectarUsuarioGoogle();
     
@@ -521,6 +540,7 @@ export class DetalleUsuarioComponent implements OnInit {
    */
   cancelarEdicion(): void {
     this.modoEdicion = false;
+    this.formularioEnviado = false;
     
     // Restaurar los valores originales si hay un usuario cargado
     if (this.usuario) {

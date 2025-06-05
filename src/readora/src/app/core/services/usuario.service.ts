@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Usuario } from '../../models/usuario/usuario.model';
 import { environment } from '../../../enviroments/enviroments';
 
@@ -105,14 +105,14 @@ export class UsuarioService {
   checkUsuarioExiste(username: string): Observable<boolean> {
     return this.http.get<any>(`${this.apiUrl}/buscar-por-usuario/${username}`).pipe(
       // Si la petición es exitosa, el usuario existe
-      data => new Observable<boolean>(observer => { observer.next(true); observer.complete(); }),
+      map(data => true),
       catchError(err => {
         if (err.status === 404) {
           // El usuario no existe
-          return new Observable<boolean>(observer => { observer.next(false); observer.complete(); });
+          return of(false);
         }
         // Para cualquier otro error, asumimos que existe para prevenir registros con errores
-        return new Observable<boolean>(observer => { observer.next(true); observer.complete(); });
+        return of(true);
       })
     );
   }
@@ -123,14 +123,14 @@ export class UsuarioService {
   checkEmailExiste(email: string): Observable<boolean> {
     return this.http.get<any>(`${this.apiUrl}/buscar-por-email/${email}`).pipe(
       // Si la petición es exitosa, el email existe
-      data => new Observable<boolean>(observer => { observer.next(true); observer.complete(); }),
+      map(() => true),
       catchError(err => {
         if (err.status === 404) {
           // El email no existe
-          return new Observable<boolean>(observer => { observer.next(false); observer.complete(); });
+          return of(false);
         }
         // Para cualquier otro error, asumimos que existe para prevenir registros con errores
-        return new Observable<boolean>(observer => { observer.next(true); observer.complete(); });
+        return of(true);
       })
     );
   }

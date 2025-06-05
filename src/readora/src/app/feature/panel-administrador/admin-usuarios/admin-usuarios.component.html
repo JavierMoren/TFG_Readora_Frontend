@@ -255,6 +255,12 @@
             <span>Cancelar</span>
           </button>
         </div>
+        
+        <!-- Mensaje de error cuando el formulario es inválido y se ha intentado enviar -->
+        <div *ngIf="formularioEnviado && usuarioForm.invalid" class="alert alert-danger mt-3">
+          <span class="material-icons align-middle me-1">error_outline</span>
+          Por favor, corrige los errores en el formulario antes de guardar.
+        </div>
       </form>
     </div>
   </div>
