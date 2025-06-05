@@ -7,7 +7,7 @@ import { NotificationService } from '../../../core/services/notification.service
 import { Router } from '@angular/router';
 import { Usuario } from '../../../models/usuario/usuario.model';
 import { Observable, of } from 'rxjs';
-import { map, catchError, debounceTime, distinctUntilChanged, first } from 'rxjs/operators';
+import { map, catchError, debounceTime, distinctUntilChanged, first, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-detalle-usuario',
@@ -132,19 +132,23 @@ export class DetalleUsuarioComponent implements OnInit {
         return of(null);
       }
 
+      console.log(`[DetalleUsuario] Validando usuario: "${control.value}"`);
       this.usuarioVerificandose = true;
       this.usuarioValido = false;
       
-      return this.usuarioService.checkUsuarioExiste(control.value).pipe(
+      return of(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
+        switchMap((value: string) => this.usuarioService.checkUsuarioExiste(value)),
         map(existe => {
+          console.log(`[DetalleUsuario] Resultado validación usuario "${control.value}": existe=${existe}`);
           this.usuarioVerificandose = false;
           this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
-        catchError(() => {
+        catchError(error => {
+          console.error(`[DetalleUsuario] Error al validar usuario "${control.value}"`, error);
           this.usuarioVerificandose = false;
           this.usuarioValido = false;
           return of(null);

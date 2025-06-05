@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { map, debounceTime, distinctUntilChanged, first, catchError } from 'rxjs/operators';
+import { map, debounceTime, distinctUntilChanged, first, catchError, switchMap } from 'rxjs/operators';
 import { Usuario } from '../../../models/usuario/usuario.model';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -170,29 +170,35 @@ export class AdminUsuariosComponent implements OnInit {
   usuarioUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value || control.value.trim() === '') {
+        console.log(`[AdminUsuarios] Usuario vacío, no se valida`);
         this.usuarioValido = false;
         return of(null);
       }
 
       // Si estamos editando y el usuario no ha cambiado, no validar
       if (this.isEditing && this.currentUsuario.usuario === control.value) {
+        console.log(`[AdminUsuarios] Editando y usuario no cambió, se considera válido: "${control.value}"`);
         this.usuarioValido = true;
         return of(null);
       }
 
+      console.log(`[AdminUsuarios] Validando usuario: "${control.value}"`);
       this.usuarioVerificandose = true;
       this.usuarioValido = false;
       
-      return this.usuarioService.checkUsuarioExiste(control.value).pipe(
+      return of(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
+        switchMap((value: string) => this.usuarioService.checkUsuarioExiste(value)),
         map(existe => {
+          console.log(`[AdminUsuarios] Resultado validación usuario "${control.value}": existe=${existe}`);
           this.usuarioVerificandose = false;
           this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
-        catchError(() => {
+        catchError(error => {
+          console.error(`[AdminUsuarios] Error al validar usuario "${control.value}"`, error);
           this.usuarioVerificandose = false;
           this.usuarioValido = false;
           return of(null);
@@ -218,16 +224,19 @@ export class AdminUsuariosComponent implements OnInit {
       this.gmailVerificandose = true;
       this.gmailValido = false;
       
+      console.log(`[AdminUsuarios] Validando email: "${control.value}"`);
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
+          console.log(`[AdminUsuarios] Resultado validación email "${control.value}": existe=${existe}`);
           this.gmailVerificandose = false;
           this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;
         }),
         first(),
-        catchError(() => {
+        catchError((error) => {
+          console.error(`[AdminUsuarios] Error al validar email "${control.value}"`, error);
           this.gmailVerificandose = false;
           this.gmailValido = false;
           return of(null);

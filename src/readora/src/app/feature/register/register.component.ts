@@ -8,7 +8,7 @@ import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { HttpResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, debounceTime, distinctUntilChanged, first, catchError } from 'rxjs/operators';
+import { map, debounceTime, distinctUntilChanged, first, catchError, switchMap } from 'rxjs/operators';
 import { OAuth2Service } from '../../core/services/oauth2.service';
 
 @Component({
@@ -81,22 +81,31 @@ export class RegisterComponent implements OnInit {
   usuarioUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value || control.value.trim() === '') {
+        this.usuarioValido = false;
         return of(null);
       }
 
+      console.log(`[Register] Validando usuario: "${control.value}"`);
       this.usuarioVerificandose = true;
       this.usuarioValido = false;
       
-      return this.usuarioService.checkUsuarioExiste(control.value).pipe(
+      // Añadimos un pequeño retraso antes de hacer la petición para evitar demasiadas llamadas al API
+      return of(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
+        // Hacemos la llamada al servicio
+        switchMap((value: string) => {
+          return this.usuarioService.checkUsuarioExiste(value);
+        }),
         map(existe => {
+          console.log(`[Register] Resultado validación usuario "${control.value}": existe=${existe}`);
           this.usuarioVerificandose = false;
           this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
-        catchError(() => {
+        catchError(error => {
+          console.error(`[Register] Error al validar usuario "${control.value}"`, error);
           this.usuarioVerificandose = false;
           this.usuarioValido = false;
           return of(null);
@@ -108,23 +117,39 @@ export class RegisterComponent implements OnInit {
   // Validador asíncrono para comprobar si el email ya existe
   emailUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value || control.value.trim() === '' || !Validators.email(control)) {
+      // Verificamos si el valor es válido antes de realizar la verificación
+      if (!control.value || control.value.trim() === '') {
+        this.gmailValido = false;
+        return of(null);
+      }
+      
+      // No usar Validators.email directamente como función
+      const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+      if (!emailPattern.test(control.value)) {
+        this.gmailValido = false;
         return of(null);
       }
 
+      console.log(`[Register] Validando email: "${control.value}"`);
       this.gmailVerificandose = true;
       this.gmailValido = false;
       
-      return this.usuarioService.checkEmailExiste(control.value).pipe(
+      // Usar switchMap para mejor control de flujo
+      return of(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
+        switchMap((email: string) => {
+          return this.usuarioService.checkEmailExiste(email);
+        }),
         map(existe => {
+          console.log(`[Register] Resultado validación email "${control.value}": existe=${existe}`);
           this.gmailVerificandose = false;
           this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;
         }),
         first(),
-        catchError(() => {
+        catchError(error => {
+          console.error(`[Register] Error al validar email "${control.value}"`, error);
           this.gmailVerificandose = false;
           this.gmailValido = false;
           return of(null);
