@@ -132,7 +132,6 @@ export class DetalleUsuarioComponent implements OnInit {
         return of(null);
       }
 
-      console.log(`[DetalleUsuario] Validando usuario: "${control.value}"`);
       this.usuarioVerificandose = true;
       this.usuarioValido = false;
       
@@ -141,7 +140,6 @@ export class DetalleUsuarioComponent implements OnInit {
         distinctUntilChanged(),
         switchMap((value: string) => this.usuarioService.checkUsuarioExiste(value)),
         map(existe => {
-          console.log(`[DetalleUsuario] Resultado validación usuario "${control.value}": existe=${existe}`);
           this.usuarioVerificandose = false;
           this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;

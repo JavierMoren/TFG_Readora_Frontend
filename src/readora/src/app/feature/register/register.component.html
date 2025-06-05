@@ -45,14 +45,17 @@
                   [ngClass]="{'is-invalid': registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || formularioEnviado), 
                              'is-valid': gmailValido && registerForm.get('gmail')?.touched}"
                   placeholder="Ingresa tu correo electrónico">
-                <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+                <!-- Solo mostrar el spinner mientras se valida -->
+                <output *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3">
                   <span class="visually-hidden">Verificando...</span>
-                </div>
-                <div *ngIf="gmailValido && !gmailVerificandose && registerForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                </output>
+                <!-- Solo mostrar el check si es válido y no se está validando -->
+                <div *ngIf="!gmailVerificandose && gmailValido && registerForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
                   <i class="material-icons text-success small">check_circle</i>
                 </div>
               </div>
-              <div *ngIf="registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || formularioEnviado)" class="invalid-feedback d-block small mt-1">
+              <!-- Solo mostrar el mensaje de error si es inválido y no se está validando -->
+              <div *ngIf="!gmailVerificandose && registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || formularioEnviado)" class="invalid-feedback d-block small mt-1">
                 {{ getErrorMessage('gmail') }}
               </div>
             </div>

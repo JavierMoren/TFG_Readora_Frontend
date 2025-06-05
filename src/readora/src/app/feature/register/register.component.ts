@@ -85,7 +85,6 @@ export class RegisterComponent implements OnInit {
         return of(null);
       }
 
-      console.log(`[Register] Validando usuario: "${control.value}"`);
       this.usuarioVerificandose = true;
       this.usuarioValido = false;
       
@@ -98,7 +97,6 @@ export class RegisterComponent implements OnInit {
           return this.usuarioService.checkUsuarioExiste(value);
         }),
         map(existe => {
-          console.log(`[Register] Resultado validación usuario "${control.value}": existe=${existe}`);
           this.usuarioVerificandose = false;
           this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
@@ -130,7 +128,6 @@ export class RegisterComponent implements OnInit {
         return of(null);
       }
 
-      console.log(`[Register] Validando email: "${control.value}"`);
       this.gmailVerificandose = true;
       this.gmailValido = false;
       
@@ -142,7 +139,6 @@ export class RegisterComponent implements OnInit {
           return this.usuarioService.checkEmailExiste(email);
         }),
         map(existe => {
-          console.log(`[Register] Resultado validación email "${control.value}": existe=${existe}`);
           this.gmailVerificandose = false;
           this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;

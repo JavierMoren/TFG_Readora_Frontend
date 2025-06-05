@@ -69,7 +69,6 @@ export class AdminUsuariosComponent implements OnInit {
         this.totalPages = data.totalPages;
       },
       error: (error) => {
-        // console.error('[AdminUsuarios] Error al cargar usuarios', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los usuarios'
         });
@@ -170,19 +169,16 @@ export class AdminUsuariosComponent implements OnInit {
   usuarioUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value || control.value.trim() === '') {
-        console.log(`[AdminUsuarios] Usuario vacío, no se valida`);
         this.usuarioValido = false;
         return of(null);
       }
 
       // Si estamos editando y el usuario no ha cambiado, no validar
       if (this.isEditing && this.currentUsuario.usuario === control.value) {
-        console.log(`[AdminUsuarios] Editando y usuario no cambió, se considera válido: "${control.value}"`);
         this.usuarioValido = true;
         return of(null);
       }
 
-      console.log(`[AdminUsuarios] Validando usuario: "${control.value}"`);
       this.usuarioVerificandose = true;
       this.usuarioValido = false;
       
@@ -191,14 +187,12 @@ export class AdminUsuariosComponent implements OnInit {
         distinctUntilChanged(),
         switchMap((value: string) => this.usuarioService.checkUsuarioExiste(value)),
         map(existe => {
-          console.log(`[AdminUsuarios] Resultado validación usuario "${control.value}": existe=${existe}`);
           this.usuarioVerificandose = false;
           this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
         catchError(error => {
-          console.error(`[AdminUsuarios] Error al validar usuario "${control.value}"`, error);
           this.usuarioVerificandose = false;
           this.usuarioValido = false;
           return of(null);
@@ -224,19 +218,16 @@ export class AdminUsuariosComponent implements OnInit {
       this.gmailVerificandose = true;
       this.gmailValido = false;
       
-      console.log(`[AdminUsuarios] Validando email: "${control.value}"`);
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
-          console.log(`[AdminUsuarios] Resultado validación email "${control.value}": existe=${existe}`);
           this.gmailVerificandose = false;
           this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;
         }),
         first(),
         catchError((error) => {
-          console.error(`[AdminUsuarios] Error al validar email "${control.value}"`, error);
           this.gmailVerificandose = false;
           this.gmailValido = false;
           return of(null);
@@ -255,7 +246,6 @@ export class AdminUsuariosComponent implements OnInit {
         this.usuarios = data;
       },
       error: (error) => {
-        // console.error('[AdminUsuarios] Error al cargar todos los usuarios', error);
         this.notificationService.error('Error', { 
           description: 'No se pudieron cargar los usuarios'
         });
@@ -273,7 +263,6 @@ export class AdminUsuariosComponent implements OnInit {
         this.usuarioDetalle = data;
       },
       error: (error) => {
-        // console.error(`[AdminUsuarios] Error al cargar usuario ID=${id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo cargar el usuario'
         });
@@ -387,7 +376,6 @@ export class AdminUsuariosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error('[AdminUsuarios] Error al crear usuario', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo crear el usuario'
         });
@@ -412,7 +400,6 @@ export class AdminUsuariosComponent implements OnInit {
           this.enviarActualizacionUsuario();
         },
         error: (error) => {
-          console.error(`[AdminUsuarios] Error al obtener usuario original ID=${this.currentUsuario.id}`, error);
           this.notificationService.error('Error', { 
             description: 'No se pudo verificar la información original del usuario de Google'
           });
@@ -437,7 +424,6 @@ export class AdminUsuariosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error(`[AdminUsuarios] Error al actualizar usuario ID=${this.currentUsuario.id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo actualizar el usuario'
         });
@@ -472,7 +458,6 @@ export class AdminUsuariosComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('[AdminUsuarios] Error al verificar contraseña', error);
         this.notificationService.error('Error', { 
           description: 'No se pudo verificar la contraseña'
         });
@@ -501,7 +486,6 @@ export class AdminUsuariosComponent implements OnInit {
         this.cancelEdit();
       },
       error: (error) => {
-        console.error(`[AdminUsuarios] Error al actualizar contraseña de usuario ID=${this.currentUsuario.id}`, error);
         this.notificationService.error('Error', { 
           description: 'No se pudo actualizar la contraseña'
         });
@@ -552,7 +536,6 @@ export class AdminUsuariosComponent implements OnInit {
           this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
         },
         error: (error) => {
-          console.error(`[AdminUsuarios] Error al eliminar usuario ID=${this.userIdToDelete}`, error);
           
           // Verificar si el error es debido a que el usuario tiene libros asociados (código 409)
           if (error.status === 409) {

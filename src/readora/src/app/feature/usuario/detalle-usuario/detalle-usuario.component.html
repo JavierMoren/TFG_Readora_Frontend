@@ -154,11 +154,11 @@
                   [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched,
                              'is-valid': gmailValido && usuarioForm.get('gmail')?.touched}">
                 <!-- Spinner de carga para validación asíncrona del email -->
-                <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando email">
+                <output *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3">
                   <span class="visually-hidden">Verificando...</span>
-                </div>
+                </output>
                 <!-- Icono de check para email válido -->
-                <div *ngIf="gmailValido && !gmailVerificandose && usuarioForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                <div *ngIf="!gmailVerificandose && gmailValido && usuarioForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
                   <i class="material-icons text-success small">check_circle</i>
                 </div>
               </div>
@@ -173,8 +173,8 @@
                   <span class="material-icons small">google</span>
                 </span>
               </div>
-              
-              <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback d-block">
+              <!-- Mensaje de error solo si no se está validando -->
+              <div *ngIf="!gmailVerificandose && usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="invalid-feedback d-block">
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El correo electrónico es obligatorio.</span>
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Formato de correo electrónico inválido.</span>
                 <span *ngIf="usuarioForm.get('gmail')?.errors?.['gmailExistente']">Este correo electrónico ya está registrado.</span>
