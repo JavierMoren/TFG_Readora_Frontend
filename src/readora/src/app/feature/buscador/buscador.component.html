@@ -80,15 +80,16 @@
         </div>
         <a href="#" (click)="$event.preventDefault(); searchDeep()" 
            [class.disabled]="!isValidSearch"
-           style="font-size:0.98em; opacity:0.8; text-decoration: underline; cursor: pointer;">
-          Buscar también en Google Books
+           style="font-size:0.98em; opacity:0.9; text-decoration: none; cursor: pointer; color: #4285F4; font-weight: 500; display: inline-flex; align-items: center; gap: 0.3em;"
+           title="Buscar en Google Books (más resultados)">
+          <img src="assets/logos/Logo.svg" alt="Google Books" style="height:1.1em; vertical-align:middle; margin-right:0.2em;"> Buscar en Google Books
         </a>
       </div>
     </div>
   </div>
   
   <!-- Mensaje cuando no hay resultados -->
-  <div class="alert alert-info mt-4" *ngIf="results.length === 0 && !loading && searchForm.get('searchTerm')?.value && isSearchingBooks">
+  <div class="alert alert-info mt-4" *ngIf="results.length === 0 && !loading && searchForm.get('searchTerm')?.value && isSearchingBooks && lastSearchTerm">
     <div *ngIf="!isGoogleSearch">
       No se encontraron libros en la biblioteca local. 
       <button 
