@@ -53,11 +53,7 @@
                   [readonly]="!modoEdicion"
                   [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched,
                              'is-valid': usuarioValido && usuarioForm.get('usuario')?.touched}">
-                <!-- Spinner de carga para validación asíncrona -->
-                <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" aria-label="Verificando disponibilidad">
-                  <span class="visually-hidden">Verificando...</span>
-                </div>
-                <!-- Icono de check para usuarios normales en modo edición y campo válido -->
+                <!-- Eliminado spinner de usuarioVerificandose -->
                 <div *ngIf="usuarioValido && !usuarioVerificandose && usuarioForm.get('usuario')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
                   <i class="material-icons text-success small">check_circle</i>
                 </div>
@@ -153,11 +149,7 @@
                   [readonly]="!modoEdicion"
                   [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched,
                              'is-valid': gmailValido && usuarioForm.get('gmail')?.touched}">
-                <!-- Spinner de carga para validación asíncrona del email -->
-                <output *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3">
-                  <span class="visually-hidden">Verificando...</span>
-                </output>
-                <!-- Icono de check para email válido -->
+                <!-- Eliminado spinner de gmailVerificandose -->
                 <div *ngIf="!gmailVerificandose && gmailValido && usuarioForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
                   <i class="material-icons text-success small">check_circle</i>
                 </div>
@@ -195,8 +187,8 @@
                   <span class="material-icons me-1">save</span>
                   Guardar cambios
                 </span>
+                <!-- Eliminado spinner de botón -->
                 <span *ngIf="usuarioVerificandose || gmailVerificandose" class="d-flex align-items-center">
-                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                   Verificando...
                 </span>
               </button>
