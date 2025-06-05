@@ -57,16 +57,6 @@
                   <span>Eliminando...</span>
                 </ng-container>
               </button>
-              
-              <!-- Botón para iniciar sesión (solo visible cuando no hay sesión) -->
-              <button class="btn btn-outline-primary btn-block" 
-                      *ngIf="!isLoggedIn" 
-                      routerLink="/api/v1/authenticate" 
-                      [queryParams]="{returnUrl: '/libros/' + libroId}"
-                      aria-label="Iniciar sesión para añadir este libro a tu biblioteca">
-                <span class="material-icons" aria-hidden="true">login</span>
-                <span>Iniciar sesión para añadir</span>
-              </button>
             </div>
           </div>
         </div>

@@ -25,10 +25,11 @@ export const routes: Routes = [
     component: HomeComponent,
   },
   {
-    path: 'api/v1/register',
+    path: 'register', // Cambiado de 'api/v1/register'
     component: RegisterComponent,
-  },  {
-    path: 'api/v1/authenticate',
+  },
+  {
+    path: 'login', // Cambiado de 'api/v1/authenticate'
     component: AutenticacionComponent,
   },
   {
@@ -40,17 +41,21 @@ export const routes: Routes = [
     path: 'buscador',
     component: BuscadorComponent,
     canActivate: [autenticacionGuard]
-  },  {
+  },
+  {
     path: 'biblioteca',
     component: BibliotecaPersonalComponent,
     canActivate: [autenticacionGuard]
-  },  {
+  },
+  {
     path: 'libros/:id',
-    component: DetalleLibroComponent
+    component: DetalleLibroComponent,
+    canActivate: [autenticacionGuard]
   },
   {
     path: 'autores/:id',
-    component: DetalleAutorComponent
+    component: DetalleAutorComponent,
+    canActivate: [autenticacionGuard]
   },
   {
     path: 'panel-administrador',

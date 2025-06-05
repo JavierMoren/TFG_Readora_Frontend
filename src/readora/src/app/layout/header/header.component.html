@@ -32,16 +32,16 @@
         <!-- Enlaces cuando NO está autenticado -->
         <ng-container *ngIf="!(isLoggedIn$ | async)">
           <a class="nav-item nav-link px-3" 
-            routerLink="/api/v1/register" 
+            routerLink="/register" 
             routerLinkActive="active"
-            [attr.aria-current]="router.url.includes('/api/v1/register') ? 'page' : null">
+            [attr.aria-current]="router.url.includes('/register') ? 'page' : null">
             <span class="material-icons nav-icon" aria-hidden="true">person_add</span>
             <span>Registro</span>
           </a>
           <a class="nav-item nav-link px-3 ms-1" 
-            routerLink="/api/v1/authenticate" 
+            routerLink="/login" 
             routerLinkActive="active"
-            [attr.aria-current]="router.url.includes('/api/v1/authenticate') ? 'page' : null">
+            [attr.aria-current]="router.url.includes('/login') ? 'page' : null">
             <span class="material-icons nav-icon" aria-hidden="true">login</span>
             <span>Login</span>
           </a>
@@ -156,17 +156,17 @@
         <!-- Móvil: Enlaces cuando NO está autenticado -->
         <ng-container *ngIf="!(isLoggedIn$ | async)">
           <a class="nav-link mobile-nav-link" 
-            routerLink="/api/v1/register" 
+            routerLink="/register" 
             routerLinkActive="active"
-            [attr.aria-current]="router.url.includes('/api/v1/register') ? 'page' : null"
+            [attr.aria-current]="router.url.includes('/register') ? 'page' : null"
             data-bs-dismiss="offcanvas">
             <span class="material-icons nav-icon" aria-hidden="true">person_add</span>
             <span>Registro</span>
           </a>
           <a class="nav-link mobile-nav-link" 
-            routerLink="/api/v1/authenticate" 
+            routerLink="/login" 
             routerLinkActive="active"
-            [attr.aria-current]="router.url.includes('/api/v1/authenticate') ? 'page' : null"
+            [attr.aria-current]="router.url.includes('/login') ? 'page' : null"
             data-bs-dismiss="offcanvas">
             <span class="material-icons nav-icon" aria-hidden="true">login</span>
             <span>Inicio de sesión</span>
