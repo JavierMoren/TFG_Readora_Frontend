@@ -22,6 +22,11 @@ export class RegisterComponent implements OnInit {
   usuarioVerificandose = false;
   gmailVerificandose = false;
   
+  // Nuevos campos para mejorar la validación
+  usuarioValido = false;
+  gmailValido = false;
+  formularioEnviado = false;
+  
   constructor(
     private registerService: RegisterService,
     private usuarioService: UsuarioService, 
@@ -33,13 +38,6 @@ export class RegisterComponent implements OnInit {
   
   ngOnInit(): void {
     this.initForm();
-    // Forzar revalidación de usuario/email al cambiar valor
-    this.registerForm.get('usuario')?.valueChanges.subscribe(() => {
-      this.registerForm.get('usuario')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-    });
-    this.registerForm.get('gmail')?.valueChanges.subscribe(() => {
-      this.registerForm.get('gmail')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-    });
   }
   
   initForm(): void {
@@ -82,20 +80,25 @@ export class RegisterComponent implements OnInit {
   // Validador asíncrono para comprobar si el usuario ya existe
   usuarioUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value || control.value.trim() === '' || !control.parent?.get('usuario')?.valid) {
+      if (!control.value || control.value.trim() === '') {
         return of(null);
       }
+
       this.usuarioVerificandose = true;
+      this.usuarioValido = false;
+      
       return this.usuarioService.checkUsuarioExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
           this.usuarioVerificandose = false;
+          this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
         catchError(() => {
           this.usuarioVerificandose = false;
+          this.usuarioValido = false;
           return of(null);
         })
       );
@@ -105,20 +108,25 @@ export class RegisterComponent implements OnInit {
   // Validador asíncrono para comprobar si el email ya existe
   emailUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value || control.value.trim() === '' || !control.parent?.get('gmail')?.valid) {
+      if (!control.value || control.value.trim() === '' || !Validators.email(control)) {
         return of(null);
       }
+
       this.gmailVerificandose = true;
+      this.gmailValido = false;
+      
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
           this.gmailVerificandose = false;
+          this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;
         }),
         first(),
         catchError(() => {
           this.gmailVerificandose = false;
+          this.gmailValido = false;
           return of(null);
         })
       );
@@ -126,6 +134,8 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    this.formularioEnviado = true; // Marcar el formulario como enviado
+
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       this.notificationService.error('Error', { 

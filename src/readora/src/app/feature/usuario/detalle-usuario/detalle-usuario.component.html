@@ -189,9 +189,16 @@
                 <span class="material-icons">cancel</span>
                 Cancelar
               </button>
-              <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid">
-                <span class="material-icons">save</span>
-                Guardar cambios
+              <button type="submit" class="btn btn-primary" 
+                [disabled]="usuarioForm.invalid || usuarioForm.pending || usuarioVerificandose || gmailVerificandose">
+                <span *ngIf="!usuarioVerificandose && !gmailVerificandose" class="d-flex align-items-center">
+                  <span class="material-icons me-1">save</span>
+                  Guardar cambios
+                </span>
+                <span *ngIf="usuarioVerificandose || gmailVerificandose" class="d-flex align-items-center">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Verificando...
+                </span>
               </button>
             </div>
           </form>

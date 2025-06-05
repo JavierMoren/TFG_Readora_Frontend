@@ -35,13 +35,17 @@
               <input type="text" id="usuario" formControlName="usuario" 
                 class="form-control"
                 [readonly]="isEditing && esUsuarioGoogle"
-                [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched, 
+                [ngClass]="{'is-invalid': usuarioForm.get('usuario')?.invalid && (usuarioForm.get('usuario')?.touched || formularioEnviado), 
+                           'is-valid': usuarioValido && usuarioForm.get('usuario')?.touched,
                            'bg-light-subtle': isEditing && esUsuarioGoogle}">
+              <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+                <span class="visually-hidden">Verificando...</span>
+              </div>
+              <div *ngIf="usuarioValido && !usuarioVerificandose && usuarioForm.get('usuario')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                <span class="material-icons text-success small">check_circle</span>
+              </div>
             </div>
-            <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
-              <span class="visually-hidden">Verificando...</span>
-            </div>
-            <div *ngIf="usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched" class="text-danger small mt-1">
+            <div *ngIf="usuarioForm.get('usuario')?.invalid && (usuarioForm.get('usuario')?.touched || formularioEnviado)" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio</span>
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">Solo letras, números y guion bajo. Entre 4 y 100 caracteres</span>
               <span *ngIf="usuarioForm.get('usuario')?.errors?.['usuarioExistente']">Este nombre de usuario ya está en uso</span>
@@ -61,13 +65,17 @@
               <input type="email" id="gmail" formControlName="gmail" 
                 class="form-control"
                 [readonly]="isEditing && esUsuarioGoogle"
-                [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched,
+                [ngClass]="{'is-invalid': usuarioForm.get('gmail')?.invalid && (usuarioForm.get('gmail')?.touched || formularioEnviado),
+                           'is-valid': gmailValido && usuarioForm.get('gmail')?.touched,
                            'bg-light-subtle': isEditing && esUsuarioGoogle}">
+              <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
+                <span class="visually-hidden">Verificando...</span>
+              </div>
+              <div *ngIf="gmailValido && !gmailVerificandose && usuarioForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                <span class="material-icons text-success small">check_circle</span>
+              </div>
             </div>
-            <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
-              <span class="visually-hidden">Verificando...</span>
-            </div>
-            <div *ngIf="usuarioForm.get('gmail')?.invalid && usuarioForm.get('gmail')?.touched" class="text-danger small mt-1">
+            <div *ngIf="usuarioForm.get('gmail')?.invalid && (usuarioForm.get('gmail')?.touched || formularioEnviado)" class="text-danger small mt-1">
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['required']">El email es obligatorio</span>
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['pattern']">Introduce un email válido</span>
               <span *ngIf="usuarioForm.get('gmail')?.errors?.['gmailExistente']">Este correo electrónico ya está registrado</span>
@@ -230,10 +238,16 @@
         
         <div class="d-flex gap-2">
           <button type="submit" 
-            [disabled]="usuarioForm.invalid || (cambiarContrasenna && passwordForm.invalid)"
+            [disabled]="usuarioForm.invalid || (cambiarContrasenna && passwordForm.invalid) || usuarioForm.pending || usuarioVerificandose || gmailVerificandose"
             class="btn btn-primary btn-sm d-inline-flex align-items-center transition-all">
-            <span class="material-icons small me-1">save</span>
-            <span>Guardar</span>
+            <span *ngIf="!usuarioVerificandose && !gmailVerificandose" class="d-flex align-items-center">
+              <span class="material-icons small me-1">save</span>
+              <span>Guardar</span>
+            </span>
+            <span *ngIf="usuarioVerificandose || gmailVerificandose" class="d-flex align-items-center">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span>Verificando...</span>
+            </span>
           </button>
           <button type="button" (click)="cancelEdit()" 
             class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center transition-all">

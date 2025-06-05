@@ -36,6 +36,15 @@ export class AdminUsuariosComponent implements OnInit {
   
   Math = Math;
 
+  // Nuevas variables para control de estado de validación
+  usuarioValido = false;
+  gmailValido = false;
+  formularioEnviado = false;
+
+  // Variables para control de estado de validación
+  usuarioVerificandose = false;
+  gmailVerificandose = false;
+
   constructor(
     private usuarioService: UsuarioService,
     private fb: FormBuilder,
@@ -45,13 +54,6 @@ export class AdminUsuariosComponent implements OnInit {
   ngOnInit(): void {
     // Inicializar formularios
     this.initForms();
-    // Forzar revalidación de usuario/email al cambiar valor
-    this.usuarioForm.get('usuario')?.valueChanges.subscribe(() => {
-      this.usuarioForm.get('usuario')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-    });
-    this.usuarioForm.get('gmail')?.valueChanges.subscribe(() => {
-      this.usuarioForm.get('gmail')?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-    });
     // Carga los usuarios paginados al inicializar el componente
     this.getUsuariosPaginados();
   }
@@ -163,30 +165,36 @@ export class AdminUsuariosComponent implements OnInit {
     }
   }
   
-  // Variables para control de estado de validación
-  usuarioVerificandose = false;
-  gmailVerificandose = false;
   
   // Validador asíncrono para comprobar si el usuario ya existe
   usuarioUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       if (!control.value || control.value.trim() === '') {
+        this.usuarioValido = false;
         return of(null);
       }
+
+      // Si estamos editando y el usuario no ha cambiado, no validar
       if (this.isEditing && this.currentUsuario.usuario === control.value) {
+        this.usuarioValido = true;
         return of(null);
       }
+
       this.usuarioVerificandose = true;
+      this.usuarioValido = false;
+      
       return this.usuarioService.checkUsuarioExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
           this.usuarioVerificandose = false;
+          this.usuarioValido = !existe;
           return existe ? { usuarioExistente: true } : null;
         }),
         first(),
         catchError(() => {
           this.usuarioVerificandose = false;
+          this.usuarioValido = false;
           return of(null);
         })
       );
@@ -196,23 +204,32 @@ export class AdminUsuariosComponent implements OnInit {
   // Validador asíncrono para comprobar si el email ya existe
   emailUnicoValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value || control.value.trim() === '' || !control.parent?.get('gmail')?.valid) {
+      if (!control.value || control.value.trim() === '') {
+        this.gmailValido = false;
         return of(null);
       }
+
+      // Si estamos editando y el email no ha cambiado, no validar
       if (this.isEditing && this.currentUsuario.gmail === control.value) {
+        this.gmailValido = true;
         return of(null);
       }
+
       this.gmailVerificandose = true;
+      this.gmailValido = false;
+      
       return this.usuarioService.checkEmailExiste(control.value).pipe(
         debounceTime(300),
         distinctUntilChanged(),
         map(existe => {
           this.gmailVerificandose = false;
+          this.gmailValido = !existe;
           return existe ? { gmailExistente: true } : null;
         }),
         first(),
         catchError(() => {
           this.gmailVerificandose = false;
+          this.gmailValido = false;
           return of(null);
         })
       );
@@ -260,6 +277,7 @@ export class AdminUsuariosComponent implements OnInit {
    */
   prepareCreateUsuario(): void {
     this.isEditing = false;
+    this.formularioEnviado = false;
     this.resetForms();
     this.showForm = true;
   }
@@ -270,6 +288,7 @@ export class AdminUsuariosComponent implements OnInit {
    */
   prepareUpdateUsuario(usuario: Usuario): void {
     this.isEditing = true; 
+    this.formularioEnviado = false;
     // Establecer valores en el formulario
     this.usuarioForm.patchValue({
       id: usuario.id,
@@ -316,6 +335,8 @@ export class AdminUsuariosComponent implements OnInit {
    * Determina si debe crear o actualizar un usuario
    */
   saveUsuario(): void {
+    this.formularioEnviado = true; // Marcar el formulario como enviado
+    
     if (this.usuarioForm.valid) {
       this.currentUsuario = this.usuarioForm.value;
       
@@ -546,6 +567,7 @@ export class AdminUsuariosComponent implements OnInit {
    */
   cancelEdit(): void {
     this.showForm = false;
+    this.formularioEnviado = false;
     this.resetForms();
   }
 

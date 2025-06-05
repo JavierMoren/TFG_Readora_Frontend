@@ -11,8 +11,7 @@
       <div class="card-body p-0">
         
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form p-4">
-          <div class="row">
-            <div class="col-md-6 mb-4">
+          <div class="row">            <div class="col-md-6 mb-4">
               <label for="usuario" class="form-label fw-medium">Usuario <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="material-icons small">account_circle</i></span>
@@ -21,18 +20,20 @@
                   id="usuario" 
                   formControlName="usuario"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || registerForm.get('usuario')?.dirty)}"
+                  [ngClass]="{'is-invalid': registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || formularioEnviado), 
+                             'is-valid': usuarioValido && registerForm.get('usuario')?.touched}"
                   placeholder="Elige un nombre de usuario">
                 <div *ngIf="usuarioVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
                   <span class="visually-hidden">Verificando...</span>
                 </div>
+                <div *ngIf="usuarioValido && !usuarioVerificandose && registerForm.get('usuario')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                  <i class="material-icons text-success small">check_circle</i>
+                </div>
               </div>
-              <div *ngIf="registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || registerForm.get('usuario')?.dirty)" class="invalid-feedback d-block small mt-1">
+              <div *ngIf="registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || formularioEnviado)" class="invalid-feedback d-block small mt-1">
                 {{ getErrorMessage('usuario') }}
               </div>
-            </div>
-
-            <div class="col-md-6 mb-4">
+            </div>            <div class="col-md-6 mb-4">
               <label for="gmail" class="form-label fw-medium">Correo electrónico <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0"><i class="material-icons small">mail</i></span>
@@ -41,13 +42,17 @@
                   id="gmail" 
                   formControlName="gmail"
                   class="form-control border-start-0"
-                  [ngClass]="{'is-invalid': registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || registerForm.get('gmail')?.dirty)}"
+                  [ngClass]="{'is-invalid': registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || formularioEnviado), 
+                             'is-valid': gmailValido && registerForm.get('gmail')?.touched}"
                   placeholder="Ingresa tu correo electrónico">
                 <div *ngIf="gmailVerificandose" class="spinner-border spinner-border-sm text-primary position-absolute end-0 top-50 translate-middle-y me-3" role="status">
                   <span class="visually-hidden">Verificando...</span>
                 </div>
+                <div *ngIf="gmailValido && !gmailVerificandose && registerForm.get('gmail')?.touched" class="valid-feedback position-absolute end-0 top-50 translate-middle-y me-3">
+                  <i class="material-icons text-success small">check_circle</i>
+                </div>
               </div>
-              <div *ngIf="registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || registerForm.get('gmail')?.dirty)" class="invalid-feedback d-block small mt-1">
+              <div *ngIf="registerForm.get('gmail')?.invalid && (registerForm.get('gmail')?.touched || formularioEnviado)" class="invalid-feedback d-block small mt-1">
                 {{ getErrorMessage('gmail') }}
               </div>
             </div>
@@ -106,15 +111,17 @@
                 La contraseña debe tener al menos 6 caracteres. Te recomendamos usar letras, números y símbolos.
               </small>
             </div>
-          </div>
-
-          <button 
+          </div>          <button 
             type="submit" 
-            [disabled]="registerForm.invalid || registerForm.pending"
+            [disabled]="registerForm.invalid || registerForm.pending || usuarioVerificandose || gmailVerificandose"
             class="btn btn-primary w-100 py-2 mb-3 auth-btn mt-2">
             <span class="d-flex align-items-center justify-content-center">
               <i class="material-icons me-2">how_to_reg</i>
-              Crear cuenta
+              <span *ngIf="!registerForm.pending && !usuarioVerificandose && !gmailVerificandose">Crear cuenta</span>
+              <span *ngIf="registerForm.pending || usuarioVerificandose || gmailVerificandose">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Verificando...
+              </span>
             </span>
           </button>
           
