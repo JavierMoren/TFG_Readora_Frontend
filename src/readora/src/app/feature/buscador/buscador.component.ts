@@ -82,7 +82,11 @@ export class BuscadorComponent implements OnInit {
 
   // Método para realizar búsqueda profunda (Google Books)
   searchDeep(): void {
-    const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
+    // Solo permitir si ya se ha hecho una búsqueda (no al escribir)
+    if (!this.lastSearchTerm || !this.isValidSearch) {
+      return;
+    }
+    const searchTerm = this.lastSearchTerm;
     
     // Validar que el término de búsqueda tenga al menos 3 caracteres
     if (!this.isValidSearch) {
@@ -108,21 +112,17 @@ export class BuscadorComponent implements OnInit {
 
     const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
     const searchType = this.searchForm.get('searchType')?.value;
-    
     // Validar que el término de búsqueda tenga al menos 3 caracteres
     if (!searchTerm || searchTerm.length < 3) {
       this.hasError = true;
       this.errorMessage = 'El término de búsqueda debe tener al menos 3 caracteres.';
       return;
     }
-    
     // Resetear la bandera de búsqueda en Google
     this.isGoogleSearch = false;
-    
     // Resetear el estado de error
     this.hasError = false;
     this.errorMessage = '';
-    
     this.lastSearchTerm = searchTerm;
     this.lastSearchType = searchType;
     

@@ -63,21 +63,6 @@
   
   <!-- Resultados de la búsqueda -->
   <div class="mt-4" *ngIf="results.length > 0 && !loading">
-    <!-- Indicador de fuente para búsqueda local con opción de Google Books -->
-    <div class="alert alert-success mb-3" *ngIf="!isGoogleSearch && isSearchingBooks">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <i class="bi bi-check-circle me-2"></i>
-          <span>
-            <strong>Resultados de la biblioteca local</strong>
-            <span *ngIf="totalItems > 0">
-              ({{totalItems}} libro{{totalItems !== 1 ? 's' : ''}} encontrado{{totalItems !== 1 ? 's' : ''}})
-            </span>
-          </span>
-        </div>
-      </div>
-    </div>
-    
     <!-- Contenedor de resultados -->
     <div *ngIf="results && results.length > 0">
       <app-resultado-busqueda 
@@ -88,17 +73,16 @@
         [pageSize]="pageSize"
         (pageChange)="pageChanged($event)">
       </app-resultado-busqueda>
-      <!-- Opción de buscar en Google Books al final de los resultados locales -->
+      <!-- Opción de buscar en Google Books al final de los resultados locales, como enlace -->
       <div *ngIf="!isGoogleSearch && isSearchingBooks && results.length > 0" class="text-center mt-3">
-        <button class="btn btn-outline-secondary btn-sm" 
-                (click)="searchDeep()"
-                [disabled]="!isValidSearch"
-                style="opacity:0.7; font-size:0.95em;">
-          <i class="bi bi-cloud-download"></i> Buscar también en Google Books
-        </button>
-        <div class="small text-muted mt-1" style="font-size:0.85em;">
-          ¿No encuentras lo que buscas? Prueba buscar en Google Books para descubrir más títulos
+        <div class="small text-muted mb-1" style="font-size:0.95em;">
+          ¿No encuentras lo que buscas?
         </div>
+        <a href="#" (click)="$event.preventDefault(); searchDeep()" 
+           [class.disabled]="!isValidSearch"
+           style="font-size:0.98em; opacity:0.8; text-decoration: underline; cursor: pointer;">
+          Buscar también en Google Books
+        </a>
       </div>
     </div>
   </div>
