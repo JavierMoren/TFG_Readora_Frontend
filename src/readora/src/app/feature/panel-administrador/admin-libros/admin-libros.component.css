@@ -4,6 +4,18 @@
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1rem;
   width: 100%;
+  /* Siempre mostrar la barra de scroll horizontal si hay overflow */
+  scrollbar-color: var(--primary-color) var(--background-subtle);
+  scrollbar-width: thin;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 10px;
+  background: var(--background-subtle);
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 5px;
 }
 
 /* Estilos para la tabla principal */
@@ -81,14 +93,20 @@
 /* Evita que los botones de acciones se apilen en resoluciones pequeñas */
 .actions-column {
   white-space: nowrap;
-  min-width: 120px;
+  min-width: 160px;
+  max-width: 220px;
 }
 
 /* Mejora la visualización en pantallas pequeñas */
 @media (max-width: 768px) {
+  .actions-column {
+    min-width: 180px;
+    max-width: 260px;
+  }
   .table-responsive {
     border: 0;
     margin-bottom: 0;
+    overflow-x: auto;
   }
 }
 
