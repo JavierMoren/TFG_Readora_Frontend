@@ -1,8 +1,9 @@
 /* Estilos para el contenedor de la tabla */
 .table-responsive {
-  overflow-x: scroll !important;
+  border-radius: 0.75rem;
+  overflow-x: auto; /* Igual que admin-usuario-libros */
   overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
   margin-bottom: 1rem;
   width: 100%;
   min-height: 20px;
@@ -12,18 +13,8 @@
   scrollbar-gutter: stable both-edges;
 }
 
-.table-responsive::-webkit-scrollbar {
-  height: 10px;
-  background: var(--background-subtle);
-  display: block;
-}
-.table-responsive::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 5px;
-}
-
-/* Estilos para la tabla principal */
 .table {
+  margin-bottom: 0;
   width: 100%;
   table-layout: fixed;
 }
