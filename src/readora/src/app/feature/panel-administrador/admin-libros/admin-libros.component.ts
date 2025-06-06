@@ -7,6 +7,7 @@ import { LibrosService } from '../../../core/services/libros.service';
 import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-libros',
@@ -53,7 +54,8 @@ export class AdminLibrosComponent implements OnInit {
     private librosService: LibrosService,
     private autorService: AutorService,
     private storageService: StorageService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -979,6 +981,8 @@ export class AdminLibrosComponent implements OnInit {
   }
 
   verDetalleLibro(libro: Libro): void {
-    this.libroDetalle = libro;
+    if (libro && libro.id) {
+      this.router.navigate(['/libros', libro.id]);
+    }
   }
 }

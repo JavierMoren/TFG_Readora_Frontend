@@ -5,6 +5,7 @@ import { AutorService } from '../../../core/services/autor.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Autor } from '../../../models/autor/autor.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-autores',
@@ -52,7 +53,8 @@ export class AdminAutoresComponent implements OnInit {
   constructor(
     private autorService: AutorService,
     private storageService: StorageService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -348,6 +350,8 @@ export class AdminAutoresComponent implements OnInit {
   }
 
   verDetalleAutor(autor: Autor): void {
-    this.autorDetalle = autor;
+    if (autor && autor.id) {
+      this.router.navigate(['/autores', autor.id]);
+    }
   }
 }
