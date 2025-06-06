@@ -1,17 +1,21 @@
 /* Estilos para el contenedor de la tabla */
 .table-responsive {
-  overflow-x: auto;
+  overflow-x: scroll !important;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 1rem;
   width: 100%;
-  /* Siempre mostrar la barra de scroll horizontal si hay overflow */
+  min-height: 20px;
   scrollbar-color: var(--primary-color) var(--background-subtle);
   scrollbar-width: thin;
+  /* Para navegadores modernos: mantener espacio para la barra aunque no haya overflow */
+  scrollbar-gutter: stable both-edges;
 }
 
 .table-responsive::-webkit-scrollbar {
   height: 10px;
   background: var(--background-subtle);
+  display: block;
 }
 .table-responsive::-webkit-scrollbar-thumb {
   background: var(--primary-color);
