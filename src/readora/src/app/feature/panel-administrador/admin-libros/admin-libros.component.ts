@@ -977,4 +977,8 @@ export class AdminLibrosComponent implements OnInit {
       this.mensajeErrorIsbn = '';
     }
   }
+
+  verDetalleLibro(libro: Libro): void {
+    this.libroDetalle = libro;
+  }
 }

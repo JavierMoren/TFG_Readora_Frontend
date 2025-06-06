@@ -28,6 +28,7 @@ export class AdminAutoresComponent implements OnInit {
   showForm: boolean = false;
   isEditing: boolean = false;
   isUploading: boolean = false;
+  autorDetalle: Autor | null = null; 
   
   // Propiedades para la paginación del servidor
   currentPage: number = 0; // Paginación basada en 0 para el backend
@@ -344,5 +345,9 @@ export class AdminAutoresComponent implements OnInit {
         }
       }
     });
+  }
+
+  verDetalleAutor(autor: Autor): void {
+    this.autorDetalle = autor;
   }
 }
