@@ -271,7 +271,6 @@
           <th scope="col" class="text-primary small" style="min-width: 150px; max-width: 200px;">Título</th>
           <th scope="col" class="text-primary small" style="width: 120px;">ISBN</th>
           <th scope="col" class="text-primary small" style="min-width: 150px; max-width: 200px;">Autores</th>
-          <th scope="col" class="text-primary small" style="width: 80px;">Páginas</th>
           <th scope="col" class="text-primary small" style="width: 100px;">Publicación</th>
           <th scope="col" class="text-primary small text-center" style="width: 120px;">Acciones</th>
         </tr>
@@ -303,9 +302,6 @@
             <!-- Si no hay autores -->
             <span *ngIf="!libro.autores?.length" class="text-muted">Sin autores</span>
           </td>
-          <td class="text-center" style="width: 80px;">
-            {{libro.numeroPaginas || 'N/A'}}
-          </td>
           <td style="width: 100px;">
             {{libro.anioPublicacion ? (libro.anioPublicacion | date:'yyyy') : 'N/A'}}
           </td>
@@ -329,7 +325,7 @@
         
         <!-- Mensaje cuando no hay libros -->
         <tr *ngIf="libros.length === 0">
-          <td colspan="8" class="text-center text-secondary py-4">
+          <td colspan="7" class="text-center text-secondary py-4">
             No hay libros disponibles
           </td>
         </tr>
