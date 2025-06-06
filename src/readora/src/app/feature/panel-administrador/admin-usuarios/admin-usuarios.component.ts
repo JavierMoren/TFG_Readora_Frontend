@@ -121,7 +121,12 @@ export class AdminUsuariosComponent implements OnInit {
     this.usuarioForm = this.fb.group({
       id: [null],
       usuario: ['', {
-        validators: [Validators.required, Validators.pattern('^[a-zA-Z0-9_]{4,100}$')],
+        validators: [
+          Validators.required,
+          Validators.minLength(4),
+          Validators.maxLength(100),
+          Validators.pattern('^[a-zA-Z0-9._-]+$')
+        ],
         asyncValidators: [this.usuarioUnicoValidator()],
         updateOn: 'blur'
       }],

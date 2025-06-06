@@ -61,9 +61,9 @@ export class DetalleUsuarioComponent implements OnInit {
       usuario: ['', {
         validators: [
           Validators.required,
-          Validators.pattern('^[a-zA-Z0-9._-]+$'),
           Validators.minLength(4),
-          Validators.maxLength(100)
+          Validators.maxLength(100),
+          Validators.pattern('^[a-zA-Z0-9._-]+$')
         ],
         asyncValidators: [this.usuarioUnicoValidator()],
         updateOn: 'blur'

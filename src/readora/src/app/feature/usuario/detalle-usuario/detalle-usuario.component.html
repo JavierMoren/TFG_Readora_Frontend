@@ -98,9 +98,9 @@
               <!-- Mensajes de error -->
               <div class="invalid-feedback d-block" *ngIf="usuarioForm.get('usuario')?.invalid && usuarioForm.get('usuario')?.touched">
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio.</span>
-                <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">El nombre de usuario sólo puede contener letras, números, puntos, guiones y guiones bajos.</span>
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['minlength']">El nombre de usuario debe tener al menos 4 caracteres.</span>
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['maxlength']">El nombre de usuario no puede exceder los 100 caracteres.</span>
+                <span *ngIf="usuarioForm.get('usuario')?.errors?.['pattern']">Solo se permiten letras, números, puntos, guiones y guiones bajos.</span>
                 <span *ngIf="usuarioForm.get('usuario')?.errors?.['usuarioExistente']">Este nombre de usuario ya está en uso. Elige otro.</span>
               </div>
             </div>

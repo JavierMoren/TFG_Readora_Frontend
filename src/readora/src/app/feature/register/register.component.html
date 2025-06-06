@@ -29,7 +29,11 @@
                 </div>
               </div>
               <div *ngIf="registerForm.get('usuario')?.invalid && (registerForm.get('usuario')?.touched || formularioEnviado)" class="invalid-feedback d-block small mt-1">
-                {{ getErrorMessage('usuario') }}
+                <span *ngIf="registerForm.get('usuario')?.errors?.['required']">El nombre de usuario es obligatorio.</span>
+                <span *ngIf="registerForm.get('usuario')?.errors?.['minlength']">El nombre de usuario debe tener al menos 4 caracteres.</span>
+                <span *ngIf="registerForm.get('usuario')?.errors?.['maxlength']">El nombre de usuario no puede exceder los 100 caracteres.</span>
+                <span *ngIf="registerForm.get('usuario')?.errors?.['pattern']">Solo se permiten letras, números, puntos, guiones y guiones bajos.</span>
+                <span *ngIf="registerForm.get('usuario')?.errors?.['usuarioExistente']">Este nombre de usuario ya está en uso.</span>
               </div>
             </div>            <div class="col-md-6 mb-4">
               <label for="gmail" class="form-label fw-medium">Correo electrónico <span class="text-danger">*</span></label>

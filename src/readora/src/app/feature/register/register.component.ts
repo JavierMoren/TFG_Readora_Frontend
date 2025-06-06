@@ -45,8 +45,9 @@ export class RegisterComponent implements OnInit {
       usuario: ['', {
         validators: [
           Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50)
+          Validators.minLength(4),
+          Validators.maxLength(100),
+          Validators.pattern('^[a-zA-Z0-9._-]+$')
         ],
         asyncValidators: [this.usuarioUnicoValidator()],
         updateOn: 'blur'
