@@ -365,16 +365,18 @@ export class ResultadoBusquedaComponent implements OnChanges {
       error: (error) => {
         console.error('[ResultadoBusqueda] Error al importar libro para navegación', error);
         this.librosImportando.delete(googleBook.id);
-        
-        // Ocultar la animación en caso de error
         this.showImportAnimation = false;
         
+        let errorMsg = 'No se pudo acceder a los detalles del libro';
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        }
+        
         if (error.status === 409) {
-          // El libro ya existe, intentar encontrarlo por ISBN para navegar
           this.findExistingBookAndNavigate(googleBook);
         } else {
           this.notificationService.error('Error', {
-            description: 'No se pudo acceder a los detalles del libro'
+            description: errorMsg
           });
         }
       }
@@ -500,29 +502,18 @@ export class ResultadoBusquedaComponent implements OnChanges {
    */
   private performBookImport(googleBook: any): void {
     this.librosImportando.add(googleBook.id);
-    
     // Mostrar la animación de importación
     this.importingBookTitle = googleBook.volumeInfo?.title || 'Libro';
     this.showImportAnimation = true;
-    
     this.googleBooksService.importBook(googleBook.id).subscribe({
       next: (importedBook) => {
         console.log('[ResultadoBusqueda] Libro importado exitosamente para biblioteca', importedBook);
         this.librosImportando.delete(googleBook.id);
-        
-        // Ocultar la animación después de un breve delay para que el usuario pueda ver la completación
         setTimeout(() => {
           this.showImportAnimation = false;
         }, 1500);
-        
-        // Actualizar el objeto Google Book con el ID local para sincronizar el estado
         googleBook.localId = importedBook.id;
-        
-        // Ahora agregar el libro importado a la biblioteca
         this.addLocalBookToLibrary(importedBook);
-        
-        // Actualizar también el mapa para el ID de Google Books para mantener consistencia
-        // Esto permite que el botón cambie de estado inmediatamente
         const localLibraryEntry = this.librosEnBiblioteca.get(String(importedBook.id));
         if (localLibraryEntry) {
           this.librosEnBiblioteca.set(String(googleBook.id), localLibraryEntry);
@@ -531,16 +522,16 @@ export class ResultadoBusquedaComponent implements OnChanges {
       error: (error) => {
         console.error('[ResultadoBusqueda] Error al importar libro para biblioteca', error);
         this.librosImportando.delete(googleBook.id);
-        
-        // Ocultar la animación en caso de error
         this.showImportAnimation = false;
-        
+        let errorMsg = 'No se pudo agregar el libro a tu biblioteca';
+        if (error.error && error.error.error) {
+          errorMsg = error.error.error;
+        }
         if (error.status === 409) {
-          // El libro ya existe, intentar encontrarlo y agregarlo a la biblioteca
           this.findExistingBookAndAddToLibrary(googleBook);
         } else {
           this.notificationService.error('Error', {
-            description: 'No se pudo agregar el libro a tu biblioteca'
+            description: errorMsg
           });
         }
       }
