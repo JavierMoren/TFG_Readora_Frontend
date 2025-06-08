@@ -103,18 +103,6 @@
   color: var(--info-color);
 }
 
-/* Forzar feedback de validación redondeado y con padding/margen adecuado en todos los paneles admin */
-.admin-container .alert,
-.card-body .alert {
-  border-radius: 0.5rem !important;
-  padding: 1rem 1.25rem !important;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: none !important;
-  overflow: visible !important;
-}
-
 /* Mejoras para formularios */
 .form-floating > .form-control:focus ~ label,
 .form-floating > .form-control:not(:placeholder-shown) ~ label {

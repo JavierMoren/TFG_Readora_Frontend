@@ -162,6 +162,24 @@ export class UsuarioService {
     );
   }
 
+  /**
+   * Actualiza un usuario desde el panel de admin (no cambia sesión ni JWT)
+   */
+  adminUpdateUsuario(usuario: Usuario): Observable<Usuario> {
+    return this.http.put<Usuario>(`${this.apiUrl}/admin-update/${usuario.id}`, usuario).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Elimina un usuario desde el panel de admin (no cambia sesión ni JWT)
+   */
+  adminDeleteUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin-delete/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
     if (error.error instanceof ErrorEvent) {

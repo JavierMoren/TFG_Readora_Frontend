@@ -422,12 +422,12 @@ export class AdminUsuariosComponent implements OnInit {
    * Método auxiliar que envía la petición de actualización al servidor
    */
   private enviarActualizacionUsuario(): void {
-    this.usuarioService.updateUsuario(this.currentUsuario).subscribe({
+    this.usuarioService.adminUpdateUsuario(this.currentUsuario).subscribe({
       next: (response) => {
         this.notificationService.success('Éxito', { 
           description: 'Usuario actualizado correctamente'
         });
-        this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
+        this.getUsuariosPaginados();
         this.cancelEdit();
       },
       error: (error) => {
@@ -535,16 +535,14 @@ export class AdminUsuariosComponent implements OnInit {
    */
   confirmDelete(): void {
     if (this.userIdToDelete !== null) {
-      this.usuarioService.deleteUsuario(this.userIdToDelete).subscribe({
+      this.usuarioService.adminDeleteUsuario(this.userIdToDelete).subscribe({
         next: () => {
           this.notificationService.success('Eliminado', { 
             description: 'El usuario ha sido eliminado'
           });
-          this.getUsuariosPaginados(); // Usar paginación en lugar de getAllUsuarios
+          this.getUsuariosPaginados();
         },
         error: (error) => {
-          
-          // Verificar si el error es debido a que el usuario tiene libros asociados (código 409)
           if (error.status === 409) {
             this.notificationService.warning('No se puede eliminar', { 
               description: 'Este usuario tiene libros asociados en su biblioteca personal. Debe eliminar primero los libros de la biblioteca del usuario.'
@@ -556,7 +554,6 @@ export class AdminUsuariosComponent implements OnInit {
           }
         }
       });
-      // Resetear el ID del usuario a eliminar
       this.userIdToDelete = null;
     }
   }
