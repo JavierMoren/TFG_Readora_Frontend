@@ -292,6 +292,8 @@ export class AdminUsuariosComponent implements OnInit {
   prepareUpdateUsuario(usuario: Usuario): void {
     this.isEditing = true; 
     this.formularioEnviado = false;
+    // Asignar el usuario actual para que los validadores asíncronos funcionen correctamente
+    this.currentUsuario = { ...usuario };
     // Establecer valores en el formulario
     this.usuarioForm.patchValue({
       id: usuario.id,
