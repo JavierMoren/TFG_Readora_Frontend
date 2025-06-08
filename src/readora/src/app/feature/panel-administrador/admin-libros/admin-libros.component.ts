@@ -462,6 +462,22 @@ export class AdminLibrosComponent implements OnInit {
   }
 
   /**
+   * Cambia el ordenamiento de los datos de la tabla
+   * @param sortBy - Campo por el que ordenar
+   */
+  changeSort(sortBy: string): void {
+    if (this.sortBy === sortBy) {
+      // Si ya está ordenando por este campo, cambia la dirección
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = sortBy;
+      this.sortDirection = 'asc';
+    }
+    this.currentPage = 0; // Vuelve a la primera página
+    this.getLibrosPaginados();
+  }
+
+  /**
    * Selecciona un autor para agregarlo al libro
    */
   selectAutor(): void {

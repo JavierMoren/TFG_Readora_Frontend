@@ -372,7 +372,7 @@ export class AdminUsuariosComponent implements OnInit {
    * Envía la petición para crear un nuevo usuario
    */
   createUsuario(): void {
-        this.usuarioService.createUsuario(this.currentUsuario).subscribe({
+    this.usuarioService.adminCreateUsuario(this.currentUsuario).subscribe({
       next: (response) => {
         this.notificationService.success('Éxito', { 
           description: 'Usuario creado correctamente'

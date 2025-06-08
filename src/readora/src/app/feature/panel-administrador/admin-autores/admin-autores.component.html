@@ -195,29 +195,50 @@
             <span>Cancelar</span>
           </button>
         </div>
+
+        <!-- Feedback de validación siempre visible -->
+        <div [ngClass]="{
+              'alert alert-success mt-2 py-2 px-3 small d-flex align-items-center gap-2': autorForm.valid && !isUploading,
+              'alert alert-warning mt-2 py-2 px-3 small d-flex align-items-center gap-2': autorForm.invalid || isUploading
+            }">
+          <span class="material-icons small align-middle">{{ autorForm.valid && !isUploading ? 'check_circle' : 'info' }}</span>
+          <span>
+            <ng-container *ngIf="autorForm.valid && !isUploading">
+              ¡El formulario está listo para guardar!
+            </ng-container>
+            <ng-container *ngIf="autorForm.invalid || isUploading">
+              <span *ngIf="isUploading">Guardando autor, espera un momento...</span>
+              <span *ngIf="!isUploading">
+                <span *ngIf="nombreInput.invalid">- El nombre es obligatorio.<br></span>
+                <span *ngIf="apellidoInput.invalid">- El apellido es obligatorio.<br></span>
+              </span>
+            </ng-container>
+          </span>
+        </div>
+        <!-- Fin feedback validación -->
+        
       </form>
     </div>
   </div>
-
   <!-- Visualización de autores en una tabla -->
   <div class="table-responsive">
     <table class="table table-hover table-striped">
       <thead class="table-light">
         <tr>
-          <th scope="col" class="text-primary small" (click)="changeSort('id')">
+          <th scope="col" class="text-primary small" (click)="changeSort('id')" tabindex="0" (keydown.enter)="changeSort('id')">
             ID
             <span *ngIf="sortBy === 'id'" class="material-icons small align-middle">
               {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
             </span>
           </th>
           <th scope="col" class="text-primary small">Foto</th>
-          <th scope="col" class="text-primary small" (click)="changeSort('nombre')">
+          <th scope="col" class="text-primary small" (click)="changeSort('nombre')" tabindex="0" (keydown.enter)="changeSort('nombre')">
             Nombre
             <span *ngIf="sortBy === 'nombre'" class="material-icons small align-middle">
               {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
             </span>
           </th>
-          <th scope="col" class="text-primary small" (click)="changeSort('fechaNacimiento')">
+          <th scope="col" class="text-primary small" (click)="changeSort('fechaNacimiento')" tabindex="0" (keydown.enter)="changeSort('fechaNacimiento')">
             Fechas
             <span *ngIf="sortBy === 'fechaNacimiento'" class="material-icons small align-middle">
               {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}

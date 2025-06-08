@@ -153,6 +153,15 @@ export class UsuarioService {
     );
   }
 
+  /**
+   * Crea un usuario desde el panel de admin (no cambia sesión ni JWT)
+   */
+  adminCreateUsuario(usuario: Usuario): Observable<Usuario> {
+    return this.http.post<Usuario>(`${this.apiUrl}/admin-create`, usuario).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'Ocurrió un error desconocido';
     if (error.error instanceof ErrorEvent) {

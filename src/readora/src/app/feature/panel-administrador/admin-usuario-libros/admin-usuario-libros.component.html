@@ -265,225 +265,248 @@
             <span>Cancelar</span>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- Tabla de relaciones usuario-libro -->
-  <div class="table-responsive">
-    <table class="table table-hover table-striped">
-      <thead class="table-light">
-        <tr>
-          <th scope="col" class="text-primary small" (click)="changeSort('id')">
-            ID
-            <span *ngIf="sortBy === 'id'" class="material-icons small align-middle">
-              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-            </span>
-          </th>
-          <th scope="col" class="text-primary small" (click)="changeSort('usuarioId')">
-            Usuario
-            <span *ngIf="sortBy === 'usuarioId'" class="material-icons small align-middle">
-              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-            </span>
-          </th>
-          <th scope="col" class="text-primary small" (click)="changeSort('libroId')">
-            Libro
-            <span *ngIf="sortBy === 'libroId'" class="material-icons small align-middle">
-              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-            </span>
-          </th>
-          <th scope="col" class="text-primary small" (click)="changeSort('fechaInicioLectura')">
-            Fecha Inicio
-            <span *ngIf="sortBy === 'fechaInicioLectura'" class="material-icons small align-middle">
-              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-            </span>
-          </th>
-          <th scope="col" class="text-primary small" (click)="changeSort('estadoLectura')">
-            Estado
-            <span *ngIf="sortBy === 'estadoLectura'" class="material-icons small align-middle">
-              {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-            </span>
-          </th>
-          <th scope="col" class="text-primary small">
-            Progreso
-          </th>
-          <th scope="col" class="text-primary small">
-            Notas
-          </th>
-          <th scope="col" class="text-primary small text-center">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let usuarioLibro of usuarioLibros">
-          <td class="small text-secondary">
-            {{usuarioLibro.id}}
-          </td>
-          <td class="fw-medium">
-            <div class="d-flex flex-column">
-              <span class="fw-medium">{{usuarioLibro.usuarioNombre || 'Sin nombre'}}</span>
-              <span class="text-secondary small">#{{usuarioLibro.usuarioId}}</span>
-            </div>
-          </td>
-          <td>
-            <div class="d-flex flex-column">
-              <span class="fw-medium">{{usuarioLibro.libroTitulo || 'Sin título'}}</span>
-              <span class="text-secondary small">#{{usuarioLibro.libroId}}</span>
-            </div>
-          </td>
-          <td class="small text-secondary">
-            {{usuarioLibro.fechaInicioLectura ? formatDate(usuarioLibro.fechaInicioLectura) : '-'}}
-          </td>
-          <td>
-            <span class="badge rounded-pill"
-              [ngClass]="{
-                'bg-warning text-dark': usuarioLibro.estadoLectura === 'LEYENDO',
-                'bg-success': usuarioLibro.estadoLectura === 'TERMINADO',
-                'bg-primary': usuarioLibro.estadoLectura === 'PENDIENTE',
-                'bg-danger': usuarioLibro.estadoLectura === 'ABANDONADO'
-              }">
-              {{usuarioLibro.estadoLectura}}
-            </span>
-          </td>
-          <td style="width: 170px;">
-            <div class="d-flex flex-column">
-              <!-- Mostrar progreso si hay datos y no está en estado ABANDONADO -->
-              <div *ngIf="usuarioLibro.paginasLeidas !== undefined && usuarioLibro.paginasLeidas !== null && usuarioLibro.numeroPaginas && usuarioLibro.estadoLectura !== 'ABANDONADO'">
-                <div class="progress" style="height: 8px;">
-                  <div class="progress-bar" role="progressbar"
-                      [ngClass]="{
-                        'bg-warning': usuarioLibro.estadoLectura === 'PENDIENTE',
-                        'bg-info': usuarioLibro.estadoLectura === 'LEYENDO',
-                        'bg-success': usuarioLibro.estadoLectura === 'TERMINADO'
-                      }"
-                      [style.width.%]="calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)"
-                      [attr.aria-valuenow]="calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)"
-                      aria-valuemin="0" aria-valuemax="100">
+        <!-- Feedback de validación siempre visible -->
+        <div [ngClass]="{
+              'alert alert-success mt-2 py-2 px-3 small d-flex align-items-center gap-2': lecturaForm.valid,
+              'alert alert-warning mt-2 py-2 px-3 small d-flex align-items-center gap-2': lecturaForm.invalid
+            }">
+          <span class="material-icons small align-middle">{{ lecturaForm.valid ? 'check_circle' : 'info' }}</span>
+          <span>
+            <ng-container *ngIf="lecturaForm.valid">
+              ¡El formulario está listo para guardar!
+            </ng-container>
+            <ng-container *ngIf="lecturaForm.invalid">
+              <span *ngIf="usuarioIdInput.invalid">- El ID del usuario es obligatorio y debe ser positivo.<br></span>
+              <span *ngIf="libroIdInput.invalid">- El ID del libro es obligatorio y debe ser positivo.<br></span>
+              <span *ngIf="fechaInicioInput.invalid">- La fecha de inicio es obligatoria y no puede ser futura.<br></span>
+              <span *ngIf="fechaFinInput.invalid">- La fecha de finalización debe ser posterior a la de inicio.<br></span>
+              <span *ngIf="estadoInput.invalid">- El estado de lectura es obligatorio.<br></span>
+              <span *ngIf="paginasLeidasInput.invalid">- Las páginas leídas deben ser un número válido dentro del rango.<br></span>
+              <span *ngIf="comentarioInput.invalid">- El comentario no puede exceder los 500 caracteres.<br></span>
+            </ng-container>
+          </span>
+        </div>
+        <!-- Fin feedback validación -->
+        
+        </form>
+      </div>
+    </div>
+    <!-- Visualización de relaciones usuario-libro en una tabla -->
+    <div class="table-responsive">
+      <table class="table table-hover table-striped">
+        <thead class="table-light">
+          <tr>
+            <th scope="col" class="text-primary small" (click)="changeSort('id')" tabindex="0" (keydown.enter)="changeSort('id')">
+              ID
+              <span *ngIf="sortBy === 'id'" class="material-icons small align-middle">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+            </th>
+            <th scope="col" class="text-primary small" (click)="changeSort('usuarioId')" tabindex="0" (keydown.enter)="changeSort('usuarioId')">
+              Usuario
+              <span *ngIf="sortBy === 'usuarioId'" class="material-icons small align-middle">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+            </th>
+            <th scope="col" class="text-primary small" (click)="changeSort('libroId')" tabindex="0" (keydown.enter)="changeSort('libroId')">
+              Libro
+              <span *ngIf="sortBy === 'libroId'" class="material-icons small align-middle">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+            </th>
+            <th scope="col" class="text-primary small" (click)="changeSort('fechaInicioLectura')" tabindex="0" (keydown.enter)="changeSort('fechaInicioLectura')">
+              Fecha Inicio
+              <span *ngIf="sortBy === 'fechaInicioLectura'" class="material-icons small align-middle">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+            </th>
+            <th scope="col" class="text-primary small" (click)="changeSort('estadoLectura')" tabindex="0" (keydown.enter)="changeSort('estadoLectura')">
+              Estado
+              <span *ngIf="sortBy === 'estadoLectura'" class="material-icons small align-middle">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </span>
+            </th>
+            <th scope="col" class="text-primary small">
+              Progreso
+            </th>
+            <th scope="col" class="text-primary small">
+              Notas
+            </th>
+            <th scope="col" class="text-primary small text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let usuarioLibro of usuarioLibros">
+            <td class="small text-secondary">
+              {{usuarioLibro.id}}
+            </td>
+            <td class="fw-medium">
+              <div class="d-flex flex-column">
+                <span class="fw-medium">{{usuarioLibro.usuarioNombre || 'Sin nombre'}}</span>
+                <span class="text-secondary small">#{{usuarioLibro.usuarioId}}</span>
+              </div>
+            </td>
+            <td>
+              <div class="d-flex flex-column">
+                <span class="fw-medium">{{usuarioLibro.libroTitulo || 'Sin título'}}</span>
+                <span class="text-secondary small">#{{usuarioLibro.libroId}}</span>
+              </div>
+            </td>
+            <td class="small text-secondary">
+              {{usuarioLibro.fechaInicioLectura ? formatDate(usuarioLibro.fechaInicioLectura) : '-'}}
+            </td>
+            <td>
+              <span class="badge rounded-pill"
+                [ngClass]="{
+                  'bg-warning text-dark': usuarioLibro.estadoLectura === 'LEYENDO',
+                  'bg-success': usuarioLibro.estadoLectura === 'TERMINADO',
+                  'bg-primary': usuarioLibro.estadoLectura === 'PENDIENTE',
+                  'bg-danger': usuarioLibro.estadoLectura === 'ABANDONADO'
+                }">
+                {{usuarioLibro.estadoLectura}}
+              </span>
+            </td>
+            <td style="width: 170px;">
+              <div class="d-flex flex-column">
+                <!-- Mostrar progreso si hay datos y no está en estado ABANDONADO -->
+                <div *ngIf="usuarioLibro.paginasLeidas !== undefined && usuarioLibro.paginasLeidas !== null && usuarioLibro.numeroPaginas && usuarioLibro.estadoLectura !== 'ABANDONADO'">
+                  <div class="progress" style="height: 8px;">
+                    <div class="progress-bar" role="progressbar"
+                        [ngClass]="{
+                          'bg-warning': usuarioLibro.estadoLectura === 'PENDIENTE',
+                          'bg-info': usuarioLibro.estadoLectura === 'LEYENDO',
+                          'bg-success': usuarioLibro.estadoLectura === 'TERMINADO'
+                        }"
+                        [style.width.%]="calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)"
+                        [attr.aria-valuenow]="calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)"
+                        aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-1">
+                    <span class="small text-secondary">
+                      {{calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)}}%
+                    </span>
+                    <span class="small text-secondary">
+                      {{usuarioLibro.paginasLeidas}}/{{usuarioLibro.numeroPaginas}}
+                    </span>
                   </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mt-1">
-                  <span class="small text-secondary">
-                    {{calcularProgreso(usuarioLibro.paginasLeidas, usuarioLibro.numeroPaginas)}}%
-                  </span>
-                  <span class="small text-secondary">
-                    {{usuarioLibro.paginasLeidas}}/{{usuarioLibro.numeroPaginas}}
-                  </span>
+                <!-- Mensaje cuando no hay datos de páginas -->
+                <span *ngIf="usuarioLibro.paginasLeidas === undefined || usuarioLibro.paginasLeidas === null || !usuarioLibro.numeroPaginas" class="small text-secondary">
+                  Sin datos de progreso
+                </span>
+                <!-- Mensaje para libros abandonados -->
+                <span *ngIf="usuarioLibro.estadoLectura === 'ABANDONADO'" class="small text-secondary">
+                  No aplicable
+                </span>
+              </div>
+            </td>
+            <td style="max-width: 200px;">
+              <!-- Mostrar comentarios/notas -->
+              <div *ngIf="usuarioLibro.comentario" class="notas-container">
+                <div class="notas-content text-secondary small">
+                  <span class="material-icons small me-1 text-primary align-middle">note</span>
+                  <span>{{usuarioLibro.comentario | slice:0:60}}{{usuarioLibro.comentario.length > 60 ? '...' : ''}}</span>
                 </div>
               </div>
-              <!-- Mensaje cuando no hay datos de páginas -->
-              <span *ngIf="usuarioLibro.paginasLeidas === undefined || usuarioLibro.paginasLeidas === null || !usuarioLibro.numeroPaginas" class="small text-secondary">
-                Sin datos de progreso
-              </span>
-              <!-- Mensaje para libros abandonados -->
-              <span *ngIf="usuarioLibro.estadoLectura === 'ABANDONADO'" class="small text-secondary">
-                No aplicable
-              </span>
-            </div>
-          </td>
-          <td style="max-width: 200px;">
-            <!-- Mostrar comentarios/notas -->
-            <div *ngIf="usuarioLibro.comentario" class="notas-container">
-              <div class="notas-content text-secondary small">
-                <span class="material-icons small me-1 text-primary align-middle">note</span>
-                <span>{{usuarioLibro.comentario | slice:0:60}}{{usuarioLibro.comentario.length > 60 ? '...' : ''}}</span>
+              <div *ngIf="!usuarioLibro.comentario" class="small text-secondary">
+                Sin notas
               </div>
-            </div>
-            <div *ngIf="!usuarioLibro.comentario" class="small text-secondary">
-              Sin notas
-            </div>
-          </td>
-          <td class="text-center">
-            <div class="d-flex justify-content-center gap-2">
-              <button (click)="prepareUpdateUsuarioLibro(usuarioLibro)" 
-                class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">
-                <span class="material-icons small">edit</span>
-              </button>
-              <button (click)="deleteUsuarioLibro(usuarioLibro.id!)" 
-                class="btn btn-sm btn-outline-danger border-0 transition-all" title="Eliminar">
-                <span class="material-icons small">delete</span>
-              </button>
-            </div>
-          </td>
-        </tr>
-        
-        <!-- Mensaje cuando no hay relaciones -->
-        <tr *ngIf="usuarioLibros.length === 0">
-          <td colspan="8" class="text-center text-secondary py-4">
-            No hay lecturas registradas
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Navegador de paginación y controles -->
-  <div *ngIf="totalPages > 0" class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
-    <!-- Información de paginación -->
-    <div class="text-secondary small">
-      Mostrando {{ usuarioLibros.length ? (currentPage * pageSize + 1) : 0 }} a 
-      {{ usuarioLibros.length ? Math.min((currentPage + 1) * pageSize, totalElements) : 0 }} 
-      de {{ totalElements }} registros
+            </td>
+            <td class="text-center">
+              <div class="d-flex justify-content-center gap-2">
+                <button (click)="prepareUpdateUsuarioLibro(usuarioLibro)" 
+                  class="btn btn-sm btn-outline-primary border-0 transition-all" title="Editar">
+                  <span class="material-icons small">edit</span>
+                </button>
+                <button (click)="deleteUsuarioLibro(usuarioLibro.id!)" 
+                  class="btn btn-sm btn-outline-danger border-0 transition-all" title="Eliminar">
+                  <span class="material-icons small">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Mensaje cuando no hay relaciones -->
+          <tr *ngIf="usuarioLibros.length === 0">
+            <td colspan="8" class="text-center text-secondary py-4">
+              No hay lecturas registradas
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    
-    <div class="d-flex flex-wrap align-items-center gap-3">
-      <!-- Selector de tamaño de página -->
-      <div class="d-flex align-items-center">
-        <span class="text-secondary me-2 small">Mostrar:</span>
-        <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
-          <option [value]="5">5</option>
-          <option [value]="10">10</option>
-          <option [value]="25">25</option>
-          <option [value]="50">50</option>
-        </select>
+
+    <!-- Navegador de paginación y controles -->
+    <div *ngIf="totalPages > 0" class="d-flex flex-wrap justify-content-between align-items-center mt-4 gap-3">
+      <!-- Información de paginación -->
+      <div class="text-secondary small">
+        Mostrando {{ usuarioLibros.length ? (currentPage * pageSize + 1) : 0 }} a 
+        {{ usuarioLibros.length ? Math.min((currentPage + 1) * pageSize, totalElements) : 0 }} 
+        de {{ totalElements }} registros
       </div>
       
-      <!-- Paginación -->
-      <nav aria-label="Paginación de lecturas">
-        <ul class="pagination pagination-sm mb-0">
-          <!-- Botón Anterior -->
-          <li class="page-item" [class.disabled]="currentPage === 0">
-            <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
-              <span class="material-icons small">navigate_before</span>
-            </button>
-          </li>
-          
-          <!-- Primera página siempre visible -->
-          <li class="page-item" [class.active]="currentPage === 0">
-            <button class="page-link" (click)="goToPage(0)">1</button>
-          </li>
-          
-          <!-- Elipsis inicial si estamos lejos del inicio -->
-          <li class="page-item disabled" *ngIf="currentPage > 2">
-            <span class="page-link">...</span>
-          </li>
-          
-          <!-- Páginas cercanas a la actual (máximo 5 páginas visibles) -->
-          <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
-            <li class="page-item" [class.active]="currentPage === i + 1" 
-                *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
-              <button class="page-link" (click)="goToPage(i + 1)">{{ i + 2 }}</button>
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <!-- Selector de tamaño de página -->
+        <div class="d-flex align-items-center">
+          <span class="text-secondary me-2 small">Mostrar:</span>
+          <select class="form-select form-select-sm py-0" style="min-width: 70px; height: 31px;" [(ngModel)]="pageSize" (change)="changePageSize(pageSize)">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="25">25</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+        
+        <!-- Paginación -->
+        <nav aria-label="Paginación de lecturas">
+          <ul class="pagination pagination-sm mb-0">
+            <!-- Botón Anterior -->
+            <li class="page-item" [class.disabled]="currentPage === 0">
+              <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                <span class="material-icons small">navigate_before</span>
+              </button>
             </li>
-          </ng-container>
-          
-          <!-- Elipsis final si estamos lejos del final -->
-          <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
-            <span class="page-link">...</span>
-          </li>
-          
-          <!-- Última página siempre visible si hay más de una página -->
-          <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
-            <button class="page-link" (click)="goToPage(totalPages - 1)">{{ totalPages }}</button>
-          </li>
-          
-          <!-- Botón Siguiente -->
-          <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-            <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
-              <span class="material-icons small">navigate_next</span>
-            </button>
-          </li>
-        </ul>
-      </nav>
+            
+            <!-- Primera página siempre visible -->
+            <li class="page-item" [class.active]="currentPage === 0">
+              <button class="page-link" (click)="goToPage(0)">1</button>
+            </li>
+            
+            <!-- Elipsis inicial si estamos lejos del inicio -->
+            <li class="page-item disabled" *ngIf="currentPage > 2">
+              <span class="page-link">...</span>
+            </li>
+            
+            <!-- Páginas cercanas a la actual (máximo 5 páginas visibles) -->
+            <ng-container *ngFor="let p of [].constructor(totalPages > 1 ? totalPages - 1 : 0); let i = index">
+              <li class="page-item" [class.active]="currentPage === i + 1" 
+                  *ngIf="(i + 1) >= currentPage - 1 && (i + 1) <= currentPage + 1 && (i + 1) > 0 && (i + 1) < totalPages - 1">
+                <button class="page-link" (click)="goToPage(i + 1)">{{ i + 2 }}</button>
+              </li>
+            </ng-container>
+            
+            <!-- Elipsis final si estamos lejos del final -->
+            <li class="page-item disabled" *ngIf="currentPage < totalPages - 3">
+              <span class="page-link">...</span>
+            </li>
+            
+            <!-- Última página siempre visible si hay más de una página -->
+            <li class="page-item" [class.active]="currentPage === totalPages - 1" *ngIf="totalPages > 1">
+              <button class="page-link" (click)="goToPage(totalPages - 1)">{{ totalPages }}</button>
+            </li>
+            
+            <!-- Botón Siguiente -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+              <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+                <span class="material-icons small">navigate_next</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- El modal de confirmación ha sido reemplazado por SweetAlert2 desde NotificationService -->
+  <!-- El modal de confirmación ha sido reemplazado por SweetAlert2 desde NotificationService -->

@@ -252,7 +252,35 @@
             <span>Cancelar</span>
           </button>
         </div>
-        
+        <!-- Feedback de validación siempre visible -->
+        <div [ngClass]="{
+              'alert alert-success mt-2 py-2 px-3 small d-flex align-items-center gap-2': usuarioForm.valid && (!cambiarContrasenna || passwordForm.valid) && !usuarioForm.pending && !usuarioVerificandose && !gmailVerificandose,
+              'alert alert-warning mt-2 py-2 px-3 small d-flex align-items-center gap-2': usuarioForm.invalid || (cambiarContrasenna && passwordForm.invalid) || usuarioForm.pending || usuarioVerificandose || gmailVerificandose
+            }">
+          <span class="material-icons small align-middle">{{ usuarioForm.valid && (!cambiarContrasenna || passwordForm.valid) && !usuarioForm.pending && !usuarioVerificandose && !gmailVerificandose ? 'check_circle' : 'info' }}</span>
+          <span>
+            <ng-container *ngIf="usuarioForm.valid && (!cambiarContrasenna || passwordForm.valid) && !usuarioForm.pending && !usuarioVerificandose && !gmailVerificandose">
+              ¡El formulario está listo para guardar!
+            </ng-container>
+            <ng-container *ngIf="usuarioForm.invalid || (cambiarContrasenna && passwordForm.invalid) || usuarioForm.pending || usuarioVerificandose || gmailVerificandose">
+              <span *ngIf="usuarioVerificandose">Comprobando si el nombre de usuario ya existe...</span>
+              <span *ngIf="gmailVerificandose">Comprobando si el email ya existe...</span>
+              <span *ngIf="usuarioForm.pending && !usuarioVerificandose && !gmailVerificandose">Validaciones asíncronas en curso...</span>
+              <span *ngIf="!usuarioForm.pending && !usuarioVerificandose && !gmailVerificandose && (usuarioForm.invalid || (cambiarContrasenna && passwordForm.invalid))">
+                <span *ngIf="usuarioForm.get('usuario')?.invalid">- El nombre de usuario es inválido o está vacío.<br></span>
+                <span *ngIf="usuarioForm.get('gmail')?.invalid">- El email es inválido o está vacío.<br></span>
+                <span *ngIf="usuarioForm.get('nombre')?.invalid">- El nombre es inválido o está vacío.<br></span>
+                <span *ngIf="usuarioForm.get('apellido')?.invalid">- El apellido es inválido o está vacío.<br></span>
+                <span *ngIf="!isEditing && usuarioForm.get('contrasenna')?.invalid">- La contraseña es inválida o está vacía.<br></span>
+                <span *ngIf="cambiarContrasenna && passwordForm.get('contrasennaActual')?.invalid">- Debes introducir la contraseña actual.<br></span>
+                <span *ngIf="cambiarContrasenna && passwordForm.get('nuevaContrasenna')?.invalid">- La nueva contraseña no cumple los requisitos.<br></span>
+                <span *ngIf="cambiarContrasenna && passwordForm.get('confirmarContrasenna')?.invalid">- Debes confirmar la nueva contraseña.<br></span>
+                <span *ngIf="cambiarContrasenna && passwordForm.errors?.['notMatch']">- Las contraseñas no coinciden.<br></span>
+              </span>
+            </ng-container>
+          </span>
+        </div>
+        <!-- Fin feedback validación -->
         <!-- Mensaje de error cuando el formulario es inválido y se ha intentado enviar -->
         <div *ngIf="formularioEnviado && usuarioForm.invalid" class="alert alert-danger mt-3">
           <span class="material-icons align-middle me-1">error_outline</span>
