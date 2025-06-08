@@ -66,3 +66,16 @@
   margin-right: 0.5rem;
   vertical-align: middle;
 }
+
+/* Refuerzo para bloques de feedback de validación siempre visible (coherente con admin-libros) */
+.mt-2.py-2.px-3.small.d-flex.align-items-center.gap-2 {
+  border-radius: 0.75rem !important;
+  padding: 1.1rem 1.5rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07) !important;
+  font-size: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}

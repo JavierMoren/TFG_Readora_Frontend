@@ -189,7 +189,7 @@
   vertical-align: middle;
 }
 
-/* Ajuste para el bloque de feedback de validación siempre visible */
+/* Refuerzo para bloques de feedback de validación siempre visible (coherente en todos los admin) */
 .mt-2.py-2.px-3.small.d-flex.align-items-center.gap-2 {
   border-radius: 0.75rem !important;
   padding: 1.1rem 1.5rem !important;
@@ -198,4 +198,6 @@
   display: flex !important;
   align-items: center !important;
   gap: 0.75rem !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
 }
