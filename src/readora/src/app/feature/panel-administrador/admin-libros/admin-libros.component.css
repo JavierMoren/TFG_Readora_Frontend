@@ -94,7 +94,27 @@
   font-size: 1rem;
 }
 
-/* Mejora la visualización en pantallas pequeñas */
+/* Estilos para la celda de autores en la tabla de libros */
+.autores-cell {
+  white-space: normal !important;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.autores-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  align-items: flex-start;
+}
+.autor-nombre {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 500;
+  word-break: break-word;
+}
+.autor-coma {
+  margin-right: 2px;
+}
 @media (max-width: 768px) {
   .actions-column {
     min-width: 180px;
@@ -104,6 +124,15 @@
     border: 0;
     margin-bottom: 0;
     overflow-x: auto;
+  }
+  .autores-list {
+    flex-direction: column;
+    gap: 0.1rem 0;
+  }
+  .autores-cell {
+    min-width: 120px;
+    max-width: 160px;
+    font-size: 0.95em;
   }
 }
 

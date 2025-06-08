@@ -292,15 +292,19 @@
           <td style="width: 120px;">
             {{libro.isbn || 'N/A'}}
           </td>
-          <td class="small" style="min-width: 150px; max-width: 200px;">
-            <!-- Mostrar hasta 2 autores -->
-            <span *ngFor="let autor of libro.autores?.slice(0, 2); let i = index">
-              {{autor.nombre}} {{autor.apellido}}{{i < ((libro.autores && libro.autores.length > 2) ? 2 : (libro.autores ? libro.autores.length : 0)) - 1 ? ', ' : ''}}
-            </span>
-            <!-- Indicar si hay más autores -->
-            <span *ngIf="libro.autores && libro.autores.length > 2" class="text-muted"> y {{libro.autores.length - 2}} más</span>
-            <!-- Si no hay autores -->
-            <span *ngIf="!libro.autores?.length" class="text-muted">Sin autores</span>
+          <td class="small autores-cell" style="min-width: 150px; max-width: 200px;">
+            <ng-container *ngIf="libro.autores?.length; else sinAutores">
+              <div class="autores-list">
+                <ng-container *ngFor="let autor of libro.autores?.slice(0, 2); let i = index">
+                  <span class="autor-nombre">{{autor.nombre}} {{autor.apellido}}</span>
+                  <span *ngIf="i < ((libro.autores && libro.autores.length > 2) ? 2 : (libro.autores ? libro.autores.length : 0)) - 1" class="autor-coma">,</span>
+                </ng-container>
+                <span *ngIf="libro.autores && libro.autores.length > 2" class="text-muted"> y {{libro.autores.length - 2}} más</span>
+              </div>
+            </ng-container>
+            <ng-template #sinAutores>
+              <span class="text-muted">Sin autores</span>
+            </ng-template>
           </td>
           <td style="width: 100px;">
             {{libro.anioPublicacion ? (libro.anioPublicacion | date:'yyyy') : 'N/A'}}
