@@ -356,9 +356,18 @@ export class AdminLibrosComponent implements OnInit {
           error: (error) => {
             console.error('[AdminLibros] Error al subir imagen:', error);
             this.isUploading = false;
-            this.notificationService.error('Error al subir imagen', {
-              description: 'No se pudo subir la portada del libro'
-            });
+            
+            // Verificar si es un error 413 (Payload Too Large)
+            if (error.status === 413) {
+              this.notificationService.error('Archivo demasiado grande', {
+                description: 'La imagen seleccionada supera el tamaño máximo permitido. Por favor, selecciona una imagen más pequeña.'
+              });
+            } else {
+              this.notificationService.error('Error al subir imagen', {
+                description: 'No se pudo subir la portada del libro'
+              });
+            }
+            
             reject(error);
           }
         });
@@ -643,10 +652,10 @@ export class AdminLibrosComponent implements OnInit {
       return;
     }
     
-    // Validar tamaño (2MB máximo)
-    if (file.size > 2 * 1024 * 1024) {
+    // Validar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
       this.notificationService.warning('Archivo demasiado grande', { 
-        description: 'La imagen no puede superar los 2MB'
+        description: 'La imagen no puede superar los 5MB'
       });
       event.target.value = '';
       return;

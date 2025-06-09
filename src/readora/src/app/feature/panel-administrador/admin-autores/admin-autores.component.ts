@@ -213,16 +213,36 @@ export class AdminAutoresComponent implements OnInit {
 
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      
-      // Crear una URL para vista previa
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.previewImageUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      return;
     }
+    
+    // Validar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+      this.notificationService.warning('Archivo demasiado grande', { 
+        description: 'La imagen no puede superar los 5MB'
+      });
+      event.target.value = '';
+      return;
+    }
+    
+    // Validar tipo
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+      this.notificationService.error('Formato no válido', { 
+        description: 'Solo se permiten imágenes en formato JPG o PNG'
+      });
+      event.target.value = '';
+      return;
+    }
+    
+    this.selectedFile = file;
+    
+    // Crear una URL para vista previa
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.previewImageUrl = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   saveAutor(): void {
@@ -276,8 +296,19 @@ export class AdminAutoresComponent implements OnInit {
           saveAutorFn();
         },
         error: (error: any) => {
-          this.notificationService.error('Error', { description: 'No se pudo subir la foto del autor' });
+          console.error('[AdminAutores] Error al subir imagen:', error);
           this.isUploading = false;
+          
+          // Verificar si es un error 413 (Payload Too Large)
+          if (error.status === 413) {
+            this.notificationService.error('Archivo demasiado grande', {
+              description: 'La imagen seleccionada supera el tamaño máximo permitido. Por favor, selecciona una imagen más pequeña.'
+            });
+          } else {
+            this.notificationService.error('Error al subir imagen', {
+              description: 'No se pudo subir la foto del autor'
+            });
+          }
         }
       });
     } else {
