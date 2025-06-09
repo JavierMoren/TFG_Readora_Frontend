@@ -52,19 +52,19 @@ export class BuscadorComponent implements OnInit {
   }
 
   /**
-   * Verifica si el término de búsqueda es válido (al menos 3 caracteres)
+   * Verifica si el término de búsqueda no está vacío (para búsqueda local)
    */
   get isValidSearch(): boolean {
     const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
-    return searchTerm && searchTerm.length >= 3;
+    return searchTerm && searchTerm.length > 0;
   }
 
   /**
    * Verifica si el término de búsqueda es válido para Google Books (al menos 3 caracteres)
-   * @deprecated Use isValidSearch instead
    */
   get isValidForGoogleSearch(): boolean {
-    return this.isValidSearch;
+    const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
+    return searchTerm && searchTerm.length >= 3;
   }
 
   ngOnInit(): void {
@@ -82,14 +82,14 @@ export class BuscadorComponent implements OnInit {
 
   // Método para realizar búsqueda profunda (Google Books)
   searchDeep(): void {
-    // Solo permitir si ya se ha hecho una búsqueda (no al escribir)
-    if (!this.lastSearchTerm || !this.isValidSearch) {
+    // Solo permitir si ya se ha hecho una búsqueda y cumple con el mínimo para Google Books
+    if (!this.lastSearchTerm || !this.isValidForGoogleSearch) {
       return;
     }
     const searchTerm = this.lastSearchTerm;
     
-    // Validar que el término de búsqueda tenga al menos 3 caracteres
-    if (!this.isValidSearch) {
+    // Validar que el término de búsqueda tenga al menos 3 caracteres para Google Books
+    if (!this.isValidForGoogleSearch) {
       this.hasError = true;
       this.errorMessage = 'El término de búsqueda debe tener al menos 3 caracteres para buscar en Google Books.';
       return;
@@ -111,12 +111,14 @@ export class BuscadorComponent implements OnInit {
 
     const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
     const searchType = this.searchForm.get('searchType')?.value;
-    // Validar que el término de búsqueda tenga al menos 3 caracteres
-    if (!searchTerm || searchTerm.length < 3) {
+    
+    // Validar que el término de búsqueda no esté vacío
+    if (!searchTerm || searchTerm.length === 0) {
       this.hasError = true;
-      this.errorMessage = 'El término de búsqueda debe tener al menos 3 caracteres.';
+      this.errorMessage = 'Por favor ingresa un término de búsqueda.';
       return;
     }
+    
     // Resetear la bandera de búsqueda en Google
     this.isGoogleSearch = false;
     // Resetear el estado de error

@@ -10,18 +10,18 @@
               <input 
                 type="text" 
                 class="form-control" 
-                placeholder="Buscar por título, palabra clave... (mín. 3 caracteres)" 
+                placeholder="Buscar por título, palabra clave..." 
                 formControlName="searchTerm"
                 aria-label="Término de búsqueda">
               <button class="btn btn-primary" type="submit" [disabled]="!isValidSearch">
                 <i class="bi bi-search"></i> Buscar
               </button>
             </div>
-            <!-- Indicador visual para validación -->
-            <div class="mt-1" *ngIf="searchForm.get('searchTerm')?.value">
-              <small class="text-muted" *ngIf="!isValidSearch">
+            <!-- Indicador visual para validación de Google Books -->
+            <div class="mt-1" *ngIf="searchForm.get('searchTerm')?.value && isSearchingBooks">
+              <small class="text-muted" *ngIf="!isValidForGoogleSearch">
                 <i class="bi bi-info-circle me-1"></i>
-                {{3 - (searchForm.get('searchTerm')?.value?.trim()?.length || 0)}} caracteres más para buscar
+                {{3 - (searchForm.get('searchTerm')?.value?.trim()?.length || 0)}} caracteres más para buscar en Google Books
               </small>
             </div>
           </div>
@@ -79,7 +79,7 @@
           ¿No encuentras lo que buscas?
         </div>
         <a href="#" (click)="$event.preventDefault(); searchDeep()" 
-           [class.disabled]="!isValidSearch"
+           [class.disabled]="!isValidForGoogleSearch"
            style="font-size:0.98em; opacity:0.9; text-decoration: none; cursor: pointer; color: #4285F4; font-weight: 500; display: inline-flex; align-items: center; gap: 0.3em;"
            title="Buscar en Google Books (más resultados)">
           <img src="assets/logos/Logo.svg" alt="Google Books" style="height:1.1em; vertical-align:middle; margin-right:0.2em;"> Buscar en Google Books
@@ -95,13 +95,13 @@
       <button 
         class="btn btn-primary btn-sm ms-2" 
         (click)="searchDeep()"
-        [disabled]="!isValidSearch"
-        [attr.aria-label]="isValidSearch ? 'Realizar búsqueda más profunda' : 'Necesita al menos 3 caracteres'">
+        [disabled]="!isValidForGoogleSearch"
+        [attr.aria-label]="isValidForGoogleSearch ? 'Realizar búsqueda más profunda' : 'Necesita al menos 3 caracteres'">
         <i class="bi bi-search"></i> Realizar búsqueda más profunda
       </button>
       <div class="mt-2">
         <small class="d-block text-muted">La búsqueda profunda consulta en Google Books y permite añadir nuevos títulos a tu biblioteca</small>
-        <small class="d-block text-warning" *ngIf="!isValidSearch">
+        <small class="d-block text-warning" *ngIf="!isValidForGoogleSearch">
           <i class="bi bi-exclamation-triangle-fill me-1"></i>
           Ingresa al menos 3 caracteres para realizar la búsqueda en Google Books
         </small>
