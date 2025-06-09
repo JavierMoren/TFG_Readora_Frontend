@@ -698,19 +698,13 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
     if (!this.libroSeleccionado) return 'Información del libro requerida';
 
     const errores: string[] = [];
-    
-    // Validar requisitos básicos por estado
     this.agregarErroresRequisitosPorEstado(errores);
-    
-    // Validar consistencia de fechas
     this.agregarErroresConsistenciaFechas(errores);
-    
-    // Validar páginas leídas
     this.agregarErroresPaginasLeidas(errores);
 
     return errores.length > 0 
       ? `Corrige: ${errores.join(' • ')}` 
-      : 'Complete los campos obligatorios';
+      : 'Completa los campos obligatorios';
   }
 
   /**
@@ -721,16 +715,15 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
     const fechaInicio = this.libroSeleccionado.fechaInicioLectura;
     const fechaFin = this.libroSeleccionado.fechaFinLectura;
 
-    switch (estado) {
-      case 'TERMINADO':
-        if (!fechaInicio) errores.push('Fecha de inicio requerida para libros terminados');
-        if (!fechaFin) errores.push('Fecha de finalización requerida para libros terminados');
-        break;
-
-      case 'LEYENDO':
-        if (!fechaInicio) errores.push('Fecha de inicio requerida para libros en lectura');
-        if (fechaFin) errores.push('No debe tener fecha de finalización si está leyendo');
-        break;
+    // Siempre usar los mismos términos para los campos
+    if ((estado === 'TERMINADO' || estado === 'LEYENDO') && !fechaInicio) {
+      errores.push('La fecha de inicio de lectura es obligatoria');
+    }
+    if (estado === 'TERMINADO' && !fechaFin) {
+      errores.push('La fecha de finalización es obligatoria');
+    }
+    if (estado === 'LEYENDO' && fechaFin) {
+      errores.push('No debe haber fecha de finalización si el libro está en lectura');
     }
   }
 

@@ -384,7 +384,6 @@
                             <label for="fechaFinLectura" class="form-label-edit">
                                 Fecha de finalización 
                                 <span class="text-danger" *ngIf="libroSeleccionado?.estadoLectura === 'TERMINADO'">*</span>
-                                <span class="text-muted" *ngIf="libroSeleccionado?.estadoLectura !== 'TERMINADO'">(opcional)</span>
                             </label>
                             <input type="date" class="form-control form-control-edit" id="fechaFinLectura" 
                                    [(ngModel)]="libroSeleccionado.fechaFinLectura"
@@ -396,7 +395,7 @@
                             <div *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched || esCampoRequerido('fechaFin'))" class="text-danger form-error">
                                 <small *ngIf="fechaFin.errors?.['required']">
                                     <span class="material-icons small align-middle me-1">error_outline</span>
-                                    La fecha de finalización es requerida para libros terminados
+                                    La fecha de finalización es obligatoria
                                 </small>
                                 <small *ngIf="fechaFin.errors?.['min']">
                                     <span class="material-icons small align-middle me-1">error_outline</span>
