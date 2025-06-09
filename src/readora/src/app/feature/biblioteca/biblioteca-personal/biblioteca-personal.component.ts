@@ -270,8 +270,11 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
     // Si cambia a TERMINADO
     if (usuarioLibroActualizado.estadoLectura === 'TERMINADO') {
       // Establecer la fecha de fin a hoy si no existe
-      if (!usuarioLibroActualizado.fechaFinLectura) {
-        usuarioLibroActualizado.fechaFinLectura = new Date().toISOString().split('T')[0];
+      usuarioLibroActualizado.fechaFinLectura ??= new Date().toISOString().split('T')[0];
+      
+      // Si no hay fecha de inicio pero sí fecha de fin, establecer fecha de inicio igual a fecha de fin
+      if (!usuarioLibroActualizado.fechaInicioLectura && usuarioLibroActualizado.fechaFinLectura) {
+        usuarioLibroActualizado.fechaInicioLectura = usuarioLibroActualizado.fechaFinLectura;
       }
       
       // Si no ha leído todas las páginas, mostrar confirmación
@@ -311,9 +314,7 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
    */
   private ejecutarActualizacionLibro(usuarioLibroActualizado: any): void {
     // Aseguramos que paginasLeidas sea un número válido
-    if (usuarioLibroActualizado.paginasLeidas === undefined || usuarioLibroActualizado.paginasLeidas === null) {
-      usuarioLibroActualizado.paginasLeidas = 0;
-    }
+    usuarioLibroActualizado.paginasLeidas ??= 0;
     
     // Eliminamos la lógica que sobreescribía la elección del usuario
     // para respetar si decidió NO completar las páginas al marcar como terminado
@@ -716,9 +717,16 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   formularioValido(): boolean {
     if (!this.libroSeleccionado) return false;
 
-    // La fecha de inicio solo es obligatoria si hay fecha de fin
+    // Para libros ya terminados sin fecha de inicio, ser más permisivo
+    // Solo requerir fecha de inicio si el usuario está activamente editando las fechas
     if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
-      return false;
+      // Si el libro está terminado y no tiene fecha de inicio, automáticamente asignar la fecha de fin como inicio
+      if (this.libroSeleccionado.estadoLectura === 'TERMINADO') {
+        this.libroSeleccionado.fechaInicioLectura = this.libroSeleccionado.fechaFinLectura;
+      } else {
+        // Para otros estados, requerir fecha de inicio si hay fecha de fin
+        return false;
+      }
     }
     
     // Si hay fecha de inicio, validar que no sea futura
@@ -782,9 +790,14 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
     
     let errores = [];
     
-    // Validar fecha de inicio si hay fecha de fin
+    // Validar fecha de inicio si hay fecha de fin (excepto para libros ya terminados)
     if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
-      errores.push('Si indicas fecha de fin, también debes indicar fecha de inicio');
+      // Para libros terminados, auto-corregir la fecha de inicio
+      if (this.libroSeleccionado.estadoLectura === 'TERMINADO') {
+        this.libroSeleccionado.fechaInicioLectura = this.libroSeleccionado.fechaFinLectura;
+      } else {
+        errores.push('Si indicas fecha de fin, también debes indicar fecha de inicio');
+      }
     }
     
     // Validar fechas futuras
@@ -838,9 +851,14 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   tieneErroresValidacion(): boolean {
     if (!this.libroSeleccionado) return false;
     
-    // Verificar si hay fecha de fin pero no fecha de inicio
+    // Verificar si hay fecha de fin pero no fecha de inicio (excepto para libros terminados)
     if (this.libroSeleccionado.fechaFinLectura && !this.libroSeleccionado.fechaInicioLectura) {
-      return true;
+      // Para libros terminados, auto-corregir en lugar de mostrar error
+      if (this.libroSeleccionado.estadoLectura === 'TERMINADO') {
+        this.libroSeleccionado.fechaInicioLectura = this.libroSeleccionado.fechaFinLectura;
+        return false; // No hay error después de auto-corregir
+      }
+      return true; // Hay error para otros estados
     }
     
     // Verificar si la fecha de inicio es posterior a la fecha actual
@@ -903,19 +921,107 @@ export class BibliotecaPersonalComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Anuncia mensajes para lectores de pantalla usando regiones live
-   * @param mensaje Mensaje a anunciar
+   * Maneja el cambio en el estado de lectura y aplica validaciones reactivas
    */
-  anunciarParaLectoresDePantalla(mensaje: string): void {
+  onEstadoLecturaChange(): void {
+    if (!this.libroSeleccionado) return;
+    
+    const estado = this.libroSeleccionado.estadoLectura;
+    
+    // Auto-establecer fechas según el nuevo estado
+    switch (estado) {
+      case 'LEYENDO':
+        // Si no tiene fecha de inicio, establecer hoy
+        this.libroSeleccionado.fechaInicioLectura ??= new Date().toISOString().split('T')[0];
+        // Limpiar fecha de fin si existe (porque aún está leyendo)
+        this.libroSeleccionado.fechaFinLectura = null;
+        break;
+        
+      case 'TERMINADO':
+        // Si no tiene fecha de inicio, establecer hoy
+        this.libroSeleccionado.fechaInicioLectura ??= new Date().toISOString().split('T')[0];
+        // Si no tiene fecha de fin, establecer hoy
+        this.libroSeleccionado.fechaFinLectura ??= new Date().toISOString().split('T')[0];
+        // Auto-completar páginas si no están completas
+        if (this.libroSeleccionado.numeroPaginas && 
+            (!this.libroSeleccionado.paginasLeidas || 
+             this.libroSeleccionado.paginasLeidas < this.libroSeleccionado.numeroPaginas)) {
+          this.libroSeleccionado.paginasLeidas = this.libroSeleccionado.numeroPaginas;
+        }
+        break;
+        
+      case 'PENDIENTE':
+        // Para libros pendientes, limpiar todas las fechas
+        this.libroSeleccionado.fechaInicioLectura = null;
+        this.libroSeleccionado.fechaFinLectura = null;
+        // Resetear páginas leídas
+        this.libroSeleccionado.paginasLeidas = 0;
+        break;
+        
+      case 'ABANDONADO':
+        // Para libros abandonados, mantener fecha de inicio si existe pero limpiar fecha de fin
+        this.libroSeleccionado.fechaFinLectura = null;
+        // No cambiar páginas leídas - el usuario puede haber leído algo antes de abandonar
+        break;
+    }
+    
+    // Forzar la actualización de validaciones en el próximo ciclo de detección de cambios
+    // Esto hace que las validaciones se muestren inmediatamente sin esperar a que el usuario toque los campos
+    setTimeout(() => {
+      this.marcarCamposComoTocados();
+    }, 0);
+  }
+
+  /**
+   * Marca los campos del formulario como tocados para que se muestren las validaciones inmediatamente
+   */
+  private marcarCamposComoTocados(): void {
+    // Simular que el usuario ha tocado los campos relevantes
+    const fechaInicioEl = document.getElementById('fechaInicioLectura') as HTMLInputElement;
+    const fechaFinEl = document.getElementById('fechaFinLectura') as HTMLInputElement;
+    
+    if (fechaInicioEl) {
+      fechaInicioEl.dispatchEvent(new Event('blur'));
+    }
+    if (fechaFinEl) {
+      fechaFinEl.dispatchEvent(new Event('blur'));
+    }
+  }
+
+  /**
+   * Determina si un campo es requerido basado en el estado actual del libro
+   * Esto permite mostrar validaciones reactivas inmediatamente al cambiar el estado
+   */
+  esCampoRequerido(campo: string): boolean {
+    if (!this.libroSeleccionado) return false;
+    
+    const estado = this.libroSeleccionado.estadoLectura;
+    
+    switch (campo) {
+      case 'fechaInicio':
+        return estado === 'LEYENDO' || estado === 'TERMINADO';
+      case 'fechaFin':
+        return estado === 'TERMINADO';
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Anuncia mensajes para lectores de pantalla mediante una región live
+   */
+  private anunciarParaLectoresDePantalla(mensaje: string): void {
     const liveRegion = document.createElement('div');
     liveRegion.setAttribute('aria-live', 'polite');
     liveRegion.setAttribute('class', 'visually-hidden');
     liveRegion.textContent = mensaje;
     document.body.appendChild(liveRegion);
     
-    // Eliminar después de un tiempo para no sobrecargar el DOM
+    // Eliminar después de anunciar
     setTimeout(() => {
-      document.body.removeChild(liveRegion);
+      if (document.body.contains(liveRegion)) {
+        document.body.removeChild(liveRegion);
+      }
     }, 1000);
   }
 }

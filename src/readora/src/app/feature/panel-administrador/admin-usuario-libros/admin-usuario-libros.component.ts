@@ -471,46 +471,89 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   }
 
   /**
-   * Maneja los cambios en el estado de lectura
-   * Actualiza automáticamente las páginas leídas si el estado cambia a TERMINADO
+   * Maneja el cambio en el estado de lectura y aplica validaciones reactivas
    */
   onEstadoLecturaChange(): void {
-    // Si cambia a terminado
-    if (this.currentUsuarioLibro.estadoLectura === 'TERMINADO') {
-      // Preguntar si desea actualizar páginas leídas al total
-      if (this.detalleLibro?.numeroPaginas) {
-        // Solo preguntamos si el valor actual es diferente al total de páginas
-        if (this.currentUsuarioLibro.paginasLeidas !== this.detalleLibro.numeroPaginas) {
-          this.notificationService.confirm({
-            title: 'Completar páginas',
-            text: `¿Deseas actualizar automáticamente las páginas leídas al total (${this.detalleLibro.numeroPaginas})?`,
-            confirmButtonText: 'Sí, actualizar',
-            cancelButtonText: 'No, mantener valor actual'
-          }).then(confirmed => {
-            if (confirmed) {
-              this.currentUsuarioLibro.paginasLeidas = this.detalleLibro.numeroPaginas;
-            }
-          });
+    if (!this.currentUsuarioLibro) return;
+    
+    const estado = this.currentUsuarioLibro.estadoLectura;
+    
+    // Auto-establecer fechas según el nuevo estado
+    switch (estado) {
+      case 'LEYENDO':
+        // Si no tiene fecha de inicio, establecer hoy
+        this.currentUsuarioLibro.fechaInicioLectura ??= new Date().toISOString().split('T')[0];
+        // Limpiar fecha de fin si existe (porque aún está leyendo)
+        this.currentUsuarioLibro.fechaFinLectura = null;
+        break;
+        
+      case 'TERMINADO':
+        // Si no tiene fecha de inicio, establecer hoy
+        this.currentUsuarioLibro.fechaInicioLectura ??= new Date().toISOString().split('T')[0];
+        // Si no tiene fecha de fin, establecer hoy
+        this.currentUsuarioLibro.fechaFinLectura ??= new Date().toISOString().split('T')[0];
+        // Auto-completar páginas si no están completas
+        if (this.detalleLibro?.numeroPaginas && 
+            (!this.currentUsuarioLibro.paginasLeidas || 
+             this.currentUsuarioLibro.paginasLeidas < this.detalleLibro.numeroPaginas)) {
+          this.currentUsuarioLibro.paginasLeidas = this.detalleLibro.numeroPaginas;
         }
-      }
-      
-      // Establecemos la fecha de finalización a hoy si no está establecida
-      if (!this.currentUsuarioLibro.fechaFinLectura) {
-        this.currentUsuarioLibro.fechaFinLectura = new Date().toISOString().split('T')[0];
-      }
-    } 
-    // Si cambia a pendiente, preguntamos si desea reiniciar las páginas leídas
-    else if (this.currentUsuarioLibro.estadoLectura === 'PENDIENTE' && this.currentUsuarioLibro.paginasLeidas > 0) {
-      this.notificationService.confirm({
-        title: 'Reiniciar progreso',
-        text: '¿Deseas reiniciar el contador de páginas leídas a 0?',
-        confirmButtonText: 'Sí, reiniciar',
-        cancelButtonText: 'No, mantener progreso'
-      }).then(confirmed => {
-        if (confirmed) {
-          this.currentUsuarioLibro.paginasLeidas = 0;
-        }
-      });
+        break;
+        
+      case 'PENDIENTE':
+        // Para libros pendientes, limpiar todas las fechas
+        this.currentUsuarioLibro.fechaInicioLectura = null;
+        this.currentUsuarioLibro.fechaFinLectura = null;
+        // Resetear páginas leídas
+        this.currentUsuarioLibro.paginasLeidas = 0;
+        break;
+        
+      case 'ABANDONADO':
+        // Para libros abandonados, mantener fecha de inicio si existe pero limpiar fecha de fin
+        this.currentUsuarioLibro.fechaFinLectura = null;
+        // No cambiar páginas leídas - el usuario puede haber leído algo antes de abandonar
+        break;
+    }
+    
+    // Forzar la actualización de validaciones en el próximo ciclo de detección de cambios
+    // Esto hace que las validaciones se muestren inmediatamente sin esperar a que el usuario toque los campos
+    setTimeout(() => {
+      this.marcarCamposComoTocados();
+    }, 0);
+  }
+
+  /**
+   * Marca los campos del formulario como tocados para que se muestren las validaciones inmediatamente
+   */
+  private marcarCamposComoTocados(): void {
+    // Simular que el usuario ha tocado los campos relevantes
+    const fechaInicioEl = document.getElementById('fechaInicioLectura') as HTMLInputElement;
+    const fechaFinEl = document.getElementById('fechaFinLectura') as HTMLInputElement;
+    
+    if (fechaInicioEl) {
+      fechaInicioEl.dispatchEvent(new Event('blur'));
+    }
+    if (fechaFinEl) {
+      fechaFinEl.dispatchEvent(new Event('blur'));
+    }
+  }
+
+  /**
+   * Determina si un campo es requerido basado en el estado actual del libro
+   * Esto permite mostrar validaciones reactivas inmediatamente al cambiar el estado
+   */
+  esCampoRequerido(campo: string): boolean {
+    if (!this.currentUsuarioLibro) return false;
+    
+    const estado = this.currentUsuarioLibro.estadoLectura;
+    
+    switch (campo) {
+      case 'fechaInicio':
+        return estado === 'LEYENDO' || estado === 'TERMINADO';
+      case 'fechaFin':
+        return estado === 'TERMINADO';
+      default:
+        return false;
     }
   }
 
@@ -520,6 +563,14 @@ export class AdminUsuarioLibrosComponent implements OnInit {
    */
   formularioValido(): boolean {
     if (!this.currentUsuarioLibro) return false;
+    
+    // Auto-corrección para libros terminados sin fecha de inicio
+    // Si un libro está terminado pero no tiene fecha de inicio, usar la fecha de fin como inicio
+    if (this.currentUsuarioLibro.estadoLectura === 'TERMINADO' && 
+        this.currentUsuarioLibro.fechaFinLectura && 
+        !this.currentUsuarioLibro.fechaInicioLectura) {
+      this.currentUsuarioLibro.fechaInicioLectura = this.currentUsuarioLibro.fechaFinLectura;
+    }
     
     // Validar fechas
     if (this.currentUsuarioLibro.fechaInicioLectura && this.currentUsuarioLibro.fechaFinLectura) {
@@ -545,7 +596,9 @@ export class AdminUsuarioLibrosComponent implements OnInit {
       }
     } else {
       // Si no hay detalles del libro, solo validamos que las páginas no sean negativas
-      if (this.currentUsuarioLibro.paginasLeidas < 0) {
+      if (this.currentUsuarioLibro.paginasLeidas !== undefined && 
+          this.currentUsuarioLibro.paginasLeidas !== null &&
+          this.currentUsuarioLibro.paginasLeidas < 0) {
         return false;
       }
     }

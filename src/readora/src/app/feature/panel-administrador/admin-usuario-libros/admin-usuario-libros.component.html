@@ -126,26 +126,36 @@
 
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-6">
-            <label for="fechaInicioLectura" class="form-label">Fecha de Inicio de Lectura <span class="text-danger">*</span></label>
+            <label for="fechaInicioLectura" class="form-label">
+              Fecha de Inicio de Lectura 
+              <span class="text-danger" *ngIf="currentUsuarioLibro.estadoLectura === 'LEYENDO' || currentUsuarioLibro.estadoLectura === 'TERMINADO'">*</span>
+            </label>
             <div class="input-group">
               <span class="input-group-text">
                 <span class="material-icons small">calendar_today</span>
               </span>
               <input type="date" id="fechaInicioLectura" [(ngModel)]="currentUsuarioLibro.fechaInicioLectura" name="fechaInicioLectura" 
                 class="form-control" 
-                required
+                [required]="currentUsuarioLibro.estadoLectura === 'LEYENDO' || currentUsuarioLibro.estadoLectura === 'TERMINADO'"
                 [max]="getMaxDate()"
                 #fechaInicioInput="ngModel"
-                [ngClass]="{'is-invalid': fechaInicioInput.invalid && (fechaInicioInput.dirty || fechaInicioInput.touched)}">
+                [ngClass]="{'is-invalid': fechaInicioInput.invalid && (fechaInicioInput.dirty || fechaInicioInput.touched || esCampoRequerido('fechaInicio'))}">
             </div>
-            <div *ngIf="fechaInicioInput.invalid && (fechaInicioInput.dirty || fechaInicioInput.touched)" class="text-danger small mt-1">
-              <span *ngIf="fechaInicioInput.errors?.['required']">La fecha de inicio es obligatoria</span>
+            <div *ngIf="fechaInicioInput.invalid && (fechaInicioInput.dirty || fechaInicioInput.touched || esCampoRequerido('fechaInicio'))" class="text-danger small mt-1">
+              <span *ngIf="fechaInicioInput.errors?.['required']">La fecha de inicio es obligatoria para libros que se están leyendo o ya terminados</span>
               <span *ngIf="fechaInicioInput.errors?.['max']">La fecha no puede ser futura</span>
             </div>
+            <p class="form-text text-secondary small" *ngIf="currentUsuarioLibro.estadoLectura === 'PENDIENTE' || currentUsuarioLibro.estadoLectura === 'ABANDONADO'">
+              Opcional para libros {{ currentUsuarioLibro.estadoLectura === 'PENDIENTE' ? 'pendientes' : 'abandonados' }}. 
+              {{ currentUsuarioLibro.estadoLectura === 'PENDIENTE' ? 'Se puede establecer cuando comience la lectura.' : 'Un libro puede abandonarse sin haber empezado la lectura.' }}
+            </p>
           </div>
           
           <div class="col-12 col-md-6">
-            <label for="fechaFinLectura" class="form-label">Fecha de Finalización de Lectura</label>
+            <label for="fechaFinLectura" class="form-label">
+              Fecha de Finalización de Lectura 
+              <span class="text-danger" *ngIf="currentUsuarioLibro.estadoLectura === 'TERMINADO'">*</span>
+            </label>
             <div class="input-group">
               <span class="input-group-text">
                 <span class="material-icons small">event_available</span>
@@ -153,13 +163,17 @@
               <input type="date" id="fechaFinLectura" [(ngModel)]="currentUsuarioLibro.fechaFinLectura" name="fechaFinLectura" 
                 class="form-control"
                 [min]="currentUsuarioLibro.fechaInicioLectura"
+                [required]="currentUsuarioLibro.estadoLectura === 'TERMINADO'"
                 #fechaFinInput="ngModel"
-                [ngClass]="{'is-invalid': fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched)}">
+                [ngClass]="{'is-invalid': fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched || esCampoRequerido('fechaFin'))}">
             </div>
-            <div *ngIf="fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched)" class="text-danger small mt-1">
+            <div *ngIf="fechaFinInput.invalid && (fechaFinInput.dirty || fechaFinInput.touched || esCampoRequerido('fechaFin'))" class="text-danger small mt-1">
+              <span *ngIf="fechaFinInput.errors?.['required']">La fecha de finalización es obligatoria para libros terminados</span>
               <span *ngIf="fechaFinInput.errors?.['min']">La fecha de finalización debe ser posterior a la fecha de inicio</span>
             </div>
-            <p class="form-text text-secondary small">Dejar en blanco si aún no ha terminado la lectura. Para libros pendientes puede indicar una fecha futura planificada.</p>
+            <p class="form-text text-secondary small">
+              {{ currentUsuarioLibro.estadoLectura === 'TERMINADO' ? 'Obligatoria para libros terminados.' : 'Dejar en blanco si aún no ha terminado la lectura. Para libros pendientes puede indicar una fecha futura planificada.' }}
+            </p>
           </div>
         </div>
         
@@ -279,8 +293,8 @@
             <ng-container *ngIf="lecturaForm.invalid">
               <span *ngIf="usuarioIdInput.invalid">- El ID del usuario es obligatorio y debe ser positivo.<br></span>
               <span *ngIf="libroIdInput.invalid">- El ID del libro es obligatorio y debe ser positivo.<br></span>
-              <span *ngIf="fechaInicioInput.invalid">- La fecha de inicio es obligatoria y no puede ser futura.<br></span>
-              <span *ngIf="fechaFinInput.invalid">- La fecha de finalización debe ser posterior a la de inicio.<br></span>
+              <span *ngIf="fechaInicioInput.invalid">- La fecha de inicio es obligatoria para libros que se están leyendo o ya terminados.<br></span>
+              <span *ngIf="fechaFinInput.invalid">- La fecha de finalización es obligatoria para libros terminados.<br></span>
               <span *ngIf="estadoInput.invalid">- El estado de lectura es obligatorio.<br></span>
               <span *ngIf="paginasLeidasInput.invalid">- Las páginas leídas deben ser un número válido dentro del rango.<br></span>
               <span *ngIf="comentarioInput.invalid">- El comentario no puede exceder los 500 caracteres.<br></span>
