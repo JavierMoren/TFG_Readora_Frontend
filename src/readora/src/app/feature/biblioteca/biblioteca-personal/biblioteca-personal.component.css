@@ -54,9 +54,66 @@
 .pages-text { color: var(--text-secondary); font-weight: 500; font-size: 0.85rem; }
 
 /* ===== NOTAS ===== */
-.libro-notas { margin-top: 0.5rem; }
-.notas-header { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
-.notas-texto { font-size: 0.8rem; color: var(--text-secondary); margin: 0; line-height: 1.3; }
+.libro-notas { 
+  margin-top: 0.75rem; 
+  padding: 0.5rem 0.75rem; 
+  background-color: var(--background-subtle); 
+  border-radius: 0.5rem; 
+  border-left: 3px solid var(--primary-color);
+}
+
+.notas-header { 
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  font-size: 0.85rem; 
+  color: var(--text-primary); 
+  margin-bottom: 0.4rem; 
+  font-weight: 500;
+}
+
+.notas-header .material-icons {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+}
+
+.notas-titulo {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.notas-texto { 
+  font-size: 0.85rem; 
+  color: var(--text-primary); 
+  margin: 0; 
+  line-height: 1.4; 
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* ===== TEMA OSCURO - NOTAS ===== */
+[data-theme="dark"] .libro-notas {
+  background-color: var(--component-bg);
+  border-left-color: var(--primary-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .notas-header {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .notas-header .material-icons {
+  color: var(--primary-light);
+}
+
+[data-theme="dark"] .notas-titulo {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .notas-texto {
+  color: var(--text-secondary);
+  opacity: 1;
+}
 
 /* ===== ACCIONES ===== */
 .libro-actions { display: flex; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; }
