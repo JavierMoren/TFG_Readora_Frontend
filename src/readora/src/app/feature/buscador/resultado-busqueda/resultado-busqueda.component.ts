@@ -123,18 +123,15 @@ export class ResultadoBusquedaComponent implements OnChanges {
       if (libro.isGoogleBook && libro.autores) {
         // Ya tenemos los autores, simplemente los guardamos
         this.libroAutores.set(String(libro.id), libro.autores);
-        console.log(`[ResultadoBusqueda] Usando autores de Google Books para libro ${libro.id}`);
       } 
       // Si es un libro de la base de datos local, cargamos los autores mediante API
       else if (libro.id && !libro.isGoogleBook) {
-        console.log(`[ResultadoBusqueda] Cargando autores para libro local ${libro.id}`);
         this.librosService.getAutoresByLibroId(libro.id).subscribe({
           next: (autores) => {
             if (autores && autores.length > 0) {
               // Guardar los nombres de los autores para este libro
               const nombreAutores = autores.map(autor => autor.nombre + (autor.apellido ? ' ' + autor.apellido : ''));
               this.libroAutores.set(String(libro.id), nombreAutores);
-              console.log(`[ResultadoBusqueda] Autores cargados para libro ${libro.id}: ${nombreAutores.join(', ')}`);
             }
           },
           error: (err) => {
@@ -197,11 +194,8 @@ export class ResultadoBusquedaComponent implements OnChanges {
     const librosLocales = this.results.filter(libro => libro.id && !libro.isGoogleBook);
     
     if (librosLocales.length === 0) {
-      console.log('[ResultadoBusqueda] No hay libros locales para verificar en la biblioteca');
       return;
     }
-    
-    console.log(`[ResultadoBusqueda] Verificando ${librosLocales.length} libros locales en la biblioteca del usuario ${this.usuarioId}`);
     
     this.usuarioLibroService.getLibrosByUsuarioId(this.usuarioId).subscribe({
       next: (usuarioLibros) => {
@@ -217,12 +211,8 @@ export class ResultadoBusquedaComponent implements OnChanges {
           usuarioLibros.forEach(usuarioLibro => {
             if (usuarioLibro.id !== undefined && usuarioLibro.libroId !== undefined) {
               this.librosEnBiblioteca.set(String(usuarioLibro.libroId), usuarioLibro.id);
-              console.log(`[ResultadoBusqueda] Libro ${usuarioLibro.libroId} encontrado en la biblioteca (relación: ${usuarioLibro.id})`);
             }
           });
-          console.log(`[ResultadoBusqueda] Se encontraron ${usuarioLibros.length} libros del usuario en la biblioteca`);
-        } else {
-          console.log('[ResultadoBusqueda] El usuario no tiene libros en su biblioteca');
         }
       },
       error: (error) => {
@@ -352,7 +342,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
     
     this.googleBooksService.importBook(googleBook.id).subscribe({
       next: (importedBook) => {
-        console.log('[ResultadoBusqueda] Libro importado exitosamente para navegación', importedBook);
         this.librosImportando.delete(googleBook.id);
         
         // Ocultar la animación después de un breve delay
@@ -470,18 +459,15 @@ export class ResultadoBusquedaComponent implements OnChanges {
     const isbn = this.extractISBNFromGoogleBook(googleBook);
     
     if (isbn) {
-      console.log(`[ResultadoBusqueda] Verificando si el libro con ISBN ${isbn} ya existe...`);
       this.librosService.searchLibros(isbn, {}, 0, 1).subscribe({
         next: (searchResult) => {
           if (searchResult.content && searchResult.content.length > 0) {
             // El libro ya existe, agregarlo directamente sin importar
             const existingBook = searchResult.content[0];
-            console.log(`[ResultadoBusqueda] Libro ya existe con ID ${existingBook.id}, agregando a biblioteca directamente`);
             googleBook.localId = existingBook.id;
             this.addLocalBookToLibrary(existingBook);
           } else {
             // El libro no existe, proceder con la importación con animación
-            console.log(`[ResultadoBusqueda] Libro no existe, procediendo con importación...`);
             this.performBookImport(googleBook);
           }
         },
@@ -493,7 +479,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
       });
     } else {
       // No hay ISBN, proceder con la importación normal
-      console.log(`[ResultadoBusqueda] No se pudo extraer ISBN, procediendo con importación...`);
       this.performBookImport(googleBook);
     }
   }
@@ -507,7 +492,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
     this.showImportAnimation = true;
     this.googleBooksService.importBook(googleBook.id).subscribe({
       next: (importedBook) => {
-        console.log('[ResultadoBusqueda] Libro importado exitosamente para biblioteca', importedBook);
         this.librosImportando.delete(googleBook.id);
         setTimeout(() => {
           this.showImportAnimation = false;
@@ -617,7 +601,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
           );
           if (googleBookInResults) {
             this.librosEnBiblioteca.set(String(googleBookInResults.id), response.id);
-            console.log(`[ResultadoBusqueda] Sincronizado estado de biblioteca para Google Book ${googleBookInResults.id} -> Local Book ${libro.id}`);
           }
         }
       },
@@ -681,7 +664,6 @@ export class ResultadoBusquedaComponent implements OnChanges {
             );
             if (googleBookInResults) {
               this.librosEnBiblioteca.delete(String(googleBookInResults.id));
-              console.log(`[ResultadoBusqueda] Eliminado del estado: Google Book ${googleBookInResults.id} y Local Book ${libro.id}`);
             }
           },
           error: (error) => {

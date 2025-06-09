@@ -103,7 +103,6 @@ export class BuscadorComponent implements OnInit {
     this.errorMessage = '';
     this.lastSearchTerm = searchTerm;
     
-    console.log(`[Buscador] Iniciando búsqueda profunda en Google Books: "${searchTerm}"`);
     this.searchGoogleBooks(searchTerm);
   }
   
@@ -151,7 +150,7 @@ export class BuscadorComponent implements OnInit {
           
           // Si no hay resultados locales, sugerir búsqueda en Google Books
           if (this.results.length === 0 && !this.isGoogleSearch) {
-            console.log('[Buscador] No se encontraron resultados locales para:', term);
+            // No results found locally
           }
         },
         error: (error) => {
@@ -204,17 +203,11 @@ export class BuscadorComponent implements OnInit {
     
     // Verificar si estamos intentando acceder a una página más allá del límite práctico
     if (this.googleBooksStartIndex >= GOOGLE_MAX_RESULTS) {
-      console.warn(`[Buscador] StartIndex ${this.googleBooksStartIndex} excede el límite establecido de Google Books (${GOOGLE_MAX_RESULTS})`);
       // Ajustar a la última página posible
       const lastValidPage = Math.floor((GOOGLE_MAX_RESULTS - 1) / this.googleBooksMaxResults);
       this.currentPage = lastValidPage;
       this.googleBooksStartIndex = this.currentPage * this.googleBooksMaxResults;
-      console.log(`[Buscador] Ajustado a la última página válida: ${this.currentPage+1}, startIndex=${this.googleBooksStartIndex}`);
     }
-    
-    // Logging detallado para depuración
-    console.log(`[Buscador] Buscando en Google Books: "${term}"`);
-    console.log(`[Buscador] Parámetros de paginación - Página: ${this.currentPage + 1}, maxResults: ${this.googleBooksMaxResults}, startIndex: ${this.googleBooksStartIndex}`);
     
     this.googleBooksService.searchBooks(term, this.googleBooksMaxResults, this.googleBooksStartIndex)
       .subscribe({
@@ -236,24 +229,17 @@ export class BuscadorComponent implements OnInit {
             if (this.currentPage > maxPage && maxPage >= 0) {
               this.currentPage = maxPage;
               this.googleBooksStartIndex = this.currentPage * this.googleBooksMaxResults;
-              console.log(`[Buscador] Ajustando a página máxima: ${this.currentPage+1}`);
               
               // Si hubo un cambio de página y el startIndex es diferente, ejecutar una nueva búsqueda
               if (this.googleBooksStartIndex !== receivedStartIndex) {
-                console.log(`[Buscador] Recargando con nuevo startIndex: ${this.googleBooksStartIndex}`);
                 this.loading = false;
                 this.searchGoogleBooks(term);
                 return;
               }
             }
-            
-            // Logging detallado para depuración
-            console.log(`[Buscador] Recibidos ${this.results.length} resultados de un total estimado de ${this.totalItems}`);
-            console.log(`[Buscador] Página actual: ${this.currentPage + 1} de ${Math.ceil(this.totalItems / this.pageSize)}`);
           } else {
             this.results = [];
             this.totalItems = 0;
-            console.log('[Buscador] No se encontraron resultados en Google Books');
           }
           this.loading = false;
         },
@@ -271,7 +257,6 @@ export class BuscadorComponent implements OnInit {
   // Transforma los resultados de Google Books al formato esperado por el componente
   transformGoogleBooksResults(items: any[]): any[] {
     if (!items || !Array.isArray(items)) {
-      console.warn('[Buscador] Items de Google Books no es un array válido');
       return [];
     }
     
@@ -328,7 +313,6 @@ export class BuscadorComponent implements OnInit {
     this.googleBooksService.importBook(googleBookId)
       .subscribe({
         next: (importedBook) => {
-          console.log('[Buscador] Libro importado exitosamente', importedBook);
           this.results[bookIndex].importing = false;
           this.results[bookIndex].imported = true;
           
@@ -359,7 +343,6 @@ export class BuscadorComponent implements OnInit {
     
     // Solo cargar nuevos datos si: 1) cambió la página 2) cambió el tamaño de página
     if (this.currentPage !== page || event.pageSize !== oldPageSize) {
-      console.log(`[Buscador] Cambiando página: de ${this.currentPage + 1} a ${page + 1}, tamaño: ${this.pageSize}`);
       this.currentPage = page;
       this.loading = true; // Mostrar indicador de carga
       this.hasError = false; // Reiniciar estado de error
@@ -376,7 +359,6 @@ export class BuscadorComponent implements OnInit {
                 this.results = data.content;
                 this.totalItems = data.totalElements;
                 this.loading = false;
-                console.log(`[Buscador] Búsqueda local completada - Página ${page+1}, mostrando ${this.results.length} resultados de ${this.totalItems} totales`);
               },
               error: (error) => {
                 console.error('[Buscador] Error al buscar libros localmente', error);
@@ -400,13 +382,9 @@ export class BuscadorComponent implements OnInit {
             if (page > lastValidPage) {
               this.currentPage = lastValidPage;
               this.googleBooksStartIndex = this.currentPage * this.googleBooksMaxResults;
-              console.log(`[Buscador] Ajustado a la última página válida: ${this.currentPage+1}, startIndex=${this.googleBooksStartIndex}`);
             }
           }
           
-          console.log(`[Buscador] Cambiando página en Google Books: página ${this.currentPage+1}/${Math.ceil(this.totalItems/this.pageSize)}, startIndex=${this.googleBooksStartIndex}, pageSize=${this.googleBooksMaxResults}`);
-          
-          console.log(`[Buscador] Cambiando página en Google Books: página ${this.currentPage+1}, startIndex ${this.googleBooksStartIndex}`);
           this.searchGoogleBooks(this.lastSearchTerm);
         }
       } else {
@@ -417,7 +395,6 @@ export class BuscadorComponent implements OnInit {
               this.results = data.content;
               this.totalItems = data.totalElements;
               this.loading = false;
-              console.log(`[Buscador] Búsqueda de autores completada - Página ${page+1}, mostrando ${this.results.length} autores de ${this.totalItems} totales`);
             },
             error: (error) => {
               console.error('[Buscador] Error al buscar autores', error);
