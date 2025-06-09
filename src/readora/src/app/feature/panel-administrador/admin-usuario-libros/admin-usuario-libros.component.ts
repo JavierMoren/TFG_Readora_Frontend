@@ -41,8 +41,6 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   
   Math = Math;
 
-  // La función getPagesArray() se ha eliminado ya que ahora usamos una paginación simplificada
-
   // Filtros para búsqueda 
   filtroUsuarioId: number | null = null;
   filtroLibroId: number | null = null;
@@ -52,10 +50,10 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   detalleLibro: any = null;
 
   constructor(
-    private usuarioLibroService: UsuarioLibroService,
-    private usuarioService: UsuarioService,
-    private libroService: LibrosService,
-    private notificationService: NotificationService
+    private readonly usuarioLibroService: UsuarioLibroService,
+    private readonly usuarioService: UsuarioService,
+    private readonly libroService: LibrosService,
+    private readonly notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -119,7 +117,7 @@ export class AdminUsuarioLibrosComponent implements OnInit {
                 ...resultado.relacion,
                 usuarioNombre: `${resultado.usuario.nombre} ${resultado.usuario.apellido}`,
                 libroTitulo: resultado.libro.titulo,
-                numeroPaginas: resultado.libro.numeroPaginas || null
+                numeroPaginas: resultado.libro.numeroPaginas ?? null
               };
             });
           },
@@ -471,85 +469,175 @@ export class AdminUsuarioLibrosComponent implements OnInit {
   }
 
   /**
-   * Maneja los cambios en el estado de lectura
-   * Actualiza automáticamente las páginas leídas si el estado cambia a TERMINADO
+   * Maneja el cambio en el estado de lectura y aplica validaciones reactivas
    */
   onEstadoLecturaChange(): void {
-    // Si cambia a terminado
-    if (this.currentUsuarioLibro.estadoLectura === 'TERMINADO') {
-      // Preguntar si desea actualizar páginas leídas al total
-      if (this.detalleLibro?.numeroPaginas) {
-        // Solo preguntamos si el valor actual es diferente al total de páginas
-        if (this.currentUsuarioLibro.paginasLeidas !== this.detalleLibro.numeroPaginas) {
-          this.notificationService.confirm({
-            title: 'Completar páginas',
-            text: `¿Deseas actualizar automáticamente las páginas leídas al total (${this.detalleLibro.numeroPaginas})?`,
-            confirmButtonText: 'Sí, actualizar',
-            cancelButtonText: 'No, mantener valor actual'
-          }).then(confirmed => {
-            if (confirmed) {
-              this.currentUsuarioLibro.paginasLeidas = this.detalleLibro.numeroPaginas;
-            }
-          });
+    if (!this.currentUsuarioLibro) return;
+    
+    const estado = this.currentUsuarioLibro.estadoLectura;
+    
+    // Auto-establecer fechas según el nuevo estado
+    switch (estado) {
+      case 'LEYENDO':
+        // Si no tiene fecha de inicio, establecer hoy
+        this.currentUsuarioLibro.fechaInicioLectura ??= new Date().toISOString().split('T')[0];
+        // Limpiar fecha de fin si existe (porque aún está leyendo)
+        this.currentUsuarioLibro.fechaFinLectura = null;
+        break;
+        
+      case 'TERMINADO':
+        // Si no tiene fecha de inicio, establecer hoy
+        this.currentUsuarioLibro.fechaInicioLectura ??= new Date().toISOString().split('T')[0];
+        // Si no tiene fecha de fin, establecer hoy
+        this.currentUsuarioLibro.fechaFinLectura ??= new Date().toISOString().split('T')[0];
+        // Auto-completar páginas si no están completas
+        if (this.detalleLibro?.numeroPaginas && 
+            (!this.currentUsuarioLibro.paginasLeidas || 
+             this.currentUsuarioLibro.paginasLeidas < this.detalleLibro.numeroPaginas)) {
+          this.currentUsuarioLibro.paginasLeidas = this.detalleLibro.numeroPaginas;
         }
-      }
-      
-      // Establecemos la fecha de finalización a hoy si no está establecida
-      if (!this.currentUsuarioLibro.fechaFinLectura) {
-        this.currentUsuarioLibro.fechaFinLectura = new Date().toISOString().split('T')[0];
-      }
-    } 
-    // Si cambia a pendiente, preguntamos si desea reiniciar las páginas leídas
-    else if (this.currentUsuarioLibro.estadoLectura === 'PENDIENTE' && this.currentUsuarioLibro.paginasLeidas > 0) {
-      this.notificationService.confirm({
-        title: 'Reiniciar progreso',
-        text: '¿Deseas reiniciar el contador de páginas leídas a 0?',
-        confirmButtonText: 'Sí, reiniciar',
-        cancelButtonText: 'No, mantener progreso'
-      }).then(confirmed => {
-        if (confirmed) {
-          this.currentUsuarioLibro.paginasLeidas = 0;
-        }
-      });
+        break;
+        
+      case 'PENDIENTE':
+        // Para libros pendientes, limpiar todas las fechas
+        this.currentUsuarioLibro.fechaInicioLectura = null;
+        this.currentUsuarioLibro.fechaFinLectura = null;
+        // Resetear páginas leídas
+        this.currentUsuarioLibro.paginasLeidas = 0;
+        break;
+        
+      case 'ABANDONADO':
+        // Para libros abandonados, mantener fecha de inicio si existe pero limpiar fecha de fin
+        this.currentUsuarioLibro.fechaFinLectura = null;
+        // No cambiar páginas leídas - el usuario puede haber leído algo antes de abandonar
+        break;
+    }
+    
+    // Forzar la actualización de validaciones en el próximo ciclo de detección de cambios
+    // Esto hace que las validaciones se muestren inmediatamente sin esperar a que el usuario toque los campos
+    setTimeout(() => {
+      this.marcarCamposComoTocados();
+    }, 0);
+  }
+
+  /**
+   * Marca los campos del formulario como tocados para que se muestren las validaciones inmediatamente
+   */
+  private marcarCamposComoTocados(): void {
+    // Simular que el usuario ha tocado los campos relevantes
+    const fechaInicioEl = document.getElementById('fechaInicioLectura') as HTMLInputElement;
+    const fechaFinEl = document.getElementById('fechaFinLectura') as HTMLInputElement;
+    
+    if (fechaInicioEl) {
+      fechaInicioEl.dispatchEvent(new Event('blur'));
+    }
+    if (fechaFinEl) {
+      fechaFinEl.dispatchEvent(new Event('blur'));
+    }
+  }
+
+  /**
+   * Determina si un campo es requerido basado en el estado actual del libro
+   * Esto permite mostrar validaciones reactivas inmediatamente al cambiar el estado
+   */
+  esCampoRequerido(campo: string): boolean {
+    if (!this.currentUsuarioLibro) return false;
+    
+    const estado = this.currentUsuarioLibro.estadoLectura;
+    
+    switch (campo) {
+      case 'fechaInicio':
+        return estado === 'LEYENDO' || estado === 'TERMINADO';
+      case 'fechaFin':
+        return estado === 'TERMINADO';
+      default:
+        return false;
     }
   }
 
   /**
    * Valida que todos los datos del formulario sean correctos
-   * Añade validaciones adicionales que no pueden hacerse directamente en la plantilla
+   * Implementa reglas claras según el estado de lectura:
+   * - TERMINADO: Requiere fecha inicio y fecha fin
+   * - LEYENDO: Requiere fecha inicio, fecha fin debe estar vacía
+   * - PENDIENTE/ABANDONADO: Fechas opcionales
    */
   formularioValido(): boolean {
     if (!this.currentUsuarioLibro) return false;
-    
-    // Validar fechas
-    if (this.currentUsuarioLibro.fechaInicioLectura && this.currentUsuarioLibro.fechaFinLectura) {
-      const fechaInicio = new Date(this.currentUsuarioLibro.fechaInicioLectura);
-      const fechaFin = new Date(this.currentUsuarioLibro.fechaFinLectura);
+
+    return this.validarReglasEstado() && 
+           this.validarConsistenciaFechas() && 
+           this.validarPaginasLeidas();
+  }
+
+  /**
+   * Valida las reglas específicas de cada estado de lectura
+   */
+  private validarReglasEstado(): boolean {
+    const estado = this.currentUsuarioLibro.estadoLectura;
+    const fechaInicio = this.currentUsuarioLibro.fechaInicioLectura;
+    const fechaFin = this.currentUsuarioLibro.fechaFinLectura;
+
+    switch (estado) {
+      case 'TERMINADO':
+        // Auto-corrección: Si no tiene fecha de inicio, usar la fecha de fin
+        if (fechaFin && !fechaInicio) {
+          this.currentUsuarioLibro.fechaInicioLectura = fechaFin;
+        }
+        return !!fechaInicio && !!fechaFin;
+      
+      case 'LEYENDO':
+        return !!fechaInicio;
+      
+      case 'PENDIENTE':
+      case 'ABANDONADO':
+        // Fechas opcionales
+        return true;
+      
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Valida que las fechas sean coherentes entre sí
+   */
+  private validarConsistenciaFechas(): boolean {
+    const fechaInicio = this.currentUsuarioLibro.fechaInicioLectura;
+    const fechaFin = this.currentUsuarioLibro.fechaFinLectura;
+
+    if (fechaInicio && fechaFin) {
+      const inicio = new Date(fechaInicio);
+      const fin = new Date(fechaFin);
       
       // La fecha de fin debe ser posterior o igual a la de inicio
-      if (fechaFin < fechaInicio) return false;
-      
-      // No validamos que la fecha sea futura o no, permitiendo fechas de finalización planificadas
+      return fin >= inicio;
     }
     
-    // Validar páginas leídas para estados relevantes
-    if (this.detalleLibro && this.detalleLibro.numeroPaginas) {
-      // IMPORTANTE: Ya no modificamos automaticamente las páginas leídas aquí, solo validamos
-      // Si las páginas leídas están definidas, deben estar en un rango válido
-      if (this.currentUsuarioLibro.paginasLeidas !== undefined && 
-          this.currentUsuarioLibro.paginasLeidas !== null) {
-        if (this.currentUsuarioLibro.paginasLeidas < 0 || 
-            (this.detalleLibro.numeroPaginas && this.currentUsuarioLibro.paginasLeidas > this.detalleLibro.numeroPaginas)) {
-          return false;
-        }
-      }
-    } else {
-      // Si no hay detalles del libro, solo validamos que las páginas no sean negativas
-      if (this.currentUsuarioLibro.paginasLeidas < 0) {
-        return false;
-      }
-    }
+    return true; // Si no hay ambas fechas, no hay inconsistencia
+  }
+
+  /**
+   * Valida que las páginas leídas estén en un rango válido
+   */
+  private validarPaginasLeidas(): boolean {
+    const paginasLeidas = this.currentUsuarioLibro.paginasLeidas;
     
+    // Si no hay páginas definidas, la validación pasa
+    if (paginasLeidas === undefined || paginasLeidas === null) {
+      return true;
+    }
+
+    // Las páginas no pueden ser negativas
+    if (paginasLeidas < 0) {
+      return false;
+    }
+
+    // Si tenemos el detalle del libro, validar contra el número total de páginas
+    if (this.detalleLibro?.numeroPaginas) {
+      return paginasLeidas <= this.detalleLibro.numeroPaginas;
+    }
+
     return true;
   }
 
@@ -571,80 +659,9 @@ export class AdminUsuarioLibrosComponent implements OnInit {
     this.usuarioLibroService.getLibrosByUsuarioId(this.filtroUsuarioId).subscribe({
       next: (data: UsuarioLibro[]) => {
         if (data && data.length > 0) {
-          // Enriquecer los datos con información de libros
-          const observables = data.map((relacion: UsuarioLibro) => {
-            return this.libroService.getLibroById(relacion.libroId).pipe(
-              map(libro => {
-                return {
-                  ...relacion,
-                  libroTitulo: libro.titulo,
-                  numeroPaginas: libro.numeroPaginas || null
-                };
-              }),
-              catchError(() => {
-                return of({
-                  ...relacion,
-                  libroTitulo: 'Libro desconocido',
-                  numeroPaginas: null
-                });
-              })
-            );
-          });
-          
-          forkJoin(observables).subscribe({
-            next: (resultados: any[]) => {
-              // Cargar el nombre del usuario para todas las lecturas
-              this.usuarioService.getUsuarioById(this.filtroUsuarioId!).subscribe({
-                next: (usuario) => {
-                  this.usuarioLibros = resultados.map((item: any) => {
-                    return {
-                      ...item,
-                      usuarioNombre: `${usuario.nombre} ${usuario.apellido}`
-                    };
-                  });
-                  
-                  // Actualizamos el contador para mostrar el total correctamente
-                  this.totalElements = resultados.length;
-                  this.totalPages = 1; // Al filtrar no tenemos paginación
-                  
-                  this.notificationService.success('Búsqueda completada', {
-                    description: `Se encontraron ${resultados.length} lecturas para el usuario #${this.filtroUsuarioId}`
-                  });
-                },
-                error: () => {
-                  // Si no podemos obtener el nombre del usuario, mostramos solo el ID
-                  this.usuarioLibros = resultados.map((item: any) => {
-                    return {
-                      ...item,
-                      usuarioNombre: `Usuario #${this.filtroUsuarioId}`
-                    };
-                  });
-                  
-                  // Actualizamos el contador
-                  this.totalElements = resultados.length;
-                  this.totalPages = 1;
-                  
-                  this.notificationService.success('Búsqueda completada', {
-                    description: `Se encontraron ${resultados.length} lecturas para el usuario #${this.filtroUsuarioId}`
-                  });
-                }
-              });
-            },
-            error: (error: any) => {
-              console.error('[AdminUsuarioLibros] Error al enriquecer datos de lecturas', error);
-              this.notificationService.error('Error', {
-                description: 'No se pudieron cargar los detalles de las lecturas'
-              });
-            }
-          });
+          this.procesarLecturasUsuario(data);
         } else {
-          // No hay resultados
-          this.usuarioLibros = [];
-          this.totalElements = 0;
-          this.totalPages = 0;
-          this.notificationService.info('Sin resultados', {
-            description: `No se encontraron lecturas para el usuario con ID ${this.filtroUsuarioId}`
-          });
+          this.mostrarSinResultadosUsuario();
         }
       },
       error: (error: any) => {
@@ -653,6 +670,89 @@ export class AdminUsuarioLibrosComponent implements OnInit {
           description: 'Error al buscar lecturas por ID de usuario'
         });
       }
+    });
+  }
+
+  /**
+   * Procesa las lecturas encontradas para un usuario, enriqueciendo los datos
+   */
+  private procesarLecturasUsuario(data: UsuarioLibro[]): void {
+    const observables = this.crearObservablesLibrosUsuario(data);
+    
+    forkJoin(observables).subscribe({
+      next: (resultados: any[]) => {
+        this.enriquecerConDatosUsuario(resultados);
+      },
+      error: (error: any) => {
+        console.error('[AdminUsuarioLibros] Error al enriquecer datos de lecturas', error);
+        this.notificationService.error('Error', {
+          description: 'No se pudieron cargar los detalles de las lecturas'
+        });
+      }
+    });
+  }
+
+  /**
+   * Crea observables para enriquecer cada relación con datos del libro
+   */
+  private crearObservablesLibrosUsuario(data: UsuarioLibro[]): Observable<any>[] {
+    return data.map((relacion: UsuarioLibro) => {
+      return this.libroService.getLibroById(relacion.libroId).pipe(
+        map(libro => ({
+          ...relacion,
+          libroTitulo: libro.titulo,
+          numeroPaginas: libro.numeroPaginas ?? null
+        })),
+        catchError(() => of({
+          ...relacion,
+          libroTitulo: 'Libro desconocido',
+          numeroPaginas: null
+        }))
+      );
+    });
+  }
+
+  /**
+   * Enriquece los resultados con datos del usuario
+   */
+  private enriquecerConDatosUsuario(resultados: any[]): void {
+    this.usuarioService.getUsuarioById(this.filtroUsuarioId!).subscribe({
+      next: (usuario) => {
+        this.asignarResultadosConUsuario(resultados, `${usuario.nombre} ${usuario.apellido}`);
+      },
+      error: () => {
+        this.asignarResultadosConUsuario(resultados, `Usuario #${this.filtroUsuarioId}`);
+      }
+    });
+  }
+
+  /**
+   * Asigna los resultados finales con el nombre del usuario
+   */
+  private asignarResultadosConUsuario(resultados: any[], nombreUsuario: string): void {
+    this.usuarioLibros = resultados.map((item: any) => ({
+      ...item,
+      usuarioNombre: nombreUsuario
+    }));
+    
+    // Establece los valores de paginación para mostrar resultados de búsqueda
+    this.totalElements = resultados.length;
+    this.totalPages = 1; // Sin paginación en búsquedas específicas
+    
+    this.notificationService.success('Búsqueda completada', {
+      description: `Se encontraron ${resultados.length} lecturas para el usuario #${this.filtroUsuarioId}`
+    });
+  }
+
+  /**
+   * Muestra mensaje cuando no se encuentran resultados para el usuario
+   */
+  private mostrarSinResultadosUsuario(): void {
+    this.usuarioLibros = [];
+    this.totalElements = 0;
+    this.totalPages = 0;
+    this.notificationService.info('Sin resultados', {
+      description: `No se encontraron lecturas para el usuario con ID ${this.filtroUsuarioId}`
     });
   }
   
@@ -686,72 +786,12 @@ export class AdminUsuarioLibrosComponent implements OnInit {
     // Usamos el método getUsuariosByLibroId para obtener las lecturas del libro
     this.usuarioLibroService.getUsuariosByLibroId(this.filtroLibroId).subscribe({
       next: (data: UsuarioLibro[]) => {
-        // Si no hay resultados, mostrar mensaje
         if (data.length === 0) {
-          this.usuarioLibros = [];
-          this.totalElements = 0;
-          this.totalPages = 0;
-          this.notificationService.info('Sin resultados', {
-            description: `No se encontraron lecturas para el libro con ID ${this.filtroLibroId}`
-          });
+          this.mostrarSinResultadosLibro();
           return;
         }
         
-        // Procesar los datos de manera similar a como se hace en getUsuarioLibrosPaginados
-        const relacionesEnriquecidas: UsuarioLibro[] = [];
-        
-        interface ResultadoCombinado {
-          relacion: UsuarioLibro;
-          usuario: Usuario;
-          libro: Libro;
-        }
-        
-        const observables: Observable<ResultadoCombinado>[] = data.map((relacion: UsuarioLibro) => {
-          const usuarioObs = this.usuarioService.getUsuarioById(relacion.usuarioId).pipe(
-            catchError(() => {
-              return of({ id: relacion.usuarioId, nombre: 'Usuario desconocido', apellido: '' } as Usuario);
-            })
-          );
-          
-          const libroObs = this.libroService.getLibroById(relacion.libroId).pipe(
-            catchError(() => {
-              return of({ id: relacion.libroId, titulo: 'Libro desconocido' } as Libro);
-            })
-          );
-          
-          return forkJoin({
-            relacion: of(relacion),
-            usuario: usuarioObs,
-            libro: libroObs
-          }) as Observable<ResultadoCombinado>;
-        });
-        
-        forkJoin(observables).subscribe({
-          next: (resultados) => {
-            this.usuarioLibros = resultados.map((resultado) => {
-              return {
-                ...resultado.relacion,
-                usuarioNombre: `${resultado.usuario.nombre} ${resultado.usuario.apellido}`,
-                libroTitulo: resultado.libro.titulo,
-                numeroPaginas: resultado.libro.numeroPaginas || null
-              };
-            });
-            
-            this.totalElements = this.usuarioLibros.length;
-            this.totalPages = 1; // Al ser búsqueda específica, mostramos todo en una página
-            
-            this.notificationService.success('Búsqueda completada', {
-              description: `Se encontraron ${this.usuarioLibros.length} lecturas para el libro con ID ${this.filtroLibroId}`
-            });
-          },
-          error: (error) => {
-            console.error('[AdminUsuarioLibros] Error al cargar detalles de las lecturas por libro', error);
-            this.notificationService.error('Error', { 
-              description: 'No se pudieron cargar todos los detalles de las lecturas'
-            });
-            this.usuarioLibros = data;
-          }
-        });
+        this.procesarLecturasLibro(data);
       },
       error: (error) => {
         console.error('[AdminUsuarioLibros] Error al buscar lecturas por libro', error);
@@ -759,6 +799,85 @@ export class AdminUsuarioLibrosComponent implements OnInit {
           description: 'No se pudieron cargar las lecturas para este libro'
         });
       }
+    });
+  }
+
+  /**
+   * Procesa las lecturas encontradas para un libro específico
+   */
+  private procesarLecturasLibro(data: UsuarioLibro[]): void {
+    const observables = this.crearObservablesUsuarioLibro(data);
+    
+    forkJoin(observables).subscribe({
+      next: (resultados) => {
+        this.asignarResultadosLibro(resultados);
+      },
+      error: (error) => {
+        console.error('[AdminUsuarioLibros] Error al cargar detalles de las lecturas por libro', error);
+        this.notificationService.error('Error', { 
+          description: 'No se pudieron cargar todos los detalles de las lecturas'
+        });
+        this.usuarioLibros = data;
+      }
+    });
+  }
+
+  /**
+   * Crea observables para enriquecer cada relación con datos de usuario y libro
+   */
+  private crearObservablesUsuarioLibro(data: UsuarioLibro[]): Observable<any>[] {
+    return data.map((relacion: UsuarioLibro) => {
+      const usuarioObs = this.usuarioService.getUsuarioById(relacion.usuarioId).pipe(
+        catchError(() => of({ 
+          id: relacion.usuarioId, 
+          nombre: 'Usuario desconocido', 
+          apellido: '' 
+        } as Usuario))
+      );
+      
+      const libroObs = this.libroService.getLibroById(relacion.libroId).pipe(
+        catchError(() => of({ 
+          id: relacion.libroId, 
+          titulo: 'Libro desconocido' 
+        } as Libro))
+      );
+      
+      return forkJoin({
+        relacion: of(relacion),
+        usuario: usuarioObs,
+        libro: libroObs
+      });
+    });
+  }
+
+  /**
+   * Asigna los resultados finales para la búsqueda por libro
+   */
+  private asignarResultadosLibro(resultados: any[]): void {
+    this.usuarioLibros = resultados.map((resultado) => ({
+      ...resultado.relacion,
+      usuarioNombre: `${resultado.usuario.nombre} ${resultado.usuario.apellido}`,
+      libroTitulo: resultado.libro.titulo,
+      numeroPaginas: resultado.libro.numeroPaginas ?? null
+    }));
+    
+    this.totalElements = this.usuarioLibros.length;
+    this.totalPages = 1; // Sin paginación en búsquedas específicas
+    
+    this.notificationService.success('Búsqueda completada', {
+      description: `Se encontraron ${this.usuarioLibros.length} lecturas para el libro con ID ${this.filtroLibroId}`
+    });
+  }
+
+  /**
+   * Muestra mensaje cuando no se encuentran resultados para el libro
+   */
+  private mostrarSinResultadosLibro(): void {
+    this.usuarioLibros = [];
+    this.totalElements = 0;
+    this.totalPages = 0;
+    this.notificationService.info('Sin resultados', {
+      description: `No se encontraron lecturas para el libro con ID ${this.filtroLibroId}`
     });
   }
 
