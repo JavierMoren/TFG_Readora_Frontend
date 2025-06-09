@@ -4,7 +4,7 @@
 #### Autor: [Javier Moreno Salas](https://github.com/JavierMoren)
 #### Tutor: [Antonio Gabriel González Casado](https://github.com/antonio-gabriel-gonzalez-casado)
 #### Fecha de Inicio: 11-03-2025
-#### Fecha de Finalización: XX-XX-XXXX
+#### Fecha de Finalización: 10-06-2025
 
 ## Breve descripción del proyecto
 
