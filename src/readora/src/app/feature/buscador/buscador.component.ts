@@ -52,11 +52,10 @@ export class BuscadorComponent implements OnInit {
   }
 
   /**
-   * Verifica si el término de búsqueda no está vacío (para búsqueda local)
+   * Verifica si el término de búsqueda es válido para búsqueda local (siempre true)
    */
   get isValidSearch(): boolean {
-    const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
-    return searchTerm && searchTerm.length > 0;
+    return true; // Búsqueda local siempre permitida (incluso vacía para mostrar todo)
   }
 
   /**
@@ -109,15 +108,11 @@ export class BuscadorComponent implements OnInit {
   search(): void {
     if (!this.searchForm.valid) return;
 
-    const searchTerm = this.searchForm.get('searchTerm')?.value?.trim();
+    const searchTerm = this.searchForm.get('searchTerm')?.value?.trim() ?? '';
     const searchType = this.searchForm.get('searchType')?.value;
     
-    // Validar que el término de búsqueda no esté vacío
-    if (!searchTerm || searchTerm.length === 0) {
-      this.hasError = true;
-      this.errorMessage = 'Por favor ingresa un término de búsqueda.';
-      return;
-    }
+    // Para búsqueda local, permitir términos vacíos (mostrará todos los resultados paginados)
+    // Para Google Books, se requerirá al menos 3 caracteres en searchDeep()
     
     // Resetear la bandera de búsqueda en Google
     this.isGoogleSearch = false;
