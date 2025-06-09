@@ -83,6 +83,10 @@ export class BuscadorComponent implements OnInit {
   searchDeep(): void {
     // Solo permitir si ya se ha hecho una búsqueda y cumple con el mínimo para Google Books
     if (!this.lastSearchTerm || !this.isValidForGoogleSearch) {
+      // Mostrar notificación informativa al usuario
+      this.notificationService.warning('Búsqueda en Google Books', {
+        description: 'Necesitas ingresar al menos 3 caracteres para buscar en Google Books'
+      });
       return;
     }
     const searchTerm = this.lastSearchTerm;
@@ -91,6 +95,9 @@ export class BuscadorComponent implements OnInit {
     if (!this.isValidForGoogleSearch) {
       this.hasError = true;
       this.errorMessage = 'El término de búsqueda debe tener al menos 3 caracteres para buscar en Google Books.';
+      this.notificationService.warning('Búsqueda en Google Books', {
+        description: 'Necesitas ingresar al menos 3 caracteres para buscar en Google Books'
+      });
       return;
     }
     

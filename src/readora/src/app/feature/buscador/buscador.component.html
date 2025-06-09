@@ -10,7 +10,7 @@
               <input 
                 type="text" 
                 class="form-control" 
-                placeholder="Buscar por título, palabra clave... (vacío = mostrar todo)" 
+                placeholder="Buscar por título, palabra clave... " 
                 formControlName="searchTerm"
                 aria-label="Término de búsqueda">
               <button class="btn btn-primary" type="submit" [disabled]="!isValidSearch">
@@ -73,17 +73,30 @@
         [pageSize]="pageSize"
         (pageChange)="pageChanged($event)">
       </app-resultado-busqueda>
-      <!-- Opción de buscar en Google Books al final de los resultados locales, como enlace -->
+      <!-- Opción de buscar en Google Books al final de los resultados locales -->
       <div *ngIf="!isGoogleSearch && isSearchingBooks && results.length > 0" class="text-center mt-3">
         <div class="small text-muted mb-1" style="font-size:0.95em;">
           ¿No encuentras lo que buscas?
         </div>
-        <a href="#" (click)="$event.preventDefault(); searchDeep()" 
-           [class.disabled]="!isValidForGoogleSearch"
+        
+        <!-- Enlace habilitado cuando hay 3+ caracteres -->
+        <a *ngIf="isValidForGoogleSearch" 
+           href="#" (click)="$event.preventDefault(); searchDeep()" 
            style="font-size:0.98em; opacity:0.9; text-decoration: none; cursor: pointer; color: #4285F4; font-weight: 500; display: inline-flex; align-items: center; gap: 0.3em;"
            title="Buscar en Google Books (más resultados)">
           <img src="assets/logos/Logo.svg" alt="Google Books" style="height:1.1em; vertical-align:middle; margin-right:0.2em;"> Buscar en Google Books
         </a>
+        
+        <!-- Mensaje cuando no hay suficientes caracteres -->
+        <div *ngIf="!isValidForGoogleSearch" class="d-flex flex-column align-items-center">
+          <span style="font-size:0.98em; opacity:0.6; color: #6c757d; font-weight: 500; display: inline-flex; align-items: center; gap: 0.3em;">
+            <img src="assets/logos/Logo.svg" alt="Google Books" style="height:1.1em; vertical-align:middle; margin-right:0.2em; opacity:0.5;"> Buscar en Google Books
+          </span>
+          <small class="text-warning mt-1" style="font-size:0.85em;">
+            <i class="bi bi-info-circle me-1"></i>
+            Necesitas ingresar al menos 3 caracteres para buscar en Google Books
+          </small>
+        </div>
       </div>
     </div>
   </div>

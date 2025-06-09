@@ -96,11 +96,6 @@
                   {{ item.biografia | slice:0:120 }}{{ item.biografia?.length > 120 ? '...' : '' }}
                 </p>
                 
-                <!-- Indicador de información adicional -->
-                <small class="text-muted" *ngIf="item.biografia || item.nacionalidad">
-                  <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
-                  Ver más información
-                </small>
               </div>
             </div>
           </ng-container>
