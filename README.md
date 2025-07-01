@@ -2,7 +2,6 @@
 
 #### Curso Escolar 2024-2025
 #### Autor: [Javier Moreno Salas](https://github.com/JavierMoren)
-#### Tutor: [Antonio Gabriel González Casado](https://github.com/antonio-gabriel-gonzalez-casado)
 #### Fecha de Inicio: 11-03-2025
 #### Fecha de Finalización: 10-06-2025
 
